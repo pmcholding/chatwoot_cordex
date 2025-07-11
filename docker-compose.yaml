@@ -92,7 +92,7 @@ services:
     environment:
       - POSTGRES_DB=chatwoot
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=
+      - POSTGRES_PASSWORD=19cf0abe394ede914ac74c6cf5bd9669
 
   redis:
     image: redis:alpine
