@@ -237,9 +237,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_14_104358) do
     t.jsonb "audience", default: []
     t.datetime "scheduled_at", precision: nil
     t.boolean "trigger_only_during_business_hours", default: false
-    t.bigint "template_id"
-    t.integer "processed_contacts_count", default: 0
-    t.integer "failed_contacts_count", default: 0
+    t.jsonb "template_params"
     t.index ["account_id"], name: "index_campaigns_on_account_id"
     t.index ["campaign_status"], name: "index_campaigns_on_campaign_status"
     t.index ["campaign_type"], name: "index_campaigns_on_campaign_type"
