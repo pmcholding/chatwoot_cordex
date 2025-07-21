@@ -287,7 +287,7 @@
     "SETTINGS": "Settings",
     "CONTACTS": "Contacts",
     "ACTIVE": "Active",
-    "CAPTAIN": "Captain",
+    "CAPTAIN": "AI Agent",
     "CAPTAIN_ASSISTANTS": "Assistants",
     "CAPTAIN_DOCUMENTS": "Documents",
     "CAPTAIN_RESPONSES": "FAQs",
@@ -360,19 +360,46 @@
       "SEAT_COUNT": "Number of seats",
       "RENEWS_ON": "Renews on"
     },
+    "CURRENT_PLAN_DESC": "You are currently subscribed to the plan with licenses",
+    "USERS": "Users",
+    "NEXT_BILLING": "Next Billing",
+    "STATUS": "Status",
     "VIEW_PRICING": "View Pricing",
+    "VIEW_PLANS": "View Plans",
     "MANAGE_SUBSCRIPTION": {
       "TITLE": "Manage your subscription",
       "DESCRIPTION": "View your previous invoices, edit your billing details, or cancel your subscription.",
       "BUTTON_TXT": "Go to the billing portal"
     },
+    "USED": "used",
+    "UNLIMITED": "Unlimited",
+    "UNLIMITED_USAGE": "Unlimited usage",
+    "LIMIT_REACHED": "Limit reached",
+    "AVAILABLE": "available",
+    "REMAINING": "remaining",
+    "USAGE_LIMITS": {
+      "TITLE": "Usage Limits",
+      "INBOXES": "Inboxes",
+      "INBOXES_DESC": "Customer communication channels",
+      "AGENTS": "Agents",
+      "AGENTS_DESC": "Support team members",
+      "CAPTAIN_RESPONSES": "AI Agent Responses",
+      "CAPTAIN_RESPONSES_DESC": "AI-generated responses",
+      "CAPTAIN_DOCUMENTS": "AI Agent Documents",
+      "CAPTAIN_DOCUMENTS_DESC": "AI-processed documents"
+    },
+    "CHAT_WITH_US": {
+      "TITLE": "Need help?",
+      "DESCRIPTION": "Do you face any issues in billing? We are here to help.",
+      "BUTTON_TXT": "Chat with us"
+    },
     "CAPTAIN": {
-      "TITLE": "Captain",
-      "DESCRIPTION": "Manage usage and credits for Captain AI.",
+      "TITLE": "AI Agent",
+      "DESCRIPTION": "Manage usage and credits for AI Agent.",
       "BUTTON_TXT": "Buy more credits",
       "DOCUMENTS": "Documents",
       "RESPONSES": "Responses",
-      "UPGRADE": "Captain is not available on the free plan, upgrade now to get access to assistants, copilot and more."
+      "UPGRADE": "AI Agent is not available on the free plan, upgrade now to get access to assistants, copilot and more."
     },
     "CHAT_WITH_US": {
       "TITLE": "Need help?",

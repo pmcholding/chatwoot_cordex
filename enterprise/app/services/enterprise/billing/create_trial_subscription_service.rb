@@ -2,7 +2,7 @@ class Enterprise::Billing::CreateTrialSubscriptionService
   pattr_initialize [:account!]
 
   TRIAL_PERIOD_DAYS = 7
-  DEFAULT_TRIAL_PLAN = 'Cordex Professional'.freeze # Plano padrão para trial
+  DEFAULT_TRIAL_PLAN = 'Cordex Starter'.freeze # Plano padrão para trial
 
   def perform
     return if existing_subscription? || trial_already_created?
@@ -97,24 +97,24 @@ class Enterprise::Billing::CreateTrialSubscriptionService
   end
 
   def trial_price_id
-    # Usar o price_id do plano Professional configurado no Stripe
+    # Usar o price_id do plano Starter configurado no Stripe
     # Este deve ser configurado nas variáveis de ambiente
     ENV['STRIPE_TRIAL_PRICE_ID'] || default_trial_price_id
   end
 
   def default_trial_price_id
     # Fallback para um price_id padrão se não estiver configurado
-    # Este deve ser o price_id do plano Professional no Stripe
-    'price_1RnLfEIDmUcrOYuMZ2Ud6ohe' # Exemplo - substituir pelo real
+    # Este deve ser o price_id do plano Starter no Stripe
+    'price_1RnLcDIDmUcrOYuMcvvEvphJ' # Cordex Starter
   end
 
   def trial_limits
-    # Limites generosos para o período de trial
+    # Limites do plano Starter para o período de trial
     {
-      'inboxes' => 10,
-      'agents' => 5,
-      'captain_responses' => 500,
-      'captain_documents' => 200
+      'inboxes' => 5,
+      'agents' => 3,
+      'captain_responses' => 200,
+      'captain_documents' => 100
     }
   end
 end

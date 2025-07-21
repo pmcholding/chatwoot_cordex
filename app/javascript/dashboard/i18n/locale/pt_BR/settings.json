@@ -287,7 +287,7 @@
     "SETTINGS": "Configurações",
     "CONTACTS": "Contatos",
     "ACTIVE": "Ativo",
-    "CAPTAIN": "Capitão",
+    "CAPTAIN": "Agente IA",
     "CAPTAIN_ASSISTANTS": "Assistentes",
     "CAPTAIN_DOCUMENTS": "Documentos",
     "CAPTAIN_RESPONSES": "FAQs",
@@ -360,19 +360,46 @@
       "SEAT_COUNT": "Número de assentos",
       "RENEWS_ON": "Renovações em"
     },
+    "CURRENT_PLAN_DESC": "Você está atualmente inscrito no plano com licenças",
+    "USERS": "Usuários",
+    "NEXT_BILLING": "Próxima Cobrança",
+    "STATUS": "Status",
     "VIEW_PRICING": "Ver Preços",
+    "VIEW_PLANS": "Ver Planos",
     "MANAGE_SUBSCRIPTION": {
       "TITLE": "Gerencie sua assinatura",
       "DESCRIPTION": "Veja suas faturas anteriores, edite seus detalhes de cobrança, ou cancele sua assinatura.",
       "BUTTON_TXT": "Ir para o portal de cobrança"
     },
+    "USED": "usado",
+    "UNLIMITED": "Ilimitado",
+    "UNLIMITED_USAGE": "Uso ilimitado",
+    "LIMIT_REACHED": "Limite atingido",
+    "AVAILABLE": "disponível",
+    "REMAINING": "restante",
+    "USAGE_LIMITS": {
+      "TITLE": "Limites de Uso",
+      "INBOXES": "Caixas de Entrada",
+      "INBOXES_DESC": "Canais de comunicação com clientes",
+      "AGENTS": "Agentes",
+      "AGENTS_DESC": "Membros da equipe de suporte",
+      "CAPTAIN_RESPONSES": "Respostas do Agente IA",
+      "CAPTAIN_RESPONSES_DESC": "Respostas geradas por IA",
+      "CAPTAIN_DOCUMENTS": "Documentos do Agente IA",
+      "CAPTAIN_DOCUMENTS_DESC": "Documentos processados pela IA"
+    },
+    "CHAT_WITH_US": {
+      "TITLE": "Precisa de ajuda?",
+      "DESCRIPTION": "Você enfrenta algum problema com a cobrança? Estamos aqui para ajudar.",
+      "BUTTON_TXT": "Conversar conosco"
+    },
     "CAPTAIN": {
-      "TITLE": "Capitão",
-      "DESCRIPTION": "Gerenciar uso e créditos para o Captain AI.",
+      "TITLE": "Agente IA",
+      "DESCRIPTION": "Gerenciar uso e créditos para o Agente IA.",
       "BUTTON_TXT": "Comprar mais créditos",
       "DOCUMENTS": "Documentos",
       "RESPONSES": "Respostas",
-      "UPGRADE": "O capitão não está disponível no plano gratuito, faça o upgrade para ter acesso aos assistentes, co-piloto e muito mais."
+      "UPGRADE": "O Agente IA não está disponível no plano gratuito, faça o upgrade para ter acesso aos assistentes, co-piloto e muito mais."
     },
     "CHAT_WITH_US": {
       "TITLE": "Precisa de ajuda?",

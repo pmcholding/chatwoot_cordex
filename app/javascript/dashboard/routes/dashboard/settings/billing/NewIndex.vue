@@ -34,19 +34,27 @@ const subscriptionEndsOn = computed(
 );
 
 // Account limits from the new metadata-based system
-const accountLimits = computed(() => currentAccount.value?.limits || {});
+const accountLimits = computed(() => {
+  const limits = currentAccount.value?.limits || {};
+  // Convert the API format to simple numbers for the UI
+  return {
+    inboxes: limits.non_web_inboxes?.allowed || null,
+    agents: limits.agents?.allowed || null,
+    captain_responses: limits.captain?.responses?.total_count || null,
+    captain_documents: limits.captain?.documents?.total_count || null,
+  };
+});
 
 // Usage data
-const currentUsage = computed(() => ({
-  inboxes: currentAccount.value?.inboxes?.length || 0,
-  agents:
-    currentAccount.value?.users?.filter(user => user.role === 'agent')
-      ?.length || 0,
-  captain_responses:
-    currentAccount.value?.custom_attributes?.captain_responses_usage || 0,
-  captain_documents:
-    currentAccount.value?.custom_attributes?.captain_documents_usage || 0,
-}));
+const currentUsage = computed(() => {
+  const limits = currentAccount.value?.limits || {};
+  return {
+    inboxes: limits.non_web_inboxes?.consumed || 0,
+    agents: limits.agents?.consumed || 0,
+    captain_responses: limits.captain?.responses?.consumed || 0,
+    captain_documents: limits.captain?.documents?.consumed || 0,
+  };
+});
 
 // Formatted renewal date
 const renewalDate = computed(() => {

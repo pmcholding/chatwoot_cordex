@@ -54,8 +54,8 @@ module Enterprise::Concerns::Account
   private
 
   def create_trial_subscription
-    # Só criar trial se não for uma conta de super admin ou se não estiver em ambiente de teste
-    return if Rails.env.test? || users.any? { |user| user.type == 'SuperAdmin' }
+    # Só criar trial se não estiver em ambiente de teste
+    return if Rails.env.test?
 
     # Executar em background para não atrasar a criação da conta
     Enterprise::CreateTrialSubscriptionJob.perform_later(self)

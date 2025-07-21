@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
   title: {
@@ -27,6 +28,8 @@ const props = defineProps({
     default: 'blue',
   },
 });
+
+const { t } = useI18n();
 
 const iconClass = computed(() => {
   const iconMap = {
@@ -74,9 +77,9 @@ const isNearLimit = computed(() => {
 });
 
 const usageText = computed(() => {
-  if (!props.limit) return 'Unlimited usage';
-  if (props.current >= props.limit) return 'Limit reached';
-  return `${remaining.value} available`;
+  if (!props.limit) return t('BILLING_SETTINGS.UNLIMITED_USAGE');
+  if (props.current >= props.limit) return t('BILLING_SETTINGS.LIMIT_REACHED');
+  return `${remaining.value} ${t('BILLING_SETTINGS.AVAILABLE')}`;
 });
 </script>
 

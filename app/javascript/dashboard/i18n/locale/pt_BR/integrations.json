@@ -342,7 +342,7 @@
     }
   },
   "CAPTAIN": {
-    "NAME": "Capitão",
+    "NAME": "Agente IA",
     "HEADER_KNOW_MORE": "Know more",
     "COPILOT": {
       "TITLE": "Copiloto",
@@ -351,7 +351,7 @@
       "KICK_OFF_MESSAGE": "Precisa de um resumo rápido, quer verificar conversas passadas ou redigir uma resposta melhor? O Copiloto está aqui para acelerar as coisas.",
       "SEND_MESSAGE": "Enviar mensagem...",
       "EMPTY_MESSAGE": "Houve um erro ao gerar a resposta. Por favor, tente novamente.",
-      "LOADER": "Capitão está pensando",
+      "LOADER": "Agente IA está pensando",
       "YOU": "Você",
       "USE": "Use isto",
       "RESET": "Reiniciar",
