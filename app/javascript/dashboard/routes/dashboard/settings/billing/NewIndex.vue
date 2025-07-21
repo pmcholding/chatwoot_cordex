@@ -77,8 +77,8 @@ const onManageSubscription = () => {
 };
 
 const onViewPricing = () => {
-  // Open pricing page or external link
-  window.open('https://www.chatwoot.com/pricing', '_blank');
+  // Open Stripe Billing Portal to view and change plans
+  store.dispatch('accounts/checkout');
 };
 
 const onToggleChatWindow = () => {
