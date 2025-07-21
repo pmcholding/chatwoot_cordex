@@ -317,4 +317,200 @@ describe Enterprise::Billing::HandleStripeEventService do
       end
     end
   end
+
+  describe 'metadata-based products' do
+    let(:service) { stripe_event_service.new }
+    let(:stripe_price) { double('Stripe::Price', product: 'prod_SinCbqk24kCPfd') }
+    let(:stripe_product) do
+      double('Stripe::Product', {
+               id: 'prod_SinCbqk24kCPfd',
+               name: 'Cordex Starter',
+               metadata: {
+                 'inboxes' => '3',
+                 'agents' => '2',
+                 'captain_responses' => '100',
+                 'captain_documents' => '50'
+               }
+             })
+    end
+
+    before do
+      # Mock subscription for new metadata-based products
+      allow(subscription).to receive(:[]).with('items').and_return({
+                                                                     'data' => [{
+                                                                       'price' => {
+                                                                         'id' => 'price_1RnLcDIDmUcrOYuMcvvEvphJ',
+                                                                         'product' => 'prod_SinCbqk24kCPfd'
+                                                                       }
+                                                                     }]
+                                                                   })
+      allow(subscription).to receive(:[]).with('plan').and_return(nil)
+
+      # Mock Stripe API calls
+      allow(Stripe::Price).to receive(:retrieve).with('price_1RnLcDIDmUcrOYuMcvvEvphJ').and_return(stripe_price)
+      allow(Stripe::Product).to receive(:retrieve).with('prod_SinCbqk24kCPfd').and_return(stripe_product)
+    end
+
+    it 'processes metadata-based subscription and updates account limits' do
+      service.perform(event: event)
+
+      account.reload
+      expect(account.limits).to include(
+        'inboxes' => 3,
+        'agents' => 2,
+        'captain_responses' => 100,
+        'captain_documents' => 50
+      )
+    end
+
+    it 'updates account attributes for metadata products' do
+      service.perform(event: event)
+
+      account.reload
+      expect(account.custom_attributes).to include(
+        'plan_name' => 'Cordex Starter',
+        'stripe_product_id' => 'prod_SinCbqk24kCPfd',
+        'stripe_price_id' => 'price_1RnLcDIDmUcrOYuMcvvEvphJ'
+      )
+    end
+
+    it 'resets captain usage for metadata products' do
+      # Prime the account with some usage
+      5.times { account.increment_response_usage }
+      expect(account.custom_attributes['captain_responses_usage']).to eq(5)
+
+      service.perform(event: event)
+
+      # Verify usage was reset
+      expect(account.reload.custom_attributes['captain_responses_usage']).to eq(0)
+    end
+
+    it 'handles Stripe API errors gracefully' do
+      allow(Stripe::Price).to receive(:retrieve).and_raise(Stripe::StripeError.new('API Error'))
+
+      expect { service.perform(event: event) }.not_to raise_error
+
+      # Account should not be updated if API call fails
+      account.reload
+      expect(account.limits).to be_blank
+    end
+
+    context 'with different metadata products' do
+      let(:stripe_product_pro) do
+        double('Stripe::Product', {
+                 id: 'prod_SinFXdtck9Cdrh',
+                 name: 'Cordex Professional',
+                 metadata: {
+                   'inboxes' => '10',
+                   'agents' => '5',
+                   'captain_responses' => '500',
+                   'captain_documents' => '200'
+                 }
+               })
+      end
+
+      before do
+        allow(subscription).to receive(:[]).with('items').and_return({
+                                                                       'data' => [{
+                                                                         'price' => {
+                                                                           'id' => 'price_1RnLfEIDmUcrOYuMZ2Ud6ohe',
+                                                                           'product' => 'prod_SinFXdtck9Cdrh'
+                                                                         }
+                                                                       }]
+                                                                     })
+        allow(stripe_price).to receive(:product).and_return('prod_SinFXdtck9Cdrh')
+        allow(Stripe::Price).to receive(:retrieve).with('price_1RnLfEIDmUcrOYuMZ2Ud6ohe').and_return(stripe_price)
+        allow(Stripe::Product).to receive(:retrieve).with('prod_SinFXdtck9Cdrh').and_return(stripe_product_pro)
+      end
+
+      it 'processes Professional plan metadata correctly' do
+        service.perform(event: event)
+
+        account.reload
+        expect(account.limits).to include(
+          'inboxes' => 10,
+          'agents' => 5,
+          'captain_responses' => 500,
+          'captain_documents' => 200
+        )
+        expect(account.custom_attributes['plan_name']).to eq('Cordex Professional')
+      end
+    end
+  end
+
+  describe 'automatic metadata detection' do
+    let(:service) { stripe_event_service.new }
+
+    it 'detects products with metadata automatically' do
+      # Product with metadata should be detected
+      expect(service.send(:using_new_metadata_products?)).to be true
+    end
+
+    it 'does not detect products without metadata' do
+      # Mock a product without metadata
+      product_without_metadata = double('Stripe::Product', {
+                                          id: 'prod_old_product',
+                                          name: 'Old Product',
+                                          metadata: {}
+                                        })
+
+      allow(Stripe::Product).to receive(:retrieve).with('prod_SinCbqk24kCPfd').and_return(product_without_metadata)
+
+      expect(service.send(:using_new_metadata_products?)).to be false
+    end
+
+    it 'handles Stripe API errors when checking metadata' do
+      allow(Stripe::Price).to receive(:retrieve).and_raise(Stripe::StripeError.new('API Error'))
+
+      expect(service.send(:using_new_metadata_products?)).to be false
+    end
+
+    it 'works with any product that has required metadata keys' do
+      # Test with a completely different product ID that has metadata
+      new_product = double('Stripe::Product', {
+                             id: 'prod_any_new_product',
+                             name: 'Any New Product',
+                             metadata: {
+                               'inboxes' => '5',
+                               'agents' => '3'
+                             }
+                           })
+
+      allow(subscription).to receive(:[]).with('items').and_return({
+                                                                     'data' => [{
+                                                                       'price' => {
+                                                                         'id' => 'price_any_new_price',
+                                                                         'product' => 'prod_any_new_product'
+                                                                       }
+                                                                     }]
+                                                                   })
+
+      new_price = double('Stripe::Price', product: 'prod_any_new_product')
+      allow(Stripe::Price).to receive(:retrieve).with('price_any_new_price').and_return(new_price)
+      allow(Stripe::Product).to receive(:retrieve).with('prod_any_new_product').and_return(new_product)
+
+      expect(service.send(:using_new_metadata_products?)).to be true
+    end
+  end
+
+  describe 'event filtering' do
+    let(:service) { stripe_event_service.new }
+
+    it 'processes relevant events' do
+      described_class::RELEVANT_EVENTS.each do |event_type|
+        allow(event).to receive(:type).and_return(event_type)
+
+        # Should not raise error or skip processing
+        expect { service.perform(event: event) }.not_to raise_error
+      end
+    end
+
+    it 'skips irrelevant events' do
+      allow(event).to receive(:type).and_return('customer.created')
+
+      # Should return early without processing
+      expect(service).not_to receive(:process_subscription_updated)
+      service.perform(event: event)
+    end
+  end
 end

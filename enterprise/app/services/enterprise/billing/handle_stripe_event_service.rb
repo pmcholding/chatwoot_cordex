@@ -4,6 +4,18 @@ class Enterprise::Billing::HandleStripeEventService
   # Plan hierarchy: Hacker (default) -> Startups -> Business -> Enterprise
   # Each higher tier includes all features from the lower tiers
 
+  # Metadata keys that indicate a product uses the new metadata-based system
+  METADATA_LIMIT_KEYS = %w[inboxes agents captain_responses captain_documents].freeze
+
+  # Events we need to process (filters out irrelevant events)
+  RELEVANT_EVENTS = %w[
+    customer.subscription.created
+    customer.subscription.updated
+    customer.subscription.deleted
+    invoice.payment_succeeded
+    invoice.payment_failed
+  ].freeze
+
   # Basic features available starting with the Startups plan
   STARTUP_PLAN_FEATURES = %w[
     inbound_emails
@@ -26,23 +38,50 @@ class Enterprise::Billing::HandleStripeEventService
   def perform(event:)
     @event = event
 
+    # Filter only relevant events to avoid processing unnecessary webhooks
+    return unless RELEVANT_EVENTS.include?(@event.type)
+
     case @event.type
-    when 'customer.subscription.updated'
+    when 'customer.subscription.created', 'customer.subscription.updated'
       process_subscription_updated
     when 'customer.subscription.deleted'
       process_subscription_deleted
+    when 'invoice.payment_succeeded'
+      Rails.logger.info "Invoice payment succeeded for customer: #{subscription.customer}"
+    when 'invoice.payment_failed'
+      Rails.logger.warn "Invoice payment failed for customer: #{subscription.customer}"
     else
-      Rails.logger.debug { "Unhandled event type: #{event.type}" }
+      Rails.logger.debug { "Unhandled event type: #{@event.type}" }
     end
   end
 
   private
 
   def process_subscription_updated
+    return if account.blank?
+
+    # Check if this is a new product with metadata
+    if using_new_metadata_products?
+      process_metadata_based_subscription
+    else
+      # Legacy processing for old products
+      process_legacy_subscription
+    end
+  end
+
+  def process_metadata_based_subscription
+    Rails.logger.info "Processing metadata-based subscription for account #{account.id}"
+
+    update_account_limits_from_metadata
+    update_account_attributes_for_metadata_products
+    reset_captain_usage
+  end
+
+  def process_legacy_subscription
     plan = find_plan(subscription['plan']['product']) if subscription['plan'].present?
 
     # skipping self hosted plan events
-    return if plan.blank? || account.blank?
+    return if plan.blank?
 
     update_account_attributes(subscription, plan)
     update_plan_features
@@ -62,6 +101,76 @@ class Enterprise::Billing::HandleStripeEventService
         subscription_ends_on: Time.zone.at(subscription['current_period_end'])
       }
     )
+  end
+
+  def update_account_limits_from_metadata
+    return unless subscription['items']['data'].present?
+
+    price_id = subscription['items']['data'][0]['price']['id']
+
+    begin
+      # Retrieve price and product from Stripe to get metadata
+      price = Stripe::Price.retrieve(price_id)
+      product = Stripe::Product.retrieve(price.product)
+
+      metadata = product.metadata
+
+      # Update account limits based on product metadata dynamically
+      limits = {}
+      METADATA_LIMIT_KEYS.each do |key|
+        limits[key] = metadata[key]&.to_i || 0
+      end
+
+      account.update!(limits: limits)
+
+      Rails.logger.info "Updated account #{account.id} limits from product #{product.id}: #{metadata}"
+    rescue Stripe::StripeError => e
+      Rails.logger.error "Failed to retrieve Stripe product metadata: #{e.message}"
+    end
+  end
+
+  def update_account_attributes_for_metadata_products
+    return unless subscription['items']['data'].present?
+
+    price_id = subscription['items']['data'][0]['price']['id']
+    product_id = subscription['items']['data'][0]['price']['product']
+
+    # Get product name from Stripe
+    product_name = begin
+      product = Stripe::Product.retrieve(product_id)
+      product.name
+    rescue Stripe::StripeError
+      'Unknown Plan'
+    end
+
+    account.update!(
+      custom_attributes: account.custom_attributes.merge({
+                                                           stripe_customer_id: subscription.customer,
+                                                           stripe_price_id: price_id,
+                                                           stripe_product_id: product_id,
+                                                           plan_name: product_name,
+                                                           subscribed_quantity: subscription['quantity'] || 1,
+                                                           subscription_status: subscription['status'],
+                                                           subscription_ends_on: Time.zone.at(subscription['current_period_end'])
+                                                         })
+    )
+  end
+
+  def using_new_metadata_products?
+    return false unless subscription['items']['data'].present?
+
+    begin
+      price_id = subscription['items']['data'][0]['price']['id']
+      price = Stripe::Price.retrieve(price_id)
+      product = Stripe::Product.retrieve(price.product)
+
+      # Check if product has any of the metadata keys we use for limits
+      metadata = product.metadata || {}
+      METADATA_LIMIT_KEYS.any? { |key| metadata.key?(key) }
+    rescue Stripe::StripeError => e
+      Rails.logger.error "Failed to check product metadata: #{e.message}"
+      false
+    end
   end
 
   def process_subscription_deleted

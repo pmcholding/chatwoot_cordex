@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_14_104358) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_21_021150) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -237,6 +237,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_14_104358) do
     t.jsonb "audience", default: []
     t.datetime "scheduled_at", precision: nil
     t.boolean "trigger_only_during_business_hours", default: false
+    t.bigint "template_id"
+    t.integer "processed_contacts_count", default: 0
+    t.integer "failed_contacts_count", default: 0
     t.jsonb "template_params"
     t.index ["account_id"], name: "index_campaigns_on_account_id"
     t.index ["campaign_status"], name: "index_campaigns_on_campaign_status"
@@ -1084,6 +1087,24 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_14_104358) do
     t.datetime "updated_at", precision: nil, null: false
   end
 
+  create_table "usage_histories", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "conversation_id"
+    t.string "feature", null: false
+    t.integer "responses_consumed", default: 1, null: false
+    t.string "source_type", null: false
+    t.jsonb "details", default: {}
+    t.date "date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "date"], name: "index_usage_histories_on_account_id_and_date"
+    t.index ["account_id", "feature"], name: "index_usage_histories_on_account_id_and_feature"
+    t.index ["account_id", "source_type"], name: "index_usage_histories_on_account_id_and_source_type"
+    t.index ["account_id"], name: "index_usage_histories_on_account_id"
+    t.index ["conversation_id"], name: "index_usage_histories_on_conversation_id"
+    t.index ["date"], name: "index_usage_histories_on_date"
+  end
+
   create_table "users", id: :serial, force: :cascade do |t|
     t.string "provider", default: "email", null: false
     t.string "uid", default: "", null: false
@@ -1150,6 +1171,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_14_104358) do
   add_foreign_key "campaigns_contacts", "campaigns", on_delete: :cascade
   add_foreign_key "campaigns_contacts", "contacts", on_delete: :cascade
   add_foreign_key "inboxes", "portals"
+  add_foreign_key "usage_histories", "accounts"
+  add_foreign_key "usage_histories", "conversations"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").
       after(:insert).

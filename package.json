@@ -48,6 +48,7 @@
     "@scmmishra/pico-search": "0.5.4",
     "@sentry/vue": "^8.31.0",
     "@sindresorhus/slugify": "2.2.1",
+    "@stripe/mcp": "^0.2.3",
     "@tailwindcss/typography": "^0.5.15",
     "@tanstack/vue-table": "^8.20.5",
     "@vitejs/plugin-vue": "^5.1.4",
