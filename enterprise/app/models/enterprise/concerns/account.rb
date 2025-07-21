@@ -12,5 +12,52 @@ module Enterprise::Concerns::Account
 
     has_many :copilot_threads, dependent: :destroy_async
     has_many :voice_channels, dependent: :destroy_async, class_name: '::Channel::Voice'
+
+    # Criar trial automaticamente quando uma conta for criada
+    after_create_commit :create_trial_subscription
+  end
+
+  # Métodos públicos para verificar status do trial
+  def on_trial?
+    custom_attributes['is_trial'] == true && trial_active?
+  end
+
+  def trial_active?
+    return false unless custom_attributes['trial_ends_at'].present?
+
+    trial_end_date = Time.parse(custom_attributes['trial_ends_at'])
+    Time.current < trial_end_date
+  end
+
+  def trial_expired?
+    return false unless custom_attributes['trial_ends_at'].present?
+
+    trial_end_date = Time.parse(custom_attributes['trial_ends_at'])
+    Time.current >= trial_end_date
+  end
+
+  def trial_days_remaining
+    return 0 unless trial_active?
+
+    trial_end_date = Time.parse(custom_attributes['trial_ends_at'])
+    ((trial_end_date - Time.current) / 1.day).ceil
+  end
+
+  def trial_status
+    return 'no_trial' unless custom_attributes['is_trial']
+    return 'active' if trial_active?
+    return 'expired' if trial_expired?
+
+    'unknown'
+  end
+
+  private
+
+  def create_trial_subscription
+    # Só criar trial se não for uma conta de super admin ou se não estiver em ambiente de teste
+    return if Rails.env.test? || users.any? { |user| user.type == 'SuperAdmin' }
+
+    # Executar em background para não atrasar a criação da conta
+    Enterprise::CreateTrialSubscriptionJob.perform_later(self)
   end
 end
