@@ -32,9 +32,16 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['linkClick']);
+
 const helpURL = getHelpUrlForFeature(props.featureName);
 
 const openInNewTab = url => {
+  if (!url && props.linkText) {
+    // If no URL but linkText exists, emit custom event
+    emit('linkClick');
+    return;
+  }
   if (!url) return;
   window.open(url, '_blank', 'noopener noreferrer');
 };
@@ -93,6 +100,17 @@ const openInNewTab = url => {
             class="flex-shrink-0 text-n-blue-text size-4"
           />
         </a>
+        <button
+          v-else-if="!helpURL && linkText"
+          class="items-center hidden gap-1 text-sm font-medium sm:inline-flex w-fit text-n-blue-text hover:underline"
+          @click="openInNewTab(null)"
+        >
+          {{ linkText }}
+          <Icon
+            icon="i-lucide-chevron-right"
+            class="flex-shrink-0 text-n-blue-text size-4"
+          />
+        </button>
       </CustomBrandPolicyWrapper>
     </div>
     <div
@@ -108,6 +126,15 @@ const openInNewTab = url => {
           trailing-icon
           :label="linkText"
           @click="openInNewTab(helpURL)"
+        />
+        <Button
+          v-else-if="!helpURL && linkText"
+          blue
+          link
+          icon="i-lucide-chevron-right"
+          trailing-icon
+          :label="linkText"
+          @click="openInNewTab(null)"
         />
       </CustomBrandPolicyWrapper>
     </div>

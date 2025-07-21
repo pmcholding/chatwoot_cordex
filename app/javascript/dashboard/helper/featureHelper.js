@@ -18,7 +18,7 @@ const FEATURE_HELP_URLS = {
   sla: 'https://chwt.app/hc/sla',
   team_management: 'https://chwt.app/hc/teams',
   webhook: 'https://chwt.app/hc/webhooks',
-  billing: 'https://chwt.app/pricing',
+  billing: null, // Use Stripe Billing Portal instead
 };
 
 export function getHelpUrlForFeature(featureName) {
