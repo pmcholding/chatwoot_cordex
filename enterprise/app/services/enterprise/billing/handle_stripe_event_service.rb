@@ -104,7 +104,7 @@ class Enterprise::Billing::HandleStripeEventService
   end
 
   def update_account_limits_from_metadata
-    return unless subscription['items']['data'].present?
+    return if subscription['items']['data'].blank?
 
     price_id = subscription['items']['data'][0]['price']['id']
 
@@ -118,7 +118,7 @@ class Enterprise::Billing::HandleStripeEventService
       # Update account limits based on product metadata dynamically
       limits = {}
       METADATA_LIMIT_KEYS.each do |key|
-        limits[key] = metadata[key]&.to_i || 0
+        limits[key] = metadata[key].to_i
       end
 
       account.update!(limits: limits)
@@ -130,7 +130,7 @@ class Enterprise::Billing::HandleStripeEventService
   end
 
   def update_account_attributes_for_metadata_products
-    return unless subscription['items']['data'].present?
+    return if subscription['items']['data'].blank?
 
     price_id = subscription['items']['data'][0]['price']['id']
     product_id = subscription['items']['data'][0]['price']['product']
@@ -157,7 +157,7 @@ class Enterprise::Billing::HandleStripeEventService
   end
 
   def using_new_metadata_products?
-    return false unless subscription['items']['data'].present?
+    return false if subscription['items']['data'].blank?
 
     begin
       price_id = subscription['items']['data'][0]['price']['id']

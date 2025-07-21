@@ -2,7 +2,7 @@ class Enterprise::Billing::CreateTrialSubscriptionService
   pattr_initialize [:account!]
 
   TRIAL_PERIOD_DAYS = 7
-  DEFAULT_TRIAL_PLAN = 'Cordex Professional' # Plano padrão para trial
+  DEFAULT_TRIAL_PLAN = 'Cordex Professional'.freeze # Plano padrão para trial
 
   def perform
     return if existing_subscription? || trial_already_created?

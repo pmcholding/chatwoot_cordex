@@ -23,23 +23,23 @@ module Enterprise::Concerns::Account
   end
 
   def trial_active?
-    return false unless custom_attributes['trial_ends_at'].present?
+    return false if custom_attributes['trial_ends_at'].blank?
 
-    trial_end_date = Time.parse(custom_attributes['trial_ends_at'])
+    trial_end_date = Time.zone.parse(custom_attributes['trial_ends_at'])
     Time.current < trial_end_date
   end
 
   def trial_expired?
-    return false unless custom_attributes['trial_ends_at'].present?
+    return false if custom_attributes['trial_ends_at'].blank?
 
-    trial_end_date = Time.parse(custom_attributes['trial_ends_at'])
+    trial_end_date = Time.zone.parse(custom_attributes['trial_ends_at'])
     Time.current >= trial_end_date
   end
 
   def trial_days_remaining
     return 0 unless trial_active?
 
-    trial_end_date = Time.parse(custom_attributes['trial_ends_at'])
+    trial_end_date = Time.zone.parse(custom_attributes['trial_ends_at'])
     ((trial_end_date - Time.current) / 1.day).ceil
   end
 
