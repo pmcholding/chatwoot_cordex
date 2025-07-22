@@ -8,11 +8,9 @@
 #  campaign_type                      :integer          default("ongoing"), not null
 #  description                        :text
 #  enabled                            :boolean          default(TRUE)
-#  failed_contacts_count              :integer          default(0)
 #  message                            :text             not null
-#  processed_contacts_count           :integer          default(0)
 #  scheduled_at                       :datetime
-#  template_params                    :jsonb
+#  template_params                    :jsonb            not null
 #  title                              :string           not null
 #  trigger_only_during_business_hours :boolean          default(FALSE)
 #  trigger_rules                      :jsonb
@@ -22,7 +20,6 @@
 #  display_id                         :integer          not null
 #  inbox_id                           :bigint           not null
 #  sender_id                          :integer
-#  template_id                        :bigint
 #
 # Indexes
 #
@@ -31,7 +28,6 @@
 #  index_campaigns_on_campaign_type    (campaign_type)
 #  index_campaigns_on_inbox_id         (inbox_id)
 #  index_campaigns_on_scheduled_at     (scheduled_at)
-#  index_campaigns_on_template_id      (template_id)
 #
 class Campaign < ApplicationRecord
   include UrlHelper

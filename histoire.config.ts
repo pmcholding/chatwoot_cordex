@@ -12,16 +12,16 @@ export default defineConfig({
   viteIgnorePlugins: ['vite-plugin-ruby'],
   theme: {
     darkClass: 'dark',
-    title: '@chatwoot/design',
+    title: '@cordex/design',
     logo: {
       square: './design-system/images/logo-thumbnail.svg',
-      light: './design-system/images/logo.png',
-      dark: './design-system/images/logo-dark.png',
+      light: './design-system/images/logo-thumbnail.svg',
+      dark: './design-system/images/logo-thumbnail.svg',
     },
   },
   defaultStoryProps: {
     icon: 'carbon:cube',
-    iconColor: '#1F93FF',
+    iconColor: '#6e8103',
     layout: {
       type: 'grid',
       width: '80%',

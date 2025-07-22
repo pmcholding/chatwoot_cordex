@@ -1,0 +1,253 @@
+version: "3.7"
+services:
+
+## --------------------------- LOCAL DEV --------------------------- ##
+
+  chatwoot_app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: >
+      sh -c "echo 'Rails.application.config.active_storage.variant_processor = :mini_magick' > /app/config/initializers/active_storage.rb && bundle exec rails db:chatwoot_prepare && bundle exec rails s -p 3000 -b 0.0.0.0"
+    entrypoint: docker/entrypoints/rails.sh
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - ./public/imagens:/app/public/imagens:ro ## Suas imagens ficam em /public/imagens
+      - chatwoot_storage_local:/app/storage ## Arquivos de conversa
+      - chatwoot_public_local:/app/public ## Arquivos de logos
+      - chatwoot_mailer_local:/app/app/views/devise/mailer ## Arquivos de email
+      - chatwoot_mailers_local:/app/app/views/mailers ## Arquivos de emails
+      # Mount source code for development
+      - .:/app
+      - /app/node_modules
+      - /app/tmp
+
+    networks:
+      - cordexnet_local
+
+    environment:
+      ## 🏢 Nome da Empresa
+      - INSTALLATION_NAME=cordex-local
+
+      ## 🔐 Secret key (diferente da produção)
+      - SECRET_KEY_BASE=local_development_secret_key_base_for_cordex_testing_only
+
+      ## 💬 Url Chatwoot (local)
+      - FRONTEND_URL=http://localhost:3000
+      - FORCE_SSL=false
+
+      ## 🌍 Idioma/Localização padrão
+      - DEFAULT_LOCALE=pt_BR
+      - TZ=America/Sao_Paulo
+      
+      # Facebook (mesmas configurações da produção para testes)
+      - FB_VERIFY_TOKEN=CQZWIG45TqO6aHtMdCkQw9G6
+      - FB_APP_SECRET=c21e8f387dae8e51ffc8b08eb62a9117
+      - FB_APP_ID=1389464669853263
+
+      # Instagram
+      - IG_VERIFY_TOKEN=HxgFHtD1V1Dn8qx09Rt3Dpal
+
+      # Stripe API key (usar test keys para desenvolvimento)
+      - STRIPE_SECRET_KEY=your_stripe_test_secret_key_here
+      - STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret_here
+      # Price ID para trial de 7 dias (test)
+      - STRIPE_TRIAL_PRICE_ID=price_test_1RnLcDIDmUcrOYuMcvvEvphJ
+
+      ## 🧑‍💻 Dados do Redis
+      - REDIS_URL=redis://chatwoot_redis_local:6379
+
+      ## 🗄️ Dados do Postgres
+      - POSTGRES_HOST=chatwoot_postgres_local
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres_local_dev ## Senha local
+      - POSTGRES_DATABASE=chatwoot_development
+
+      ## 🏠 Armazenamento
+      - ACTIVE_STORAGE_SERVICE=local
+
+      ## 📧 Dados do SMTP (usar Mailcatcher para desenvolvimento)
+      - MAILER_SENDER_EMAIL=dev@cordex.local
+      - SMTP_DOMAIN=cordex.local
+      - SMTP_ADDRESS=mailcatcher
+      - SMTP_PORT=1025
+      - SMTP_SSL=false
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+      - SMTP_AUTHENTICATION=
+      - SMTP_ENABLE_STARTTLS_AUTO=false
+      - SMTP_OPENSSL_VERIFY_MODE=none
+      - MAILER_INBOUND_EMAIL_DOMAIN=dev@cordex.local
+
+      ## ⚙️ Melhorias (reduzidas para desenvolvimento)
+      - SIDEKIQ_CONCURRENCY=5
+      - RACK_TIMEOUT_SERVICE_TIMEOUT=0
+      - RAILS_MAX_THREADS=3
+      - WEB_CONCURRENCY=1
+      - ENABLE_RACK_ATTACK=false
+
+      ## ⚡ Outras configurações
+      - NODE_ENV=development
+      - RAILS_ENV=development
+      - INSTALLATION_ENV=docker
+      - RAILS_LOG_TO_STDOUT=true
+      - USE_INBOX_AVATAR_FOR_BOT=true
+      - ENABLE_ACCOUNT_SIGNUP=true
+
+    depends_on:
+      - chatwoot_postgres_local
+      - chatwoot_redis_local
+
+## --------------------------- LOCAL DEV --------------------------- ##
+
+  chatwoot_sidekiq:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: bundle exec sidekiq -C config/sidekiq.yml
+
+    volumes:
+      - chatwoot_storage_local:/app/storage
+      - chatwoot_public_local:/app/public
+      - chatwoot_mailer_local:/app/app/views/devise/mailer
+      - chatwoot_mailers_local:/app/app/views/mailers
+      # Mount source code for development
+      - .:/app
+      - /app/node_modules
+      - /app/tmp
+
+    networks:
+      - cordexnet_local
+
+    environment:
+      ## 🏢 Nome da Empresa
+      - INSTALLATION_NAME=cordex-local
+
+      ## 🔐 Secret key (diferente da produção)
+      - SECRET_KEY_BASE=local_development_secret_key_base_for_cordex_testing_only
+
+      ## 💬 Url Chatwoot (local)
+      - FRONTEND_URL=http://localhost:3000
+      - FORCE_SSL=false
+
+      ## 🌍 Idioma/Localização padrão
+      - DEFAULT_LOCALE=pt_BR
+      - TZ=America/Sao_Paulo
+      
+      # Facebook
+      - FB_VERIFY_TOKEN=CQZWIG45TqO6aHtMdCkQw9G6
+      - FB_APP_SECRET=c21e8f387dae8e51ffc8b08eb62a9117
+      - FB_APP_ID=1389464669853263
+
+      # Instagram
+      - IG_VERIFY_TOKEN=HxgFHtD1V1Dn8qx09Rt3Dpal
+
+      # Stripe API key (test)
+      - STRIPE_SECRET_KEY=your_stripe_test_secret_key_here
+      - STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret_here
+      - STRIPE_TRIAL_PRICE_ID=price_test_1RnLcDIDmUcrOYuMcvvEvphJ
+      
+      ## 🧑‍💻 Dados do Redis
+      - REDIS_URL=redis://chatwoot_redis_local:6379
+
+      ## 🗄️ Dados do Postgres
+      - POSTGRES_HOST=chatwoot_postgres_local
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres_local_dev
+      - POSTGRES_DATABASE=chatwoot_development
+
+      ## 🏠 Armazenamento
+      - ACTIVE_STORAGE_SERVICE=local
+
+      ## 📧 Dados do SMTP
+      - MAILER_SENDER_EMAIL=dev@cordex.local
+      - SMTP_DOMAIN=cordex.local
+      - SMTP_ADDRESS=mailcatcher
+      - SMTP_PORT=1025
+      - SMTP_SSL=false
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+      - SMTP_AUTHENTICATION=
+      - SMTP_ENABLE_STARTTLS_AUTO=false
+      - SMTP_OPENSSL_VERIFY_MODE=none
+      - MAILER_INBOUND_EMAIL_DOMAIN=dev@cordex.local
+
+      ## ⚙️ Melhorias
+      - SIDEKIQ_CONCURRENCY=5
+      - RACK_TIMEOUT_SERVICE_TIMEOUT=0
+      - RAILS_MAX_THREADS=3
+      - WEB_CONCURRENCY=1
+      - ENABLE_RACK_ATTACK=false
+
+      ## ⚡ Outras configurações
+      - NODE_ENV=development
+      - RAILS_ENV=development
+      - INSTALLATION_ENV=docker
+      - RAILS_LOG_TO_STDOUT=true
+      - USE_INBOX_AVATAR_FOR_BOT=true
+      - ENABLE_ACCOUNT_SIGNUP=true
+
+    depends_on:
+      - chatwoot_postgres_local
+      - chatwoot_redis_local
+
+## --------------------------- LOCAL DEV --------------------------- ##
+
+  chatwoot_postgres_local:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    volumes:
+      - chatwoot_postgres_local:/var/lib/postgresql/data
+    networks:
+      - cordexnet_local
+    environment:
+      - POSTGRES_DB=chatwoot_development
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_local_dev
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    command: postgres -c shared_preload_libraries=vector
+
+## --------------------------- LOCAL DEV --------------------------- ##
+
+  chatwoot_redis_local:
+    image: redis:latest
+    command: [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--port",
+        "6379"
+      ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - chatwoot_redis_local:/data
+    networks:
+      - cordexnet_local
+
+## --------------------------- LOCAL DEV --------------------------- ##
+
+  mailcatcher:
+    image: sj26/mailcatcher
+    ports:
+      - "1080:1080"  # Web interface
+      - "1025:1025"  # SMTP
+    networks:
+      - cordexnet_local
+
+## --------------------------- LOCAL DEV --------------------------- ##
+
+volumes:
+  chatwoot_storage_local:
+  chatwoot_public_local:
+  chatwoot_mailer_local:
+  chatwoot_mailers_local:
+  chatwoot_redis_local:
+  chatwoot_postgres_local:
+
+networks:
+  cordexnet_local:
+    driver: bridge
