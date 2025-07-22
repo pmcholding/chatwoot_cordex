@@ -165,7 +165,8 @@ class Enterprise::Billing::HandleStripeEventService
       product = Stripe::Product.retrieve(price.product)
 
       # Check if product has any of the metadata keys we use for limits
-      metadata = product.metadata || {}
+      # Convert Stripe metadata to hash to use key? method
+      metadata = product.metadata.to_h
       METADATA_LIMIT_KEYS.any? { |key| metadata.key?(key) }
     rescue Stripe::StripeError => e
       Rails.logger.error "Failed to check product metadata: #{e.message}"
@@ -238,7 +239,19 @@ class Enterprise::Billing::HandleStripeEventService
   end
 
   def account
-    @account ||= Account.where("custom_attributes->>'stripe_customer_id' = ?", subscription.customer).first
+    return @account if defined?(@account)
+
+    # Handle both Stripe object and Hash formats
+    customer_id = subscription.respond_to?(:customer) ? subscription.customer : subscription['customer']
+
+    @account = Account.where("custom_attributes->>'stripe_customer_id' = ?", customer_id).first
+
+    # Fallback: try to find account by metadata if not found by customer_id
+    if @account.blank? && subscription['metadata'] && subscription['metadata']['account_id']
+      @account = Account.find_by(id: subscription['metadata']['account_id'])
+    end
+
+    @account
   end
 
   def find_plan(plan_id)

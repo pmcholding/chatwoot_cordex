@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  napscloud:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - RAILS_ENV=production
+        - NODE_OPTIONS=--max-old-space-size=4096
+        - BUNDLE_WITHOUT=development:test
+        - RAILS_SERVE_STATIC_FILES=true
+    image: napscloud:latest
+    container_name: napscloud-arm64
+    platform: linux/arm64
+    ports:
+      - "3000:3000"
+    environment:
+      # Configurações básicas
+      - RAILS_ENV=production
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - FRONTEND_URL=${FRONTEND_URL}
+
+      # Banco de dados
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USERNAME=${POSTGRES_USERNAME:-chatwoot}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-chatwoot_password}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE:-chatwoot_production}
+
+      # Redis
+      - REDIS_URL=redis://redis:6379
+
+      # Stripe (OBRIGATÓRIO)
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+
+      # Email
+      - MAILER_SENDER_EMAIL=${MAILER_SENDER_EMAIL}
+      - SMTP_ADDRESS=${SMTP_ADDRESS}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_AUTHENTICATION=${SMTP_AUTHENTICATION:-login}
+      - SMTP_ENABLE_STARTTLS_AUTO=${SMTP_ENABLE_STARTTLS_AUTO:-true}
+      - SMTP_DOMAIN=${SMTP_DOMAIN}
+
+      # Segurança
+      - FORCE_SSL=${FORCE_SSL:-true}
+      - RAILS_LOG_TO_STDOUT=true
+
+      # Performance
+      - RAILS_MAX_THREADS=${RAILS_MAX_THREADS:-5}
+      - SIDEKIQ_CONCURRENCY=${SIDEKIQ_CONCURRENCY:-10}
+
+      # Opcionais
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - DIRECT_UPLOADS_ENABLED=${DIRECT_UPLOADS_ENABLED}
+    volumes:
+      - ./log:/app/log
+    env_file:
+      - .env.production
+    restart: unless-stopped
+    
+  # Redis service for Chatwoot
+  redis:
+    image: redis:7-alpine
+    platform: linux/arm64
+    container_name: napscloud-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    
+  # PostgreSQL service for Chatwoot
+  postgres:
+    image: postgres:15-alpine
+    platform: linux/arm64
+    container_name: napscloud-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=chatwoot_production
+      - POSTGRES_USER=chatwoot
+      - POSTGRES_PASSWORD=chatwoot_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  redis_data:
+  postgres_data:
