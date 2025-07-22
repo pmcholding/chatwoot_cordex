@@ -15,6 +15,16 @@ unless Rails.env.production?
   installation_config = InstallationConfig.find_by(name: 'CREATE_NEW_ACCOUNT_FROM_DASHBOARD')
   installation_config.value = true
   installation_config.save!
+
+  # Set enterprise defaults for development
+  plan_config = InstallationConfig.find_or_initialize_by(name: 'INSTALLATION_PRICING_PLAN')
+  plan_config.value = 'enterprise'
+  plan_config.save!
+
+  quantity_config = InstallationConfig.find_or_initialize_by(name: 'INSTALLATION_PRICING_PLAN_QUANTITY')
+  quantity_config.value = 9_999_999
+  quantity_config.save!
+
   GlobalConfig.clear_cache
 
   account = Account.create!(

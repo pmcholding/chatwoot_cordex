@@ -113,8 +113,7 @@ export const ONE_OFF_CAMPAIGN_EMPTY_STATE_CONTENT = [
       phone_number: '+29818373149903',
       provider: 'default',
     },
-    message:
-      'Hello! Enjoying our product? Share your feedback on G2 and earn a $25 Amazon coupon: https://chwt.app/g2-review',
+    message: 'Hello! Enjoying our product? We appreciate your feedback!',
     campaign_status: 'active',
     enabled: true,
     campaign_type: 'one_off',
