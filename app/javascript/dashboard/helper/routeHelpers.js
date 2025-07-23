@@ -3,6 +3,7 @@ import {
   getUserPermissions,
   getCurrentAccount,
 } from './permissionsHelper';
+import store from 'dashboard/store';
 
 import {
   ROLES,
@@ -59,6 +60,35 @@ export const validateLoggedInRoutes = (to, user) => {
   // access to the account or the account is deleted, return to login screen
   if (!currentAccount) {
     return `app/login`;
+  }
+
+  // Get account data from store (with custom_attributes)
+  const accountFromStore = store.getters['accounts/getAccount'](
+    Number(to.params.accountId)
+  );
+
+  // Check subscription status for billing redirection
+  const subscriptionStatus =
+    accountFromStore?.custom_attributes?.subscription_status;
+  const needsBillingRedirect =
+    subscriptionStatus === 'unpaid' || subscriptionStatus === 'canceled';
+
+  // Debug log
+  // eslint-disable-next-line no-console
+  console.log('🔍 BILLING REDIRECT CHECK:', {
+    accountId: to.params.accountId,
+    subscriptionStatus,
+    needsBillingRedirect,
+    currentRoute: to.name,
+    customAttributes: currentAccount.custom_attributes,
+    fullCurrentAccount: currentAccount, // ← Debug: see full object
+  });
+
+  // If subscription requires payment and user is not already on billing page, redirect to billing
+  if (needsBillingRedirect && to.name !== 'billing_settings_index') {
+    // eslint-disable-next-line no-console
+    console.log('🚀 REDIRECTING TO BILLING for account:', to.params.accountId);
+    return `accounts/${to.params.accountId}/settings/billing`;
   }
 
   const isCurrentAccountActive = currentAccount.status === 'active';

@@ -63,6 +63,22 @@ export const actions = {
       });
     }
   },
+  show: async ({ commit }, accountId) => {
+    commit(types.default.SET_ACCOUNT_UI_FLAG, { isFetchingItem: true });
+    try {
+      const response = await AccountAPI.show(accountId);
+      commit(types.default.ADD_ACCOUNT, response.data);
+      commit(types.default.SET_ACCOUNT_UI_FLAG, {
+        isFetchingItem: false,
+      });
+      return response.data;
+    } catch (error) {
+      commit(types.default.SET_ACCOUNT_UI_FLAG, {
+        isFetchingItem: false,
+      });
+      throw error;
+    }
+  },
   update: async ({ commit }, { options, ...updateObj }) => {
     if (options?.silent !== true) {
       commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdating: true });

@@ -10,7 +10,7 @@ const routes = [...dashboard.routes];
 
 export const router = createRouter({ history: createWebHistory(), routes });
 
-export const validateAuthenticateRoutePermission = (to, next) => {
+export const validateAuthenticateRoutePermission = async (to, next) => {
   const { isLoggedIn, getCurrentUser: user } = store.getters;
 
   if (!isLoggedIn) {
@@ -20,6 +20,20 @@ export const validateAuthenticateRoutePermission = (to, next) => {
 
   if (!to.name) {
     return next(frontendURL(`accounts/${user.account_id}/dashboard`));
+  }
+
+  // Ensure account data is loaded by fetching specific account details
+  const accountId = to.params.accountId;
+  if (accountId) {
+    try {
+      // Use the show method to get specific account data
+      const response = await store.dispatch('accounts/show', accountId);
+      // eslint-disable-next-line no-console
+      console.log('✅ Account data loaded:', response);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to load account data:', error);
+    }
   }
 
   const nextRoute = validateLoggedInRoutes(to, store.getters.getCurrentUser);
@@ -35,8 +49,8 @@ export const initalizeRouter = () => {
       name: to.name,
     });
 
-    userAuthentication.then(() => {
-      return validateAuthenticateRoutePermission(to, next, store);
+    userAuthentication.then(async () => {
+      return await validateAuthenticateRoutePermission(to, next, store);
     });
   });
 };

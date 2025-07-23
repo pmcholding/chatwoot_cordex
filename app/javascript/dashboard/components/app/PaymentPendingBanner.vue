@@ -33,10 +33,6 @@ export default {
       return this.$t('GENERAL_SETTINGS.OPEN_BILLING');
     },
     shouldShowBanner() {
-      if (!this.isOnChatwootCloud) {
-        return false;
-      }
-
       if (!this.isAdmin) {
         return false;
       }

@@ -3,11 +3,15 @@ import ApiClient from './ApiClient';
 
 class AccountAPI extends ApiClient {
   constructor() {
-    super('', { accountScoped: true });
+    super('', { accountScoped: false }); // Changed to false to avoid double account scoping
   }
 
   createAccount(data) {
     return axios.post(`${this.apiVersion}/accounts`, data);
+  }
+
+  show(accountId) {
+    return axios.get(`${this.apiVersion}/accounts/${accountId}`);
   }
 
   async getCacheKeys() {
