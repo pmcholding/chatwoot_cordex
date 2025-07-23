@@ -50,7 +50,7 @@ export const initalizeRouter = () => {
     });
 
     userAuthentication.then(async () => {
-      return await validateAuthenticateRoutePermission(to, next, store);
+      return validateAuthenticateRoutePermission(to, next, store);
     });
   });
 };

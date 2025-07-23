@@ -23,7 +23,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isOnChatwootCloud: 'globalConfig/isOnChatwootCloud',
       getAccount: 'accounts/getAccount',
     }),
     bannerMessage() {
