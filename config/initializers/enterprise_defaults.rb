@@ -2,8 +2,24 @@
 
 # Configure enterprise defaults for Chatwoot installations
 Rails.application.config.after_initialize do
-  # Only run if database is available
-  next unless ActiveRecord::Base.connection.table_exists?('installation_configs')
+  # Skip during assets precompilation, console, test, or when database is not needed
+  next if defined?(Rails::Console) || Rails.env.test? ||
+          ENV['RAILS_GROUPS']&.include?('assets') ||
+          ENV['PRECOMPILE_ASSETS'] == 'true'
+
+  # Only run in production and if database is available
+  next unless Rails.env.production?
+
+  # Check if database connection is available and table exists
+  begin
+    # Skip if we can't establish a connection or if ActiveRecord is not ready
+    next unless defined?(ActiveRecord::Base)
+    next unless ActiveRecord::Base.connection_pool.connected?
+    next unless ActiveRecord::Base.connection.table_exists?('installation_configs')
+  rescue ActiveRecord::NoDatabaseError, PG::ConnectionBad, ActiveRecord::ConnectionNotEstablished, StandardError => e
+    Rails.logger.info "[ENTERPRISE_DEFAULTS] Database not available (#{e.class}), skipping enterprise configuration"
+    next
+  end
 
   begin
     Rails.logger.info '[ENTERPRISE_DEFAULTS] Ensuring enterprise configuration is set'

@@ -73,21 +73,8 @@ export const validateLoggedInRoutes = (to, user) => {
   const needsBillingRedirect =
     subscriptionStatus === 'unpaid' || subscriptionStatus === 'canceled';
 
-  // Debug log
-  // eslint-disable-next-line no-console
-  console.log('🔍 BILLING REDIRECT CHECK:', {
-    accountId: to.params.accountId,
-    subscriptionStatus,
-    needsBillingRedirect,
-    currentRoute: to.name,
-    customAttributes: currentAccount.custom_attributes,
-    fullCurrentAccount: currentAccount, // ← Debug: see full object
-  });
-
   // If subscription requires payment and user is not already on billing page, redirect to billing
   if (needsBillingRedirect && to.name !== 'billing_settings_index') {
-    // eslint-disable-next-line no-console
-    console.log('🚀 REDIRECTING TO BILLING for account:', to.params.accountId);
     return `accounts/${to.params.accountId}/settings/billing`;
   }
 

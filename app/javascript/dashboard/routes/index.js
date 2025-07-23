@@ -22,17 +22,21 @@ export const validateAuthenticateRoutePermission = async (to, next) => {
     return next(frontendURL(`accounts/${user.account_id}/dashboard`));
   }
 
-  // Ensure account data is loaded by fetching specific account details
+  // Ensure account data is loaded by fetching specific account details if needed
   const accountId = to.params.accountId;
   if (accountId) {
-    try {
-      // Use the show method to get specific account data
-      const response = await store.dispatch('accounts/show', accountId);
-      // eslint-disable-next-line no-console
-      console.log('✅ Account data loaded:', response);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to load account data:', error);
+    // Check if account data is already loaded in store
+    const existingAccount = store.getters['accounts/getAccount'](
+      Number(accountId)
+    );
+
+    // Only fetch if account data is missing or doesn't have custom_attributes
+    if (!existingAccount || !existingAccount.custom_attributes) {
+      try {
+        await store.dispatch('accounts/show', accountId);
+      } catch (error) {
+        // Silent error - account data loading failed
+      }
     }
   }
 
