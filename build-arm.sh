@@ -30,9 +30,7 @@ docker buildx build \
     --platform linux/arm64 \
     --file docker/Dockerfile \
     --tag feraugaussie/cordex:latest \
-    --tag feraugaussie/cordex:arm64 \
     --tag feraugaussie/cordex:$(git rev-parse --short HEAD) \
-    --tag feraugaussie/cordex:feature-new-changes \
     --push \
     .
 
@@ -41,9 +39,7 @@ echo "☁️ Imagem ARM64 foi construída e enviada para feraugaussie/cordex"
 echo ""
 echo "📋 Tags criadas:"
 echo "  - feraugaussie/cordex:latest"
-echo "  - feraugaussie/cordex:arm64"
 echo "  - feraugaussie/cordex:$(git rev-parse --short HEAD)"
-echo "  - feraugaussie/cordex:feature-new-changes"
 echo ""
 echo "🔧 Correções incluídas nesta versão:"
 echo "  ✅ Webhook do Stripe corrigido (/enterprise/webhooks/stripe)"
