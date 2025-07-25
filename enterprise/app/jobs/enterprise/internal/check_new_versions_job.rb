@@ -2,7 +2,7 @@ module Enterprise::Internal::CheckNewVersionsJob
   def perform
     super
     update_plan_info
-    reconcile_premium_config_and_features
+    # reconcile_premium_config_and_features # Desabilitado para manter features premium
   end
 
   private
@@ -18,6 +18,9 @@ module Enterprise::Internal::CheckNewVersionsJob
   end
 
   def update_installation_config(key:, value:)
+    # Não atualizar configurações de plano para manter enterprise
+    return if key.in?(%w[INSTALLATION_PRICING_PLAN INSTALLATION_PRICING_PLAN_QUANTITY])
+
     config = InstallationConfig.find_or_initialize_by(name: key)
     config.value = value
     config.locked = true
