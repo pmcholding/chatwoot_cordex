@@ -120,6 +120,47 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_22_152516) do
     t.index ["account_id"], name: "index_agent_bots_on_account_id"
   end
 
+  create_table "ai_agent_assistants", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "account_id", null: false
+    t.string "description"
+    t.jsonb "config", default: {}, null: false
+    t.jsonb "guardrails", default: {}
+    t.jsonb "response_guidelines", default: {}
+    t.bigint "agent_bot_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "name"], name: "index_ai_agent_assistants_on_account_id_and_name", unique: true
+    t.index ["account_id"], name: "index_ai_agent_assistants_on_account_id"
+    t.index ["agent_bot_id"], name: "index_ai_agent_assistants_on_agent_bot_id"
+  end
+
+  create_table "ai_agent_inboxes", force: :cascade do |t|
+    t.bigint "ai_agent_assistant_id", null: false
+    t.bigint "inbox_id", null: false
+    t.boolean "auto_assign", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ai_agent_assistant_id", "inbox_id"], name: "index_ai_agent_inboxes_unique", unique: true
+    t.index ["ai_agent_assistant_id"], name: "index_ai_agent_inboxes_on_ai_agent_assistant_id"
+    t.index ["inbox_id"], name: "index_ai_agent_inboxes_on_inbox_id", unique: true
+  end
+
+  create_table "ai_agent_responses", force: :cascade do |t|
+    t.string "question", null: false
+    t.text "answer", null: false
+    t.vector "embedding", limit: 1536
+    t.bigint "assistant_id", null: false
+    t.bigint "account_id", null: false
+    t.string "status", default: "active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_ai_agent_responses_on_account_id"
+    t.index ["assistant_id"], name: "index_ai_agent_responses_on_assistant_id"
+    t.index ["embedding"], name: "vector_idx_ai_agent_responses_embedding", using: :ivfflat
+    t.index ["status"], name: "index_ai_agent_responses_on_status"
+  end
+
   create_table "applied_slas", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "sla_policy_id", null: false

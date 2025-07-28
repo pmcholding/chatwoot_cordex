@@ -47,6 +47,12 @@ const showConfiguration = computed(() => Boolean(selectedProvider.value));
 
 const availableProviders = computed(() => [
   {
+    value: PROVIDER_TYPES.WHATSAPP_QRCODE,
+    label: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_QRCODE'),
+    description: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_QRCODE_DESC'),
+    icon: '/assets/images/dashboard/channels/whatsapp.png',
+  },
+  {
     value: PROVIDER_TYPES.WHATSAPP,
     label: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_CLOUD'),
     description: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_CLOUD_DESC'),
@@ -57,12 +63,6 @@ const availableProviders = computed(() => [
     label: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.TWILIO'),
     description: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.TWILIO_DESC'),
     icon: '/assets/images/dashboard/channels/twilio.png',
-  },
-  {
-    value: PROVIDER_TYPES.WHATSAPP_QRCODE,
-    label: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_QRCODE'),
-    description: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_QRCODE_DESC'),
-    icon: '/assets/images/dashboard/channels/whatsapp.png',
   },
 ]);
 
