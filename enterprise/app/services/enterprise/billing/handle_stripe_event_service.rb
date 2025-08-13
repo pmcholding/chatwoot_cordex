@@ -47,9 +47,11 @@ class Enterprise::Billing::HandleStripeEventService
     when 'customer.subscription.deleted'
       process_subscription_deleted
     when 'invoice.payment_succeeded'
-      Rails.logger.info "Invoice payment succeeded for customer: #{subscription.customer}"
+      customer_id = subscription.respond_to?(:customer) ? subscription.customer : subscription['customer']
+      Rails.logger.info "Invoice payment succeeded for customer: #{customer_id}"
     when 'invoice.payment_failed'
-      Rails.logger.warn "Invoice payment failed for customer: #{subscription.customer}"
+      customer_id = subscription.respond_to?(:customer) ? subscription.customer : subscription['customer']
+      Rails.logger.warn "Invoice payment failed for customer: #{customer_id}"
     else
       Rails.logger.debug { "Unhandled event type: #{@event.type}" }
     end
@@ -90,15 +92,23 @@ class Enterprise::Billing::HandleStripeEventService
 
   def update_account_attributes(subscription, plan)
     # https://stripe.com/docs/api/subscriptions/object
+    customer_id = subscription.respond_to?(:customer) ? subscription.customer : subscription['customer']
     account.update(
       custom_attributes: {
-        stripe_customer_id: subscription.customer,
+        stripe_customer_id: customer_id,
         stripe_price_id: subscription['plan']['id'],
         stripe_product_id: subscription['plan']['product'],
         plan_name: plan['name'],
         subscribed_quantity: subscription['quantity'],
         subscription_status: subscription['status'],
-        subscription_ends_on: Time.zone.at(subscription['current_period_end'])
+        subscription_ends_on: begin
+          period_end = subscription['current_period_end']
+          Rails.logger.info "🔍 WEBHOOK DEBUG - current_period_end value: #{period_end.inspect}"
+          period_end ? Time.zone.at(period_end) : nil
+        rescue StandardError => e
+          Rails.logger.error "❌ WEBHOOK DEBUG - Error converting current_period_end: #{e.message}"
+          nil
+        end
       }
     )
   end
@@ -143,15 +153,23 @@ class Enterprise::Billing::HandleStripeEventService
       'Unknown Plan'
     end
 
+    customer_id = subscription.respond_to?(:customer) ? subscription.customer : subscription['customer']
     account.update!(
       custom_attributes: account.custom_attributes.merge({
-                                                           stripe_customer_id: subscription.customer,
+                                                           stripe_customer_id: customer_id,
                                                            stripe_price_id: price_id,
                                                            stripe_product_id: product_id,
                                                            plan_name: product_name,
                                                            subscribed_quantity: subscription['quantity'] || 1,
                                                            subscription_status: subscription['status'],
-                                                           subscription_ends_on: Time.zone.at(subscription['current_period_end'])
+                                                           subscription_ends_on: begin
+                                                             period_end = subscription['current_period_end']
+                                                             Rails.logger.info "🔍 WEBHOOK DEBUG - current_period_end value: #{period_end.inspect}"
+                                                             period_end ? Time.zone.at(period_end) : nil
+                                                           rescue StandardError => e
+                                                             Rails.logger.error "❌ WEBHOOK DEBUG - Error converting current_period_end: #{e.message}"
+                                                             nil
+                                                           end
                                                          })
     )
   end
