@@ -167,7 +167,7 @@ class Enterprise::Billing::HandleStripeEventService
       # Check if product has any of the metadata keys we use for limits
       # Convert Stripe metadata to hash to use key? method
       metadata = product.metadata.to_h
-      METADATA_LIMIT_KEYS.any? { |key| metadata.key?(key) }
+      METADATA_LIMIT_KEYS.any? { |key| metadata.key?(key) || metadata.key?(key.to_sym) }
     rescue Stripe::StripeError => e
       Rails.logger.error "Failed to check product metadata: #{e.message}"
       false
