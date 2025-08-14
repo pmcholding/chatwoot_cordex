@@ -1,6 +1,7 @@
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useAlert } from 'dashboard/composables';
 import { useInstructionGenerator } from 'dashboard/composables/useInstructionGenerator';
 import Modal from 'dashboard/components/Modal.vue';
 import WootButton from 'dashboard/components-next/button/Button.vue';
@@ -95,6 +96,14 @@ export default {
     const startConversation = async () => {
       if (conversationHistory.value.length === 0) {
         try {
+          // Check if AI integration is enabled
+          if (!isAIIntegrationEnabled.value) {
+            useAlert(
+              t('INTEGRATIONS.INSTRUCTION_GENERATOR.ERROR.AI_NOT_ENABLED')
+            );
+            return;
+          }
+
           // Start with context if provided
           let contextMessage = '';
           if (
@@ -131,10 +140,16 @@ export default {
       }
     };
 
-    // Initialize conversation automatically when modal opens
-    onMounted(() => {
-      startConversation();
-    });
+    // Initialize conversation when modal opens
+    watch(
+      () => props.show,
+      newShow => {
+        if (newShow) {
+          startConversation();
+        }
+      },
+      { immediate: true }
+    );
 
     return {
       t,
@@ -165,10 +180,10 @@ export default {
       <div class="flex items-center justify-between p-6 border-b border-n-weak">
         <div>
           <h2 class="text-lg font-semibold text-n-slate-12">
-            {{ t('CAPTAIN.INSTRUCTION_GENERATOR.TITLE') }}
+            {{ t('INTEGRATIONS.INSTRUCTION_GENERATOR.TITLE') }}
           </h2>
           <p class="text-sm text-n-slate-11 mt-1">
-            {{ t('CAPTAIN.INSTRUCTION_GENERATOR.DESCRIPTION') }}
+            {{ t('INTEGRATIONS.INSTRUCTION_GENERATOR.DESCRIPTION') }}
           </p>
         </div>
         <WootButton
@@ -176,7 +191,7 @@ export default {
           ghost
           slate
           size="sm"
-          :label="t('CAPTAIN.INSTRUCTION_GENERATOR.RESET')"
+          :label="t('INTEGRATIONS.INSTRUCTION_GENERATOR.RESET')"
           @click="resetConversation"
         />
       </div>
@@ -191,10 +206,10 @@ export default {
               <i class="i-woot-captain text-3xl" />
             </div>
             <h3 class="text-base font-medium text-n-slate-12 mb-2">
-              {{ t('CAPTAIN.INSTRUCTION_GENERATOR.WELCOME.TITLE') }}
+              {{ t('INTEGRATIONS.INSTRUCTION_GENERATOR.WELCOME.TITLE') }}
             </h3>
             <p class="text-sm text-n-slate-11">
-              {{ t('CAPTAIN.INSTRUCTION_GENERATOR.WELCOME.MESSAGE') }}
+              {{ t('INTEGRATIONS.INSTRUCTION_GENERATOR.WELCOME.MESSAGE') }}
             </p>
           </div>
 
@@ -244,7 +259,9 @@ export default {
               class="animate-spin rounded-full h-4 w-4 border-b-2 border-n-green-11"
             />
             <span class="text-sm font-medium">
-              {{ t('CAPTAIN.INSTRUCTION_GENERATOR.APPLYING_INSTRUCTIONS') }}
+              {{
+                t('INTEGRATIONS.INSTRUCTION_GENERATOR.APPLYING_INSTRUCTIONS')
+              }}
             </span>
           </div>
         </div>
@@ -255,7 +272,7 @@ export default {
             <textarea
               v-model="currentInput"
               :placeholder="
-                t('CAPTAIN.INSTRUCTION_GENERATOR.INPUT_PLACEHOLDER')
+                t('INTEGRATIONS.INSTRUCTION_GENERATOR.INPUT_PLACEHOLDER')
               "
               class="flex-1 resize-none border border-n-weak rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-n-blue-6 focus:border-transparent"
               rows="2"
@@ -277,12 +294,12 @@ export default {
         <WootButton
           ghost
           slate
-          :label="t('CAPTAIN.INSTRUCTION_GENERATOR.CANCEL')"
+          :label="t('INTEGRATIONS.INSTRUCTION_GENERATOR.CANCEL')"
           @click="close"
         />
         <WootButton
           v-if="hasInstructions"
-          :label="t('CAPTAIN.INSTRUCTION_GENERATOR.APPLY_INSTRUCTIONS')"
+          :label="t('INTEGRATIONS.INSTRUCTION_GENERATOR.APPLY_INSTRUCTIONS')"
           @click="applyInstructions"
         />
       </div>
