@@ -26,4 +26,8 @@ class Captain::AssistantPolicy < ApplicationPolicy
   def playground?
     true
   end
+
+  def generate_instructions?
+    true
+  end
 end
