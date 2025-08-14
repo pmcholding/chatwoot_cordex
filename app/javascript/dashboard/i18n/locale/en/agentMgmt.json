@@ -39,6 +39,15 @@
           "LABEL": "Email Address",
           "PLACEHOLDER": "Please enter an email address of the agent"
         },
+        "INSTRUCTIONS": {
+          "LABEL": "Instructions"
+        },
+        "CAPTAIN": {
+          "TITLE": "AI Agent Instructions Generator (Captain)",
+          "DESCRIPTION": "This will integrate with the Captain modal for AI-assisted instructions generation.",
+          "BUTTON_TEXT": "Generate with AI",
+          "SUCCESS_MESSAGE": "Instructions generated successfully"
+        },
         "SUBMIT": "Add Agent"
       },
       "API": {
@@ -101,12 +110,17 @@
     },
     "TEMPLATE_SELECTION": {
       "TITLE": "Choose Agent Creation Method",
+      "DESCRIPTION": "Choose how you want to create your new assistant",
       "USE_TEMPLATE": "Use Template",
+      "USE_TEMPLATE_DESC": "Start with a pre-built template",
       "CREATE_FROM_SCRATCH": "Create from Scratch",
+      "CREATE_FROM_SCRATCH_DESC": "Build your assistant from the ground up",
       "CREATE_WITH_AI": "Create with AI",
       "SELECT_TEMPLATE": "Select a template to get started",
       "NO_TEMPLATES": "No templates available",
-      "AI_DESCRIPTION": "Use AI to generate agent instructions"
+      "AI_DESCRIPTION": "Use AI to generate agent instructions",
+      "FAQ": "FAQ",
+      "MEMORY": "Memory"
     },
     "MULTI_SELECTOR": {
       "PLACEHOLDER": "None",

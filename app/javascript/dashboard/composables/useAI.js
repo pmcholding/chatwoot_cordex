@@ -192,6 +192,7 @@ export function useAI() {
     appIntegrations,
     currentChat,
     replyMode,
+    aiIntegration,
     isAIIntegrationEnabled,
     isLabelSuggestionFeatureEnabled,
     isFetchingAppIntegrations,

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, watch } from 'vue';
+import { reactive, computed, watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
@@ -9,6 +9,7 @@ import Input from 'dashboard/components-next/input/Input.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Editor from 'dashboard/components-next/Editor/Editor.vue';
 import Accordion from 'dashboard/components-next/Accordion/Accordion.vue';
+import InstructionGeneratorModal from 'dashboard/components/widgets/InstructionGeneratorModal.vue';
 
 const props = defineProps({
   mode: {
@@ -19,6 +20,10 @@ const props = defineProps({
   assistant: {
     type: Object,
     default: () => ({}),
+  },
+  aiMode: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -46,6 +51,7 @@ const initialState = {
 };
 
 const state = reactive({ ...initialState });
+const showInstructionModal = ref(false);
 
 const validationRules = {
   name: { required, minLength: minLength(1) },
@@ -146,6 +152,21 @@ const handleInstructionsUpdate = async () => {
   emit('submit', payload);
 };
 
+const openInstructionModal = () => {
+  showInstructionModal.value = true;
+};
+
+const closeInstructionModal = () => {
+  showInstructionModal.value = false;
+};
+
+const handleInstructionsGenerated = instructions => {
+  state.instructions = instructions;
+  showInstructionModal.value = false;
+  // Clear validation error if instructions were empty before
+  v$.value.instructions.$reset();
+};
+
 const handleFeaturesUpdate = () => {
   const payload = {
     config: {
@@ -163,6 +184,13 @@ watch(
   newAssistant => {
     if (props.mode === 'edit' && newAssistant) {
       updateStateFromAssistant(newAssistant);
+
+      // Auto-open instruction modal if in AI mode
+      if (props.aiMode && newAssistant.id) {
+        setTimeout(() => {
+          openInstructionModal();
+        }, 500); // Small delay to ensure component is fully loaded
+      }
     }
   },
   { immediate: true }
@@ -223,6 +251,15 @@ watch(
           :max-length="20000"
           :message-type="formErrors.instructions ? 'error' : 'info'"
         />
+
+        <div class="flex justify-between items-center mt-2">
+          <Button
+            faded
+            size="small"
+            label="Generate with AI"
+            @click="openInstructionModal"
+          />
+        </div>
 
         <div class="flex flex-col gap-2 mt-4">
           <label class="text-sm font-medium text-n-slate-12">
@@ -328,4 +365,15 @@ watch(
       </div>
     </Accordion>
   </form>
+
+  <!-- Captain Instruction Generator Modal -->
+  <InstructionGeneratorModal
+    :show="showInstructionModal"
+    :initial-context="{
+      agentName: state.name,
+      existingInstructions: state.instructions,
+    }"
+    @close="closeInstructionModal"
+    @apply-instructions="handleInstructionsGenerated"
+  />
 </template>

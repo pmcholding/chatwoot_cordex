@@ -385,6 +385,26 @@
       "DESCRIPTION": "Use this playground to send messages to your assistant and check if it responds accurately, quickly, and in the tone you expect.",
       "CREDIT_NOTE": "Messages sent here will count toward your AI Agent credits."
     },
+    "INSTRUCTION_GENERATOR": {
+      "TITLE": "AI Instruction Generator",
+      "DESCRIPTION": "Create comprehensive agent instructions through conversational AI assistance",
+      "WELCOME": {
+        "TITLE": "Welcome to AI Instruction Generator",
+        "MESSAGE": "I'll help you create detailed, actionable instructions for your AI agents. Tell me what kind of agent you want to create and I'll guide you through the process."
+      },
+      "INPUT_PLACEHOLDER": "Describe the type of agent you want to create or ask for help...",
+      "INITIAL_CONTEXT": "I want to create agent instructions.",
+      "AGENT_NAME": "Agent name",
+      "EXISTING_INSTRUCTIONS": "Current instructions",
+      "RESET": "Start Over",
+      "CANCEL": "Cancel",
+      "APPLY_INSTRUCTIONS": "Apply Instructions",
+      "ERROR": {
+        "GENERATION_FAILED": "Failed to generate instructions. Please try again.",
+        "AI_NOT_ENABLED": "AI integration is not enabled. Please configure OpenAI first."
+      },
+      "APPLYING_INSTRUCTIONS": "Instructions ready! Applying automatically in 2 seconds..."
+    },
     "PAYWALL": {
       "TITLE": "Upgrade to use AI Agent",
       "AVAILABLE_ON": "AI Agent is not available on the free plan.",
@@ -513,6 +533,23 @@
         "EDIT_ASSISTANT": "Edit Assistant",
         "DELETE_ASSISTANT": "Delete Assistant",
         "VIEW_CONNECTED_INBOXES": "View connected inboxes"
+      },
+      "TEMPLATE_SELECTION": {
+        "TITLE": "Choose Assistant Creation Method",
+        "DESCRIPTION": "Select how you'd like to create your new assistant",
+        "USE_TEMPLATE": "Use Template",
+        "USE_TEMPLATE_DESC": "Start with a pre-configured template for common use cases",
+        "CREATE_FROM_SCRATCH": "Create from Scratch",
+        "CREATE_FROM_SCRATCH_DESC": "Build your assistant from the ground up with full customization",
+        "CREATE_WITH_AI": "Create with AI",
+        "AI_DESCRIPTION": "Let AI help you generate assistant configuration and instructions",
+        "SELECT_TEMPLATE": "Please select a template to continue",
+        "SELECT_TEMPLATE_TITLE": "Choose a Template",
+        "SELECT_TEMPLATE_DESC": "Select a pre-configured template to get started quickly",
+        "NO_TEMPLATES": "No templates available"
+      },
+      "API": {
+        "ERROR_MESSAGE": "There was an error loading assistants. Please try again."
       },
       "EMPTY_STATE": {
         "TITLE": "No assistants available",
@@ -777,6 +814,12 @@
         "TITLE": "No Connected Inboxes",
         "SUBTITLE": "Connecting an inbox allows the assistant to handle initial questions from your customers before transferring them to you."
       }
+    },
+    "FORM": {
+      "CANCEL": "Cancel",
+      "BACK": "Back",
+      "CREATE": "Create",
+      "UPDATE": "Update"
     }
   }
 }

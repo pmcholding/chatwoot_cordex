@@ -17,6 +17,14 @@ const props = defineProps({
     default: 'create',
     validator: value => ['create', 'edit'].includes(value),
   },
+  template: {
+    type: Object,
+    default: null,
+  },
+  aiMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 const emit = defineEmits(['close']);
 const { t } = useI18n();
@@ -79,6 +87,8 @@ defineExpose({ dialogRef });
       ref="assistantForm"
       :mode="type"
       :assistant="selectedAssistant"
+      :template="template"
+      :ai-mode="aiMode"
       @submit="handleSubmit"
       @cancel="handleCancel"
     />

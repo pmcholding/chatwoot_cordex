@@ -16,6 +16,7 @@ const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
 const assistantId = route.params.assistantId;
+const aiMode = computed(() => route.query.aiMode === 'true');
 const uiFlags = useMapGetter('captainAssistants/getUIFlags');
 const isFetching = computed(() => uiFlags.value.fetchingItem);
 const assistant = computed(() =>
@@ -74,6 +75,7 @@ onMounted(() => {
           <EditAssistantForm
             :assistant="assistant"
             mode="edit"
+            :ai-mode="aiMode"
             @submit="handleSubmit"
           />
         </div>

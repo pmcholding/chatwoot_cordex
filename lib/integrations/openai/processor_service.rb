@@ -44,6 +44,14 @@ class Integrations::Openai::ProcessorService < Integrations::OpenaiBaseService
                                       "#{LANGUAGE_INSTRUCTION}"))
   end
 
+  def agent_instruction_generator_message
+    conversation_history = event['data']['conversation_history'] || []
+    user_input = event['data']['user_input'] || ''
+
+    service = Captain::Llm::InstructionGeneratorService.new(conversation_history, user_input)
+    service.generate
+  end
+
   private
 
   def prompt_from_file(file_name, enterprise: false)

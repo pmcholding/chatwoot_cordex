@@ -253,5 +253,49 @@ RSpec.describe Integrations::Openai::ProcessorService do
         expect(result).to eq({ :message => 'This is a reply from openai.' })
       end
     end
+
+    context 'when event name is agent_instruction_generator' do
+      let(:event) do
+        {
+          'name' => 'agent_instruction_generator',
+          'data' => {
+            'conversation_history' => [
+              { 'role' => 'user', 'content' => 'I need help creating an agent' },
+              { 'role' => 'assistant', 'content' => 'What type of agent do you want to create?' }
+            ],
+            'user_input' => 'I want to create a customer support agent'
+          }
+        }
+      end
+      let(:mock_instruction_service) { instance_double(Captain::Llm::InstructionGeneratorService) }
+      let(:expected_response) { { message: 'Generated agent instructions for customer support' } }
+
+      before do
+        allow(Captain::Llm::InstructionGeneratorService).to receive(:new)
+          .with(event['data']['conversation_history'], event['data']['user_input'])
+          .and_return(mock_instruction_service)
+        allow(mock_instruction_service).to receive(:generate).and_return(expected_response)
+      end
+
+      it 'creates instruction generator service with correct parameters' do
+        expect(Captain::Llm::InstructionGeneratorService).to receive(:new)
+          .with(event['data']['conversation_history'], event['data']['user_input'])
+          .and_return(mock_instruction_service)
+
+        subject.agent_instruction_generator_message
+      end
+
+      it 'returns the generated instructions' do
+        result = subject.agent_instruction_generator_message
+
+        expect(result).to eq(expected_response)
+      end
+    end
+  end
+
+  describe 'event validation' do
+    it 'includes agent_instruction_generator in allowed events' do
+      expect(Integrations::OpenaiBaseService::ALLOWED_EVENT_NAMES).to include('agent_instruction_generator')
+    end
   end
 end

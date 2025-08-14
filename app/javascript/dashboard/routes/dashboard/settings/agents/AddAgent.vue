@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email } from '@vuelidate/validators';
 import Button from 'dashboard/components-next/button/Button.vue';
+import InstructionGeneratorModal from 'dashboard/components/widgets/InstructionGeneratorModal.vue';
 
 const props = defineProps({
   template: {
@@ -93,12 +94,20 @@ const initializeAIMode = () => {
   }
 };
 
-const generateInstructions = () => {
-  // Placeholder for Captain integration
-  agentInstructions.value =
-    'AI-generated instructions will be populated here by Captain integration.';
+const handleInstructionsGenerated = instructions => {
+  agentInstructions.value = instructions;
   showCaptainModal.value = false;
-  useAlert('Instructions generated successfully');
+  useAlert(t('AGENT_MGMT.ADD.FORM.CAPTAIN.SUCCESS_MESSAGE'));
+  // Clear validation error if instructions were empty before
+  v$.value.agentInstructions.$reset();
+};
+
+const openCaptainModal = () => {
+  showCaptainModal.value = true;
+};
+
+const closeCaptainModal = () => {
+  showCaptainModal.value = false;
 };
 
 onMounted(() => {
@@ -195,7 +204,7 @@ const addAgent = async () => {
 
       <div class="w-full">
         <label :class="{ error: v$.agentInstructions.$error }">
-          Instructions
+          {{ $t('AGENT_MGMT.ADD.FORM.INSTRUCTIONS.LABEL') }}
           <textarea
             v-model="agentInstructions"
             rows="4"
@@ -208,8 +217,8 @@ const addAgent = async () => {
             v-if="!showCaptainModal"
             faded
             size="small"
-            label="Generate with AI"
-            @click="showCaptainModal = true"
+            :label="$t('AGENT_MGMT.ADD.FORM.CAPTAIN.BUTTON_TEXT')"
+            @click="openCaptainModal"
           />
         </div>
       </div>
@@ -231,25 +240,15 @@ const addAgent = async () => {
       </div>
     </form>
 
-    <!-- Captain Modal Placeholder -->
-    <woot-modal
-      v-if="showCaptainModal"
+    <!-- Captain Instruction Generator Modal -->
+    <InstructionGeneratorModal
       :show="showCaptainModal"
-      @close="showCaptainModal = false"
-    >
-      <div class="p-6">
-        <h3 class="text-lg font-medium mb-4">
-          AI Agent Instructions Generator (Captain)
-        </h3>
-        <p class="text-sm text-slate-600 mb-4">
-          This will integrate with the Captain modal for AI-assisted
-          instructions generation.
-        </p>
-        <div class="flex justify-end gap-2">
-          <Button faded label="Cancel" @click="showCaptainModal = false" />
-          <Button label="Generate Instructions" @click="generateInstructions" />
-        </div>
-      </div>
-    </woot-modal>
+      :initial-context="{
+        agentName: agentName,
+        existingInstructions: agentInstructions,
+      }"
+      @close="closeCaptainModal"
+      @apply-instructions="handleInstructionsGenerated"
+    />
   </div>
 </template>

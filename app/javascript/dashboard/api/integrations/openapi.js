@@ -36,6 +36,12 @@ class OpenAIAPI extends ApiClient {
      * @type {string[]}
      */
     this.message_events = ['rephrase'];
+
+    /**
+     * The instruction generation events supported by the API.
+     * @type {string[]}
+     */
+    this.instruction_events = ['agent_instruction_generator'];
   }
 
   /**
@@ -45,10 +51,18 @@ class OpenAIAPI extends ApiClient {
    * @param {string} [options.content] - The content of the event.
    * @param {string} [options.tone] - The tone of the event.
    * @param {string} [options.conversationId] - The ID of the conversation to process the event for.
+   * @param {Array} [options.conversationHistory] - The conversation history for instruction generation.
    * @param {string} options.hookId - The ID of the hook to use for processing the event.
    * @returns {Promise} A promise that resolves with the result of the event processing.
    */
-  processEvent({ type = 'rephrase', content, tone, conversationId, hookId }) {
+  processEvent({
+    type = 'rephrase',
+    content,
+    tone,
+    conversationId,
+    conversationHistory,
+    hookId,
+  }) {
     /**
      * @type {ConversationMessageData}
      */
@@ -60,6 +74,13 @@ class OpenAIAPI extends ApiClient {
     if (this.conversation_events.includes(type)) {
       data = {
         conversation_display_id: conversationId,
+      };
+    }
+
+    if (this.instruction_events.includes(type)) {
+      data = {
+        conversation_history: conversationHistory || [],
+        user_input: content || '',
       };
     }
 

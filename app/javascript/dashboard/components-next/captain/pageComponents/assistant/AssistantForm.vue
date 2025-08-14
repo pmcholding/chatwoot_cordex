@@ -19,6 +19,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  template: {
+    type: Object,
+    default: null,
+  },
 });
 
 const emit = defineEmits(['submit', 'cancel']);
@@ -29,15 +33,27 @@ const formState = {
   uiFlags: useMapGetter('captainAssistants/getUIFlags'),
 };
 
-const initialState = {
-  name: '',
-  description: '',
-  productName: '',
-  featureFaq: false,
-  featureMemory: false,
+const getInitialState = () => {
+  if (props.template) {
+    return {
+      name: props.template.name || '',
+      description: props.template.description || '',
+      productName: props.template.productName || '',
+      featureFaq: props.template.featureFaq || false,
+      featureMemory: props.template.featureMemory || false,
+    };
+  }
+
+  return {
+    name: '',
+    description: '',
+    productName: '',
+    featureFaq: false,
+    featureMemory: false,
+  };
 };
 
-const state = reactive({ ...initialState });
+const state = reactive({ ...getInitialState() });
 
 const validationRules = {
   name: { required, minLength: minLength(1) },

@@ -10,6 +10,8 @@ import CaptainPaywall from 'dashboard/components-next/captain/pageComponents/Pay
 import AssistantPageEmptyState from 'dashboard/components-next/captain/pageComponents/emptyStates/AssistantPageEmptyState.vue';
 import FeatureSpotlightPopover from 'dashboard/components-next/feature-spotlight/FeatureSpotlightPopover.vue';
 import LimitBanner from 'dashboard/components-next/captain/pageComponents/response/LimitBanner.vue';
+import AssistantSelectionModal from 'dashboard/components-next/captain/pageComponents/assistant/AssistantSelectionModal.vue';
+import CreateAssistantDialog from 'dashboard/components-next/captain/pageComponents/assistant/CreateAssistantDialog.vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -21,29 +23,137 @@ const isFetching = computed(() => uiFlags.value.fetchingList);
 
 const selectedAssistant = ref(null);
 const deleteAssistantDialog = ref(null);
+const showSelectionModal = ref(false);
+const showCreateDialog = ref(false);
+const selectedTemplate = ref(null);
+const aiMode = ref(false);
 
 const handleDelete = () => {
   deleteAssistantDialog.value.dialogRef.open();
 };
 
-const handleCreate = async () => {
+const handleCreate = () => {
+  showSelectionModal.value = true;
+};
+
+const hideSelectionModal = () => {
+  showSelectionModal.value = false;
+  selectedTemplate.value = null;
+  aiMode.value = false;
+};
+
+const handleUseTemplate = async template => {
   try {
-    const newAssistant = await store.dispatch('captainAssistants/create', {
-      name: 'Novo Assistente',
-      description: 'Descrição do assistente',
+    // Create assistant with template data
+    const assistantFromTemplate = {
+      name: template.name || 'Template Assistant',
+      description: template.description || 'Assistant created from template',
       config: {
-        product_name: 'Produto',
+        product_name: template.config?.product_name || '',
+        feature_faq: template.config?.feature_faq || false,
+        feature_memory: template.config?.feature_memory || false,
+        instructions: template.config?.instructions || '',
+        ...template.config,
+      },
+    };
+
+    const createdAssistant = await store.dispatch(
+      'captainAssistants/create',
+      assistantFromTemplate
+    );
+
+    // Close the selection modal
+    showSelectionModal.value = false;
+
+    // Navigate to the edit page with template data pre-filled
+    router.push({
+      name: 'captain_assistants_edit',
+      params: { assistantId: createdAssistant.id },
+    });
+  } catch (error) {
+    // Fallback to the regular creation dialog
+    selectedTemplate.value = template;
+    aiMode.value = false;
+    showSelectionModal.value = false;
+    showCreateDialog.value = true;
+  }
+};
+
+const handleCreateFromScratch = async () => {
+  try {
+    // Create a basic assistant first
+    const basicAssistant = {
+      name: 'New Assistant',
+      description: 'Assistant description',
+      config: {
+        product_name: '',
         feature_faq: false,
         feature_memory: false,
       },
-    });
+    };
+
+    const createdAssistant = await store.dispatch(
+      'captainAssistants/create',
+      basicAssistant
+    );
+
+    // Close the selection modal
+    showSelectionModal.value = false;
+
+    // Navigate to the edit page (without AI mode)
     router.push({
       name: 'captain_assistants_edit',
-      params: { assistantId: newAssistant.id },
+      params: { assistantId: createdAssistant.id },
     });
   } catch (error) {
-    // Error creating assistant
+    // Fallback to the regular creation dialog
+    selectedTemplate.value = null;
+    aiMode.value = false;
+    showSelectionModal.value = false;
+    showCreateDialog.value = true;
   }
+};
+
+const handleCreateWithAI = async () => {
+  try {
+    // Create a basic assistant first
+    const basicAssistant = {
+      name: 'New AI Assistant',
+      description: 'AI-generated assistant',
+      config: {
+        product_name: '',
+        feature_faq: false,
+        feature_memory: false,
+      },
+    };
+
+    const createdAssistant = await store.dispatch(
+      'captainAssistants/create',
+      basicAssistant
+    );
+
+    // Close the selection modal
+    showSelectionModal.value = false;
+
+    // Navigate to the edit page with AI mode
+    router.push({
+      name: 'captain_assistants_edit',
+      params: { assistantId: createdAssistant.id },
+      query: { aiMode: 'true' },
+    });
+  } catch (error) {
+    // Fallback to the regular creation dialog
+    selectedTemplate.value = null;
+    aiMode.value = true;
+    showSelectionModal.value = false;
+    showCreateDialog.value = true;
+  }
+};
+
+const hideCreateDialog = () => {
+  showCreateDialog.value = false;
+  selectedTemplate.value = null;
+  aiMode.value = false;
 };
 
 const handleEdit = () => {
@@ -130,5 +240,28 @@ onMounted(() => store.dispatch('captainAssistants/get'));
       :entity="selectedAssistant"
       type="Assistants"
     />
+
+    <!-- Assistant Selection Modal -->
+    <woot-modal
+      v-model:show="showSelectionModal"
+      :on-close="hideSelectionModal"
+    >
+      <AssistantSelectionModal
+        @close="hideSelectionModal"
+        @use-template="handleUseTemplate"
+        @create-from-scratch="handleCreateFromScratch"
+        @create-with-ai="handleCreateWithAI"
+      />
+    </woot-modal>
+
+    <!-- Create Assistant Dialog -->
+    <woot-modal v-model:show="showCreateDialog" :on-close="hideCreateDialog">
+      <CreateAssistantDialog
+        type="create"
+        :template="selectedTemplate"
+        :ai-mode="aiMode"
+        @close="hideCreateDialog"
+      />
+    </woot-modal>
   </PageLayout>
 </template>
