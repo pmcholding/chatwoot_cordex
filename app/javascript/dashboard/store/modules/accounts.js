@@ -79,13 +79,14 @@ export const actions = {
       throw error;
     }
   },
-  update: async ({ commit }, { options, ...updateObj }) => {
+  update: async ({ commit, rootGetters }, { options, ...updateObj }) => {
     if (options?.silent !== true) {
       commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdating: true });
     }
 
     try {
-      const response = await AccountAPI.update('', updateObj);
+      const accountId = rootGetters.getCurrentAccountId;
+      const response = await AccountAPI.update(accountId, updateObj);
       commit(types.default.EDIT_ACCOUNT, response.data);
       commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdating: false });
     } catch (error) {
