@@ -1,7 +1,6 @@
 <script>
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAlert } from 'dashboard/composables';
 import { useInstructionGenerator } from 'dashboard/composables/useInstructionGenerator';
 import Modal from 'dashboard/components/Modal.vue';
 import WootButton from 'dashboard/components-next/button/Button.vue';
@@ -32,7 +31,6 @@ export default {
       conversationHistory,
       error,
       canGenerate,
-      isAIIntegrationEnabled,
       generateInstructions,
       resetConversation: resetInstructionConversation,
       isInstructionResponse,
@@ -96,15 +94,6 @@ export default {
     const startConversation = async () => {
       if (conversationHistory.value.length === 0) {
         try {
-          // Check if AI integration is enabled
-          if (!isAIIntegrationEnabled.value) {
-            useAlert(
-              t('INTEGRATIONS.INSTRUCTION_GENERATOR.ERROR.AI_NOT_ENABLED')
-            );
-            emit('close');
-            return;
-          }
-
           // Start with context if provided
           let contextMessage = '';
           if (
@@ -154,7 +143,6 @@ export default {
 
     return {
       t,
-      isAIIntegrationEnabled,
       conversationHistory,
       currentInput,
       isGenerating,

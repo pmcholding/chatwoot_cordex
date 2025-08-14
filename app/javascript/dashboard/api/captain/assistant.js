@@ -21,6 +21,13 @@ class CaptainAssistant extends ApiClient {
       message_history: messageHistory,
     });
   }
+
+  generateInstructions({ conversationHistory, userInput }) {
+    return axios.post(`${this.url}/generate_instructions`, {
+      conversation_history: conversationHistory,
+      user_input: userInput,
+    });
+  }
 }
 
 export default new CaptainAssistant();

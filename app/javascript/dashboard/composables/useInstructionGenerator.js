@@ -1,7 +1,6 @@
 import { ref, computed, readonly } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAI } from 'dashboard/composables/useAI';
-import OpenAPI from 'dashboard/api/integrations/openapi';
+import CaptainAssistant from 'dashboard/api/captain/assistant';
 import { useAlert } from 'dashboard/composables';
 
 /**
@@ -10,19 +9,20 @@ import { useAlert } from 'dashboard/composables';
  */
 export function useInstructionGenerator() {
   const { t } = useI18n();
-  const { isAIIntegrationEnabled, aiIntegration } = useAI();
 
   // State
   const isGenerating = ref(false);
   const conversationHistory = ref([]);
   const error = ref('');
 
-  // Computed
-  const canGenerate = computed(
-    () => isAIIntegrationEnabled.value && !isGenerating.value
-  );
+  // For Captain AI, we don't need to check regular integrations
+  // The backend will handle the CAPTAIN_OPEN_AI_API_KEY configuration
+  const isAIIntegrationEnabled = computed(() => true);
 
-  const hookId = computed(() => aiIntegration.value?.id);
+  // Computed
+  const canGenerate = computed(() => !isGenerating.value);
+
+  // Captain AI doesn't need hookId - it uses direct API endpoint
 
   /**
    * Adds a message to the conversation history
@@ -44,10 +44,9 @@ export function useInstructionGenerator() {
    */
   const generateInstructions = async userInput => {
     if (!canGenerate.value) {
-      const errorMsg = !isAIIntegrationEnabled.value
-        ? t('INTEGRATIONS.INSTRUCTION_GENERATOR.ERROR.AI_NOT_ENABLED')
-        : t('INTEGRATIONS.INSTRUCTION_GENERATOR.ERROR.GENERATION_FAILED');
-
+      const errorMsg = t(
+        'INTEGRATIONS.INSTRUCTION_GENERATOR.ERROR.GENERATION_FAILED'
+      );
       useAlert(errorMsg);
       throw new Error(errorMsg);
     }
@@ -65,12 +64,10 @@ export function useInstructionGenerator() {
         content: msg.content,
       }));
 
-      // Call the instruction generation API
-      const response = await OpenAPI.processEvent({
-        type: 'agent_instruction_generator',
-        hookId: hookId.value,
-        content: userInput,
+      // Call the Captain instruction generation API
+      const response = await CaptainAssistant.generateInstructions({
         conversationHistory: historyForAPI,
+        userInput: userInput,
       });
 
       const assistantResponse = response.data.message;

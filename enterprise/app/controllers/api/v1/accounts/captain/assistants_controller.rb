@@ -32,6 +32,21 @@ class Api::V1::Accounts::Captain::AssistantsController < Api::V1::Accounts::Base
     render json: response
   end
 
+  def generate_instructions
+    conversation_history = params[:conversation_history] || []
+    user_input = params[:user_input] || ''
+
+    service = Captain::Llm::InstructionGeneratorService.new(conversation_history, user_input)
+    response = service.generate
+
+    render json: response
+  rescue StandardError => e
+    Rails.logger.error "Instruction generation error: #{e.message}"
+    render json: {
+      message: 'Sorry, I encountered an error while generating instructions. Please try again.'
+    }, status: :unprocessable_entity
+  end
+
   def tools
     @tools = Captain::Assistant.available_agent_tools
   end

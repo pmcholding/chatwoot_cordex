@@ -400,8 +400,8 @@
       "CANCEL": "Cancel",
       "APPLY_INSTRUCTIONS": "Apply Instructions",
       "ERROR": {
-        "GENERATION_FAILED": "Failed to generate instructions. Please try again.",
-        "AI_NOT_ENABLED": "OpenAI integration is not configured. Please go to Settings > Integrations > OpenAI to set up your API key first."
+        "GENERATION_FAILED": "Failed to generate instructions. Please ensure OpenAI is configured in Super Admin > Captain settings.",
+        "AI_NOT_ENABLED": "OpenAI integration is not configured. Please ask your administrator to configure the OpenAI API key in Super Admin > Captain settings."
       },
       "APPLYING_INSTRUCTIONS": "Instructions ready! Applying automatically in 2 seconds..."
     },

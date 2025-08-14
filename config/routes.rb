@@ -59,6 +59,7 @@ Rails.application.routes.draw do
               end
               collection do
                 get :tools
+                post :generate_instructions
               end
               resources :inboxes, only: [:index, :create, :destroy], param: :inbox_id
               resources :scenarios
