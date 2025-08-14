@@ -75,9 +75,13 @@ fi
 
 print_success "Configurações verificadas!"
 
-# Pull da imagem
-print_status "Fazendo pull da imagem feraug/chatwoot-cordex:latest..."
-docker pull feraug/chatwoot-cordex:latest
+# Build da nova imagem com debug
+print_status "Buildando nova imagem com controller de debug..."
+docker build -f docker/Dockerfile -t feraugaussie/cordex:debug-webhook .
+
+# Tag como latest para usar no docker-compose
+print_status "Taggeando imagem como latest..."
+docker tag feraugaussie/cordex:debug-webhook feraugaussie/cordex:latest
 
 # Parar containers existentes
 print_status "Parando containers existentes..."
