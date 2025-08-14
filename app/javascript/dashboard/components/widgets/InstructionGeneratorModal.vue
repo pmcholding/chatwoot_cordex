@@ -101,6 +101,7 @@ export default {
             useAlert(
               t('INTEGRATIONS.INSTRUCTION_GENERATOR.ERROR.AI_NOT_ENABLED')
             );
+            emit('close');
             return;
           }
 

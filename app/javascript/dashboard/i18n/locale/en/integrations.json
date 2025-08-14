@@ -401,7 +401,7 @@
       "APPLY_INSTRUCTIONS": "Apply Instructions",
       "ERROR": {
         "GENERATION_FAILED": "Failed to generate instructions. Please try again.",
-        "AI_NOT_ENABLED": "AI integration is not enabled. Please configure OpenAI first."
+        "AI_NOT_ENABLED": "OpenAI integration is not configured. Please go to Settings > Integrations > OpenAI to set up your API key first."
       },
       "APPLYING_INSTRUCTIONS": "Instructions ready! Applying automatically in 2 seconds..."
     },
