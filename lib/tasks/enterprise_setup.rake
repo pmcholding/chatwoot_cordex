@@ -39,7 +39,7 @@ namespace :chatwoot do
         puts ''
         puts '🔄 Reinicie a aplicação para aplicar todas as mudanças'
 
-      rescue => e
+      rescue StandardError => e
         puts "❌ Erro na configuração: #{e.message}"
         puts "   Detalhes: #{e.backtrace.first}"
         exit 1

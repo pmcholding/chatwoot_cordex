@@ -1,11 +1,22 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email } from '@vuelidate/validators';
 import Button from 'dashboard/components-next/button/Button.vue';
+
+const props = defineProps({
+  template: {
+    type: Object,
+    default: null,
+  },
+  aiMode: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 const emit = defineEmits(['close']);
 
@@ -14,17 +25,21 @@ const { t } = useI18n();
 
 const agentName = ref('');
 const agentEmail = ref('');
+const agentInstructions = ref('');
 const selectedRoleId = ref('agent');
+const showCaptainModal = ref(false);
 
 const rules = {
   agentName: { required },
   agentEmail: { required, email },
+  agentInstructions: { required },
   selectedRoleId: { required },
 };
 
 const v$ = useVuelidate(rules, {
   agentName,
   agentEmail,
+  agentInstructions,
   selectedRoleId,
 });
 
@@ -61,6 +76,36 @@ const selectedRole = computed(() =>
   )
 );
 
+// Template pre-filling
+const initializeTemplate = () => {
+  if (props.template) {
+    agentInstructions.value = props.template.instructions;
+    if (props.template.name) {
+      agentName.value = props.template.name;
+    }
+  }
+};
+
+// AI mode handling
+const initializeAIMode = () => {
+  if (props.aiMode) {
+    showCaptainModal.value = true;
+  }
+};
+
+const generateInstructions = () => {
+  // Placeholder for Captain integration
+  agentInstructions.value =
+    'AI-generated instructions will be populated here by Captain integration.';
+  showCaptainModal.value = false;
+  useAlert('Instructions generated successfully');
+};
+
+onMounted(() => {
+  initializeTemplate();
+  initializeAIMode();
+});
+
 const addAgent = async () => {
   v$.value.$touch();
   if (v$.value.$invalid) return;
@@ -69,6 +114,7 @@ const addAgent = async () => {
     const payload = {
       name: agentName.value,
       email: agentEmail.value,
+      instructions: agentInstructions.value,
     };
 
     if (selectedRole.value.name.startsWith('custom_')) {
@@ -147,6 +193,27 @@ const addAgent = async () => {
         </label>
       </div>
 
+      <div class="w-full">
+        <label :class="{ error: v$.agentInstructions.$error }">
+          Instructions
+          <textarea
+            v-model="agentInstructions"
+            rows="4"
+            placeholder="Enter agent instructions..."
+            @input="v$.agentInstructions.$touch"
+          />
+        </label>
+        <div class="flex justify-between items-center mt-2">
+          <Button
+            v-if="!showCaptainModal"
+            faded
+            size="small"
+            label="Generate with AI"
+            @click="showCaptainModal = true"
+          />
+        </div>
+      </div>
+
       <div class="flex flex-row justify-end w-full gap-2 px-0 py-2">
         <Button
           faded
@@ -163,5 +230,26 @@ const addAgent = async () => {
         />
       </div>
     </form>
+
+    <!-- Captain Modal Placeholder -->
+    <woot-modal
+      v-if="showCaptainModal"
+      :show="showCaptainModal"
+      @close="showCaptainModal = false"
+    >
+      <div class="p-6">
+        <h3 class="text-lg font-medium mb-4">
+          AI Agent Instructions Generator (Captain)
+        </h3>
+        <p class="text-sm text-slate-600 mb-4">
+          This will integrate with the Captain modal for AI-assisted
+          instructions generation.
+        </p>
+        <div class="flex justify-end gap-2">
+          <Button faded label="Cancel" @click="showCaptainModal = false" />
+          <Button label="Generate Instructions" @click="generateInstructions" />
+        </div>
+      </div>
+    </woot-modal>
   </div>
 </template>

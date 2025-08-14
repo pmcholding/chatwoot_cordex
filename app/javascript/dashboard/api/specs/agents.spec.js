@@ -15,6 +15,7 @@ describe('#AgentAPI', () => {
     const originalAxios = window.axios;
     const axiosMock = {
       post: vi.fn(() => Promise.resolve()),
+      get: vi.fn(() => Promise.resolve()),
     };
 
     beforeEach(() => {
@@ -33,6 +34,11 @@ describe('#AgentAPI', () => {
           emails: ['hello@hi.com'],
         }
       );
+    });
+
+    it('#getAgentTemplates', () => {
+      agents.getAgentTemplates();
+      expect(axiosMock.get).toHaveBeenCalledWith('/api/v1/agent_templates');
     });
   });
 });

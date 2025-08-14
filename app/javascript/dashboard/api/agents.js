@@ -12,6 +12,10 @@ class Agents extends ApiClient {
       emails,
     });
   }
+
+  getAgentTemplates() {
+    return axios.get(`${this.url.replace('/agents', '/agent_templates')}`);
+  }
 }
 
 export default new Agents();

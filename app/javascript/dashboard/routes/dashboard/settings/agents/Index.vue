@@ -10,6 +10,7 @@ import {
 } from 'dashboard/composables/store';
 
 import AddAgent from './AddAgent.vue';
+import AgentSelectionModal from './AgentSelectionModal.vue';
 import EditAgent from './EditAgent.vue';
 import BaseSettingsHeader from '../components/BaseSettingsHeader.vue';
 import SettingsLayout from '../SettingsLayout.vue';
@@ -20,11 +21,14 @@ const store = useStore();
 const { t } = useI18n();
 
 const loading = ref({});
+const showSelectionPopup = ref(false);
 const showAddPopup = ref(false);
 const showDeletePopup = ref(false);
 const showEditPopup = ref(false);
 const agentAPI = ref({ message: '' });
 const currentAgent = ref({});
+const selectedTemplate = ref(null);
+const aiMode = ref(false);
 
 const deleteConfirmText = computed(
   () => `${t('AGENT_MGMT.DELETE.CONFIRM.YES')} ${currentAgent.value.name}`
@@ -98,10 +102,40 @@ const showAlertMessage = message => {
 };
 
 const openAddPopup = () => {
+  showSelectionPopup.value = true;
+};
+
+const hideSelectionPopup = () => {
+  showSelectionPopup.value = false;
+  selectedTemplate.value = null;
+  aiMode.value = false;
+};
+
+const handleUseTemplate = template => {
+  selectedTemplate.value = template;
+  aiMode.value = false;
+  showSelectionPopup.value = false;
   showAddPopup.value = true;
 };
+
+const handleCreateFromScratch = () => {
+  selectedTemplate.value = null;
+  aiMode.value = false;
+  showSelectionPopup.value = false;
+  showAddPopup.value = true;
+};
+
+const handleCreateWithAI = () => {
+  selectedTemplate.value = null;
+  aiMode.value = true;
+  showSelectionPopup.value = false;
+  showAddPopup.value = true;
+};
+
 const hideAddPopup = () => {
   showAddPopup.value = false;
+  selectedTemplate.value = null;
+  aiMode.value = false;
 };
 
 const openEditPopup = agent => {
@@ -250,8 +284,24 @@ const confirmDeletion = () => {
       </table>
     </template>
 
+    <woot-modal
+      v-model:show="showSelectionPopup"
+      :on-close="hideSelectionPopup"
+    >
+      <AgentSelectionModal
+        @close="hideSelectionPopup"
+        @use-template="handleUseTemplate"
+        @create-from-scratch="handleCreateFromScratch"
+        @create-with-ai="handleCreateWithAI"
+      />
+    </woot-modal>
+
     <woot-modal v-model:show="showAddPopup" :on-close="hideAddPopup">
-      <AddAgent @close="hideAddPopup" />
+      <AddAgent
+        :template="selectedTemplate"
+        :ai-mode="aiMode"
+        @close="hideAddPopup"
+      />
     </woot-modal>
 
     <woot-modal v-model:show="showEditPopup" :on-close="hideEditPopup">

@@ -99,6 +99,15 @@
     "SEARCH": {
       "NO_RESULTS": "Nenhum resultado encontrado."
     },
+    "TEMPLATE_SELECTION": {
+      "TITLE": "Escolha o Método de Criação do Agente",
+      "USE_TEMPLATE": "Usar Modelo",
+      "CREATE_FROM_SCRATCH": "Criar do Zero",
+      "CREATE_WITH_AI": "Criar com IA",
+      "SELECT_TEMPLATE": "Selecione um modelo para começar",
+      "NO_TEMPLATES": "Nenhum modelo disponível",
+      "AI_DESCRIPTION": "Use IA para gerar instruções do agente"
+    },
     "MULTI_SELECTOR": {
       "PLACEHOLDER": "Nenhum",
       "TITLE": {

@@ -99,6 +99,15 @@
     "SEARCH": {
       "NO_RESULTS": "No results found."
     },
+    "TEMPLATE_SELECTION": {
+      "TITLE": "Choose Agent Creation Method",
+      "USE_TEMPLATE": "Use Template",
+      "CREATE_FROM_SCRATCH": "Create from Scratch",
+      "CREATE_WITH_AI": "Create with AI",
+      "SELECT_TEMPLATE": "Select a template to get started",
+      "NO_TEMPLATES": "No templates available",
+      "AI_DESCRIPTION": "Use AI to generate agent instructions"
+    },
     "MULTI_SELECTOR": {
       "PLACEHOLDER": "None",
       "TITLE": {
