@@ -1,5 +1,5 @@
 <script>
-import { mapGetters } from 'vuex';
+import { usePolicy } from 'dashboard/composables/usePolicy';
 export default {
   props: {
     featureKey: {
@@ -7,21 +7,17 @@ export default {
       required: true,
     },
   },
-  computed: {
-    ...mapGetters({
-      isFeatureEnabledonAccount: 'accounts/isFeatureEnabledonAccount',
-      accountId: 'getCurrentAccountId',
-    }),
-    isFeatureEnabled() {
-      return this.isFeatureEnabledonAccount(this.accountId, this.featureKey);
-    },
+  setup(props) {
+    const { isFeatureFlagEnabled } = usePolicy();
+    const isEnabled = isFeatureFlagEnabled(props.featureKey);
+    return { isEnabled };
   },
 };
 </script>
 
 <!-- eslint-disable-next-line vue/no-root-v-if -->
 <template>
-  <div v-if="isFeatureEnabled">
+  <div v-if="isEnabled">
     <slot />
   </div>
 </template>
