@@ -1,0 +1,14 @@
+{
+  "KANBAN": {
+    "PLACEHOLDER": {
+      "TITLE": "Kanban (Preview)",
+      "ACCOUNT": "Conta #",
+      "ROUTE": "Rota:",
+      "EMOJI": "🧩",
+      "BODY": "Placeholder do Kanban Board",
+      "FOOTER": "Esta visualização está atrás de feature flag e servirá como base para os próximos incrementos.",
+      "BACK": "Voltar"
+    }
+  }
+}
+
