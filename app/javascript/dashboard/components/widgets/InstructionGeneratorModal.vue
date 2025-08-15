@@ -34,6 +34,8 @@ export default {
       generateInstructions,
       resetConversation: resetInstructionConversation,
       isInstructionResponse,
+      isFinalPromptReady,
+      extractInstructions,
       initializeWithContext,
     } = useInstructionGenerator();
 
@@ -41,6 +43,7 @@ export default {
     const currentInput = ref('');
     const generatedInstructions = ref('');
     const isApplyingInstructions = ref(false);
+    const showConfirmationButtons = ref(false);
 
     // Computed
     const hasMessages = computed(() => conversationHistory.value.length > 0);
@@ -61,11 +64,26 @@ export default {
       close();
     };
 
+    const acceptInstructions = () => {
+      applyInstructions();
+    };
+
+    const editInstructions = () => {
+      // Reset to allow editing mode
+      showConfirmationButtons.value = false;
+      isApplyingInstructions.value = false;
+      // Add a message to the conversation asking for edits
+      const editMessage =
+        'Gostaria de fazer algumas modificações nas instruções. Pode me ajudar a editá-las?';
+      currentInput.value = editMessage;
+    };
+
     const resetConversation = () => {
       resetInstructionConversation();
       currentInput.value = '';
       generatedInstructions.value = '';
       isApplyingInstructions.value = false;
+      showConfirmationButtons.value = false;
     };
 
     const sendMessage = async () => {
@@ -77,11 +95,14 @@ export default {
       try {
         const response = await generateInstructions(userMessage);
 
-        // Check if this looks like final instructions
-        if (isInstructionResponse(response)) {
+        // Check if this contains the final prompt ready marker
+        if (isFinalPromptReady(response)) {
+          generatedInstructions.value = extractInstructions(response);
+          showConfirmationButtons.value = true;
+        } else if (isInstructionResponse(response)) {
+          // Fallback to old behavior for backward compatibility
           generatedInstructions.value = response;
           isApplyingInstructions.value = true;
-          // Auto-apply instructions after a short delay to let user see them
           setTimeout(() => {
             applyInstructions();
           }, 2000);
@@ -108,11 +129,14 @@ export default {
           // Send initial context and get Captain's first question
           const response = await generateInstructions(contextMessage);
 
-          // Check if this looks like final instructions (in case AI generates them immediately)
-          if (isInstructionResponse(response)) {
+          // Check if this contains the final prompt ready marker
+          if (isFinalPromptReady(response)) {
+            generatedInstructions.value = extractInstructions(response);
+            showConfirmationButtons.value = true;
+          } else if (isInstructionResponse(response)) {
+            // Fallback to old behavior for backward compatibility
             generatedInstructions.value = response;
             isApplyingInstructions.value = true;
-            // Auto-apply instructions after a short delay to let user see them
             setTimeout(() => {
               applyInstructions();
             }, 2000);
@@ -152,10 +176,13 @@ export default {
       canSendMessage,
       hasInstructions,
       isApplyingInstructions,
+      showConfirmationButtons,
       close,
       resetConversation,
       sendMessage,
       applyInstructions,
+      acceptInstructions,
+      editInstructions,
       handleKeyPress,
     };
   },
@@ -253,8 +280,42 @@ export default {
           </div>
         </div>
 
+        <!-- Confirmation Buttons for Final Prompt -->
+        <div v-if="showConfirmationButtons" class="border-t border-n-weak p-4">
+          <div class="bg-n-alpha-1 rounded-lg p-4 mb-4">
+            <h4 class="text-sm font-medium text-n-slate-12 mb-2">
+              {{ t('CAPTAIN.INSTRUCTION_GENERATOR.GENERATED_INSTRUCTIONS') }}
+            </h4>
+            <div
+              data-testid="generated-instructions"
+              class="text-sm text-n-slate-11 max-h-32 overflow-y-auto whitespace-pre-wrap"
+            >
+              {{ generatedInstructions }}
+            </div>
+          </div>
+          <div class="flex gap-3 justify-center">
+            <WootButton
+              data-testid="accept-button"
+              icon="i-lucide-check"
+              label="Aceitar e Usar"
+              @click="acceptInstructions"
+            />
+            <WootButton
+              data-testid="edit-button"
+              ghost
+              icon="i-lucide-edit"
+              label="Editar"
+              @click="editInstructions"
+            />
+          </div>
+        </div>
+
         <!-- Input Area -->
-        <div v-if="!isApplyingInstructions" class="border-t border-n-weak p-4">
+        <div
+          v-if="!isApplyingInstructions && !showConfirmationButtons"
+          data-testid="input-area"
+          class="border-t border-n-weak p-4"
+        >
           <div class="flex gap-2">
             <textarea
               v-model="currentInput"
@@ -267,6 +328,7 @@ export default {
               @keypress="handleKeyPress"
             />
             <WootButton
+              data-testid="send-button"
               :disabled="!canSendMessage"
               :loading="isGenerating"
               icon="i-lucide-send"

@@ -127,6 +127,26 @@ export function useInstructionGenerator() {
   };
 
   /**
+   * Checks if the response contains the final prompt ready marker
+   * @param {string} response - The AI response to check
+   * @returns {boolean} True if the response contains [FINAL_PROMPT_READY] marker
+   */
+  const isFinalPromptReady = response => {
+    return response && response.includes('[FINAL_PROMPT_READY]');
+  };
+
+  /**
+   * Extracts the instructions content from a response with [FINAL_PROMPT_READY] marker
+   * @param {string} response - The AI response containing instructions
+   * @returns {string} The instructions content without the marker and confirmation text
+   */
+  const extractInstructions = response => {
+    // Split by the marker and take the first part (instructions)
+    const parts = response.split('[FINAL_PROMPT_READY]');
+    return parts[0].trim();
+  };
+
+  /**
    * Initializes conversation with context
    * @param {Object} context - Initial context for the conversation
    * @param {string} context.agentName - Name of the agent
@@ -168,6 +188,8 @@ export function useInstructionGenerator() {
     resetConversation,
     addMessage,
     isInstructionResponse,
+    isFinalPromptReady,
+    extractInstructions,
     initializeWithContext,
   };
 }
