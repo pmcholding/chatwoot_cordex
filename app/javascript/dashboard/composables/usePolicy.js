@@ -25,9 +25,23 @@ export function usePolicy() {
     return getUserPermissions(user.value, accountId.value);
   };
 
+  // Dev-only override: always enable Kanban in development to allow UI access
+  // without impacting production behavior or other flags.
   const isFeatureFlagEnabled = featureFlag => {
     if (!featureFlag) return true;
-    return isFeatureEnabled.value(accountId.value, featureFlag);
+    const enabled = isFeatureEnabled.value(accountId.value, featureFlag);
+    if (enabled) return true;
+    // Allow KANBAN in local development even if not enabled on account
+    const isDev =
+      (typeof import.meta !== 'undefined' &&
+        import.meta &&
+        import.meta.env &&
+        import.meta.env.DEV) ||
+      process.env.NODE_ENV === 'development';
+    if (isDev && featureFlag === 'kanban') {
+      return true;
+    }
+    return false;
   };
 
   const checkPermissions = requiredPermissions => {
