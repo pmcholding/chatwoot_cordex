@@ -61,5 +61,7 @@
     "SLA": "SLA",
     "BILLING": "Billing",
     "INBOX": "Inbox"
+,
+    "KANBAN": "Kanban"
   }
 }

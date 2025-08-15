@@ -35,6 +35,8 @@ import signup from './signup.json';
 import sla from './sla.json';
 import teamsSettings from './teamsSettings.json';
 import whatsappTemplates from './whatsappTemplates.json';
+import sidebar from './sidebar.json';
+
 import kanban from './kanban.json';
 
 export default {
@@ -71,6 +73,7 @@ export default {
   ...search,
   ...setNewPassword,
   ...settings,
+  ...sidebar,
   ...signup,
   ...sla,
   ...teamsSettings,

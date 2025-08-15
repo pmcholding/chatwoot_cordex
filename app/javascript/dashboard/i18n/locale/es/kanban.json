@@ -1,0 +1,14 @@
+{
+  "KANBAN": {
+    "PLACEHOLDER": {
+      "TITLE": "Kanban (Vista previa)",
+      "ACCOUNT": "Cuenta #",
+      "ROUTE": "Ruta:",
+      "EMOJI": "🧩",
+      "BODY": "Marcador de posición del tablero Kanban",
+      "FOOTER": "Esta vista está detrás de un feature flag y evolucionará en las próximas iteraciones.",
+      "BACK": "Volver"
+    }
+  }
+}
+
