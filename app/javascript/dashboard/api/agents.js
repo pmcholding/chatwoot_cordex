@@ -13,8 +13,14 @@ class Agents extends ApiClient {
     });
   }
 
-  getAgentTemplates() {
-    return axios.get(`${this.url.replace('/agents', '/agent_templates')}`);
+  getAgentTemplates(language = null) {
+    const params = {};
+    if (language) {
+      params.language = language;
+    }
+    return axios.get(`${this.url.replace('/agents', '/agent_templates')}`, {
+      params,
+    });
   }
 }
 

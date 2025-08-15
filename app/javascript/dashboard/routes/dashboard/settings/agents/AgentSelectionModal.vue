@@ -20,7 +20,10 @@ const selectedTemplate = ref(null);
 const fetchTemplates = async () => {
   try {
     loading.value = true;
-    const response = await agentsAPI.getAgentTemplates();
+    // Get current locale from i18n
+    const { locale } = useI18n();
+    const currentLocale = locale.value || 'en';
+    const response = await agentsAPI.getAgentTemplates(currentLocale);
     templates.value = response.data;
   } catch (error) {
     alert.error(t('AGENT_MGMT.API.ERROR_MESSAGE'));

@@ -45,7 +45,7 @@ export function useInstructionGenerator() {
   const generateInstructions = async userInput => {
     if (!canGenerate.value) {
       const errorMsg = t(
-        'INTEGRATIONS.INSTRUCTION_GENERATOR.ERROR.GENERATION_FAILED'
+        'CAPTAIN.INSTRUCTION_GENERATOR.ERROR.GENERATION_FAILED'
       );
       useAlert(errorMsg);
       throw new Error(errorMsg);
@@ -79,7 +79,7 @@ export function useInstructionGenerator() {
     } catch (err) {
       error.value =
         err.response?.data?.error?.message ||
-        t('INTEGRATIONS.INSTRUCTION_GENERATOR.ERROR.GENERATION_FAILED');
+        t('CAPTAIN.INSTRUCTION_GENERATOR.ERROR.GENERATION_FAILED');
 
       useAlert(error.value);
       throw err;
@@ -136,12 +136,10 @@ export function useInstructionGenerator() {
   const initializeWithContext = (context = {}) => {
     resetConversation();
 
-    let contextMessage = t(
-      'INTEGRATIONS.INSTRUCTION_GENERATOR.INITIAL_CONTEXT'
-    );
+    let contextMessage = t('CAPTAIN.INSTRUCTION_GENERATOR.INITIAL_CONTEXT');
 
     if (context.agentName) {
-      contextMessage += ` ${t('INTEGRATIONS.INSTRUCTION_GENERATOR.AGENT_NAME')}: ${context.agentName}.`;
+      contextMessage += ` ${t('CAPTAIN.INSTRUCTION_GENERATOR.AGENT_NAME')}: ${context.agentName}.`;
     }
 
     if (context.agentType) {
@@ -149,7 +147,7 @@ export function useInstructionGenerator() {
     }
 
     if (context.existingInstructions) {
-      contextMessage += ` ${t('INTEGRATIONS.INSTRUCTION_GENERATOR.EXISTING_INSTRUCTIONS')}: ${context.existingInstructions}`;
+      contextMessage += ` ${t('CAPTAIN.INSTRUCTION_GENERATOR.EXISTING_INSTRUCTIONS')}: ${context.existingInstructions}`;
     }
 
     return contextMessage;

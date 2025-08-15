@@ -52,7 +52,8 @@ const handleUseTemplate = async template => {
         product_name: template.config?.product_name || '',
         feature_faq: template.config?.feature_faq || false,
         feature_memory: template.config?.feature_memory || false,
-        instructions: template.config?.instructions || '',
+        instructions:
+          template.instructions || template.config?.instructions || '',
         ...template.config,
       },
     };

@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
+import agentsAPI from 'dashboard/api/agents';
 
 const emit = defineEmits(['selectTemplate', 'back']);
 const { t } = useI18n();
@@ -11,46 +12,14 @@ const templates = ref([]);
 const loading = ref(false);
 const selectedTemplate = ref(null);
 
-// Templates de exemplo - futuramente será uma API
 const fetchTemplates = async () => {
   try {
     loading.value = true;
-    // TODO: Implementar API para templates de assistentes
-    templates.value = [
-      {
-        id: 'customer-support',
-        name: 'Atendimento ao Cliente',
-        description:
-          'Assistente especializado em suporte e atendimento ao cliente',
-        productName: 'Produto de Atendimento',
-        featureFaq: true,
-        featureMemory: true,
-      },
-      {
-        id: 'sales-assistant',
-        name: 'Assistente de Vendas',
-        description: 'Assistente focado em vendas e conversão de leads',
-        productName: 'Produto de Vendas',
-        featureFaq: false,
-        featureMemory: true,
-      },
-      {
-        id: 'technical-support',
-        name: 'Suporte Técnico',
-        description: 'Assistente para questões técnicas e troubleshooting',
-        productName: 'Produto Técnico',
-        featureFaq: true,
-        featureMemory: false,
-      },
-      {
-        id: 'general-assistant',
-        name: 'Assistente Geral',
-        description: 'Assistente versátil para múltiplas funções',
-        productName: 'Produto Geral',
-        featureFaq: false,
-        featureMemory: false,
-      },
-    ];
+    // Get current locale from i18n
+    const { locale } = useI18n();
+    const currentLocale = locale.value || 'en';
+    const response = await agentsAPI.getAgentTemplates(currentLocale);
+    templates.value = response.data;
   } catch (error) {
     alert.error(t('CAPTAIN.ASSISTANTS.API.ERROR_MESSAGE'));
   } finally {

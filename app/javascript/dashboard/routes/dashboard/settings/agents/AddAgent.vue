@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
@@ -80,7 +80,7 @@ const selectedRole = computed(() =>
 // Template pre-filling
 const initializeTemplate = () => {
   if (props.template) {
-    agentInstructions.value = props.template.instructions;
+    agentInstructions.value = props.template.instructions || '';
     if (props.template.name) {
       agentName.value = props.template.name;
     }
@@ -109,6 +109,18 @@ const openCaptainModal = () => {
 const closeCaptainModal = () => {
   showCaptainModal.value = false;
 };
+
+// Watch for template changes
+watch(
+  () => props.template,
+  async (newTemplate, oldTemplate) => {
+    if (newTemplate && newTemplate !== oldTemplate) {
+      await nextTick();
+      initializeTemplate();
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 onMounted(() => {
   initializeTemplate();
@@ -216,7 +228,7 @@ const addAgent = async () => {
           <Button
             v-if="!showCaptainModal"
             faded
-            size="small"
+            size="sm"
             :label="$t('AGENT_MGMT.ADD.FORM.CAPTAIN.BUTTON_TEXT')"
             @click="openCaptainModal"
           />

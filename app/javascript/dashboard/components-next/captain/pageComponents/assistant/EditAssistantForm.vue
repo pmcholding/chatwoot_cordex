@@ -25,6 +25,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  template: {
+    type: Object,
+    default: null,
+  },
 });
 
 const emit = defineEmits(['submit']);
@@ -95,6 +99,24 @@ const updateStateFromAssistant = assistant => {
     memories: config.feature_memory || false,
   };
   state.temperature = config.temperature || 1;
+};
+
+const updateStateFromTemplate = template => {
+  if (template) {
+    state.name = template.name || '';
+    state.description = template.description || '';
+    state.instructions = template.instructions || '';
+    // Reset other fields to defaults when using template
+    state.productName = '';
+    state.welcomeMessage = '';
+    state.handoffMessage = '';
+    state.resolutionMessage = '';
+    state.features = {
+      conversationFaqs: false,
+      memories: false,
+    };
+    state.temperature = 1;
+  }
 };
 
 const handleBasicInfoUpdate = async () => {
@@ -191,6 +213,17 @@ watch(
           openInstructionModal();
         }, 500); // Small delay to ensure component is fully loaded
       }
+    }
+  },
+  { immediate: true }
+);
+
+// Watch for template changes
+watch(
+  () => props.template,
+  newTemplate => {
+    if (props.mode === 'create' && newTemplate) {
+      updateStateFromTemplate(newTemplate);
     }
   },
   { immediate: true }

@@ -115,7 +115,11 @@ const handleUseTemplate = template => {
   selectedTemplate.value = template;
   aiMode.value = false;
   showSelectionPopup.value = false;
-  showAddPopup.value = true;
+
+  // Add a small delay to ensure the template is set before opening the modal
+  setTimeout(() => {
+    showAddPopup.value = true;
+  }, 100);
 };
 
 const handleCreateFromScratch = () => {

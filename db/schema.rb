@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_14_154214) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_15_013110) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -124,10 +124,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_14_154214) do
     t.string "name", null: false
     t.text "description"
     t.text "instructions", null: false
-    t.bigint "account_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_agent_templates_on_account_id"
+    t.string "language", default: "en", null: false
+    t.index ["language"], name: "index_agent_templates_on_language"
     t.index ["name"], name: "index_agent_templates_on_name"
   end
 
@@ -1069,6 +1069,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_14_154214) do
     t.index ["account_id"], name: "index_sla_policies_on_account_id"
   end
 
+  create_table "supported_languages", force: :cascade do |t|
+    t.string "code", limit: 10, null: false
+    t.string "name", limit: 100, null: false
+    t.string "native_name", limit: 100, null: false
+    t.boolean "enabled", default: true, null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_supported_languages_on_code", unique: true
+    t.index ["enabled"], name: "index_supported_languages_on_enabled"
+  end
+
   create_table "taggings", id: :serial, force: :cascade do |t|
     t.integer "tag_id"
     t.string "taggable_type"
@@ -1187,7 +1199,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_14_154214) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "agent_templates", "accounts"
   add_foreign_key "inboxes", "portals"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").

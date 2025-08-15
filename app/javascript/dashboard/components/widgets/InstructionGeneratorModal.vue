@@ -169,10 +169,10 @@ export default {
       <div class="flex items-center justify-between p-6 border-b border-n-weak">
         <div>
           <h2 class="text-lg font-semibold text-n-slate-12">
-            {{ t('INTEGRATIONS.INSTRUCTION_GENERATOR.TITLE') }}
+            {{ t('CAPTAIN.INSTRUCTION_GENERATOR.TITLE') }}
           </h2>
           <p class="text-sm text-n-slate-11 mt-1">
-            {{ t('INTEGRATIONS.INSTRUCTION_GENERATOR.DESCRIPTION') }}
+            {{ t('CAPTAIN.INSTRUCTION_GENERATOR.DESCRIPTION') }}
           </p>
         </div>
         <WootButton
@@ -180,7 +180,7 @@ export default {
           ghost
           slate
           size="sm"
-          :label="t('INTEGRATIONS.INSTRUCTION_GENERATOR.RESET')"
+          :label="t('CAPTAIN.INSTRUCTION_GENERATOR.RESET')"
           @click="resetConversation"
         />
       </div>
@@ -195,10 +195,10 @@ export default {
               <i class="i-woot-captain text-3xl" />
             </div>
             <h3 class="text-base font-medium text-n-slate-12 mb-2">
-              {{ t('INTEGRATIONS.INSTRUCTION_GENERATOR.WELCOME.TITLE') }}
+              {{ t('CAPTAIN.INSTRUCTION_GENERATOR.WELCOME.TITLE') }}
             </h3>
             <p class="text-sm text-n-slate-11">
-              {{ t('INTEGRATIONS.INSTRUCTION_GENERATOR.WELCOME.MESSAGE') }}
+              {{ t('CAPTAIN.INSTRUCTION_GENERATOR.WELCOME.MESSAGE') }}
             </p>
           </div>
 
@@ -248,9 +248,7 @@ export default {
               class="animate-spin rounded-full h-4 w-4 border-b-2 border-n-green-11"
             />
             <span class="text-sm font-medium">
-              {{
-                t('INTEGRATIONS.INSTRUCTION_GENERATOR.APPLYING_INSTRUCTIONS')
-              }}
+              {{ t('CAPTAIN.INSTRUCTION_GENERATOR.APPLYING_INSTRUCTIONS') }}
             </span>
           </div>
         </div>
@@ -261,7 +259,7 @@ export default {
             <textarea
               v-model="currentInput"
               :placeholder="
-                t('INTEGRATIONS.INSTRUCTION_GENERATOR.INPUT_PLACEHOLDER')
+                t('CAPTAIN.INSTRUCTION_GENERATOR.INPUT_PLACEHOLDER')
               "
               class="flex-1 resize-none border border-n-weak rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-n-blue-6 focus:border-transparent"
               rows="2"
@@ -283,12 +281,12 @@ export default {
         <WootButton
           ghost
           slate
-          :label="t('INTEGRATIONS.INSTRUCTION_GENERATOR.CANCEL')"
+          :label="t('CAPTAIN.INSTRUCTION_GENERATOR.CANCEL')"
           @click="close"
         />
         <WootButton
           v-if="hasInstructions"
-          :label="t('INTEGRATIONS.INSTRUCTION_GENERATOR.APPLY_INSTRUCTIONS')"
+          :label="t('CAPTAIN.INSTRUCTION_GENERATOR.APPLY_INSTRUCTIONS')"
           @click="applyInstructions"
         />
       </div>

@@ -412,6 +412,20 @@
       "HEADER": "Assistants",
       "NO_ASSISTANTS_AVAILABLE": "There are no assistants available in your account.",
       "ADD_NEW": "Create a new assistant",
+      "TEMPLATE_SELECTION": {
+        "TITLE": "Elige el Método de Creación del Asistente",
+        "DESCRIPTION": "Selecciona cómo te gustaría crear tu nuevo asistente",
+        "USE_TEMPLATE": "Usar Plantilla",
+        "USE_TEMPLATE_DESC": "Comienza con una plantilla preconfigurada para casos de uso comunes",
+        "CREATE_FROM_SCRATCH": "Crear desde Cero",
+        "CREATE_FROM_SCRATCH_DESC": "Construye tu asistente desde cero con personalización completa",
+        "CREATE_WITH_AI": "Crear con IA",
+        "AI_DESCRIPTION": "Deja que la IA te ayude a generar la configuración e instrucciones del asistente",
+        "SELECT_TEMPLATE": "Por favor, selecciona una plantilla para continuar",
+        "SELECT_TEMPLATE_TITLE": "Elige una Plantilla",
+        "SELECT_TEMPLATE_DESC": "Selecciona una plantilla preconfigurada para comenzar rápidamente",
+        "NO_TEMPLATES": "No hay plantillas disponibles"
+      },
       "DELETE": {
         "TITLE": "Are you sure to delete the assistant?",
         "DESCRIPTION": "This action is permanent. Deleting this assistant will remove it from all connected inboxes and permanently erase all generated knowledge.",
@@ -778,6 +792,26 @@
         "TITLE": "No Connected Inboxes",
         "SUBTITLE": "Connecting an inbox allows the assistant to handle initial questions from your customers before transferring them to you."
       }
+    },
+    "INSTRUCTION_GENERATOR": {
+      "TITLE": "Generador de Instrucciones de IA",
+      "DESCRIPTION": "Crea instrucciones integrales para agentes a través de asistencia conversacional de IA",
+      "WELCOME": {
+        "TITLE": "Bienvenido al Generador de Instrucciones de IA",
+        "MESSAGE": "Te ayudaré a crear instrucciones detalladas y prácticas para tus agentes de IA. Dime qué tipo de agente quieres crear y te guiaré a través del proceso."
+      },
+      "INPUT_PLACEHOLDER": "Describe el tipo de agente que quieres crear o pide ayuda...",
+      "INITIAL_CONTEXT": "Quiero crear instrucciones para agente.",
+      "AGENT_NAME": "Nombre del agente",
+      "EXISTING_INSTRUCTIONS": "Instrucciones actuales",
+      "RESET": "Empezar de Nuevo",
+      "CANCEL": "Cancelar",
+      "APPLY_INSTRUCTIONS": "Aplicar Instrucciones",
+      "ERROR": {
+        "GENERATION_FAILED": "Error al generar instrucciones. Asegúrate de que OpenAI esté configurado en Super Admin > Configuración del Capitán.",
+        "AI_NOT_ENABLED": "La integración de OpenAI no está configurada. Pide a tu administrador que configure la clave API de OpenAI en Super Admin > Configuración del Capitán."
+      },
+      "APPLYING_INSTRUCTIONS": "¡Instrucciones listas! Aplicando automáticamente en 2 segundos..."
     }
   }
 }
