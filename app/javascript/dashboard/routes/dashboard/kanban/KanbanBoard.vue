@@ -6,6 +6,9 @@ import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
 import Avatar from 'next/avatar/Avatar.vue';
+import Icon from 'dashboard/components-next/icon/Icon.vue';
+import ChannelIcon from 'dashboard/components-next/icon/ChannelIcon.vue';
+import InboxName from 'dashboard/components/widgets/InboxName.vue';
 
 const store = useStore();
 const stages = computed(() => store.getters['kanban/orderedStages']);
@@ -110,9 +113,11 @@ const formatLastActivity = (timestamp) => {
   <FeatureToggle :feature-key="FEATURE_FLAGS.KANBAN">
     <div class="flex flex-col h-full w-full overflow-hidden">
       <!-- Header / Filter bar -->
-      <div class="border-b p-3 flex items-center justify-between gap-3 bg-n-background">
-        <div class="flex items-center gap-3 flex-1 min-w-0">
-          <h1 class="text-lg font-medium text-n-slate-12 shrink-0">{{ $t('KANBAN.BOARD.TITLE') }}</h1>
+      <div class="flex items-center justify-between w-full gap-2 border-b px-3 h-12 border-n-weak flex-shrink-0">
+        <div class="flex items-center gap-4 min-w-0 flex-1">
+          <h1 class="min-w-0 text-base font-medium truncate text-n-slate-12">
+            {{ $t('KANBAN.BOARD.TITLE') }}
+          </h1>
           <div class="flex items-center gap-2 overflow-x-auto">
             <!-- Active filter chips -->
             <NextButton
@@ -130,19 +135,21 @@ const formatLastActivity = (timestamp) => {
         <div class="flex items-center gap-2">
           <NextButton
             :label="$t('KANBAN.BOARD.REFRESH')"
-            color="slate"
-            variant="faded"
-            size="sm"
             icon="i-lucide-rotate-cw"
+            slate
+            xs
+            faded
+            class="[&>.truncate]:hidden md:[&>.truncate]:block"
             @click="store.dispatch('kanban/fetchInitial')"
           />
           <router-link :to="{ name: 'kanban_settings' }">
             <NextButton
               :label="$t('KANBAN.BOARD.SETTINGS')"
-              color="slate"
-              variant="ghost"
-              size="sm"
               icon="i-lucide-sliders-horizontal"
+              slate
+              xs
+              faded
+              class="[&>.truncate]:hidden md:[&>.truncate]:block"
             />
           </router-link>
         </div>
@@ -159,7 +166,7 @@ const formatLastActivity = (timestamp) => {
         >
           <template #prefix>
             <div class="pointer-events-none absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-n-slate-10">
-              <fluent-icon icon="search" size="16" />
+              <Icon icon="i-lucide-search" class="size-4" />
             </div>
           </template>
         </Input>
@@ -219,61 +226,67 @@ const formatLastActivity = (timestamp) => {
               >
                 <div class="flex items-start gap-3">
                   <div class="relative">
-                    <Avatar :name="card.contact_name || card.title" :size="32" rounded-full />
+                    <Avatar :name="card.contact_name || card.title" :size="28" rounded-full class="mt-1" />
                     <span
                       v-if="card.status === 'open'"
-                      class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"
+                      class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-n-teal-10 border-2 border-white rounded-full"
                       :title="$t('CONVERSATION.STATUS.OPEN')"
                     />
                     <span
                       v-else-if="card.status === 'pending'"
-                      class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-yellow-500 border-2 border-white rounded-full"
+                      class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-n-amber-9 border-2 border-white rounded-full"
                       :title="$t('CONVERSATION.STATUS.PENDING')"
                     />
                   </div>
                   <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between mb-1">
-                      <p class="text-sm font-medium truncate text-n-slate-12">
+                    <div class="flex items-start justify-between mb-1">
+                      <p class="text-sm font-medium truncate text-n-slate-12 leading-5">
                         {{ card.contact_name || card.title }}
                       </p>
                       <span
                         v-if="card.unread_count && card.unread_count > 0"
-                        class="inline-flex items-center justify-center rounded-full bg-n-ruby-9 text-white text-[10px] px-1.5 py-0.5 font-medium"
+                        class="inline-flex items-center justify-center rounded-full bg-n-ruby-9 text-white text-[10px] px-1.5 py-0.5 font-medium ml-2 flex-shrink-0"
                         :aria-label="$t('CONVERSATION.UNREAD_COUNT', { count: card.unread_count })"
                       >
                         {{ card.unread_count }}
                       </span>
                     </div>
-                    <p class="text-xs text-n-slate-11 truncate mb-2 leading-relaxed">
+                    <p class="text-xs text-n-slate-11 truncate mb-2 leading-4 line-clamp-2">
                       {{ card.subject || card.last_message || card.title }}
                     </p>
-                    <div class="flex items-center justify-between">
-                      <div class="flex gap-1">
-                        <span
-                          v-for="l in (card.labels || []).slice(0,2)"
-                          :key="l"
-                          class="px-1.5 py-0.5 rounded-full bg-n-brand/10 text-n-brand text-[10px] font-medium"
-                        >
-                          {{ l }}
-                        </span>
-                        <span
-                          v-if="(card.labels || []).length > 2"
-                          class="px-1.5 py-0.5 rounded-full bg-n-slate-3 text-n-slate-11 text-[10px]"
-                        >
-                          {{ `+${(card.labels || []).length - 2}` }}
+                    <div class="flex items-center justify-between h-6 gap-2">
+                      <div class="flex items-center flex-1 min-w-0 gap-1">
+                        <div class="flex gap-1">
+                          <span
+                            v-for="l in (card.labels || []).slice(0,2)"
+                            :key="l"
+                            class="px-1.5 py-0.5 rounded bg-n-slate-3 text-[10px] text-n-slate-11"
+                          >
+                            {{ l }}
+                          </span>
+                          <span
+                            v-if="(card.labels || []).length > 2"
+                            class="px-1.5 py-0.5 rounded bg-n-slate-3 text-n-slate-11 text-[10px]"
+                          >
+                            {{ `+${(card.labels || []).length - 2}` }}
+                          </span>
+                        </div>
+                        <div v-if="card.assignee" class="w-px h-3 rounded-sm bg-n-slate-4" />
+                        <div v-if="card.assignee" class="flex items-center gap-1">
+                          <Icon icon="i-lucide-user" class="size-3 text-n-slate-10" />
+                          <span class="text-[10px] text-n-slate-11 truncate">{{ card.assignee }}</span>
+                        </div>
+                        <div v-if="card.inbox" class="w-px h-3 rounded-sm bg-n-slate-4" />
+                        <InboxName v-if="card.inbox" :inbox="card.inbox" />
+                        <span class="text-xs text-n-slate-10 ml-auto">
+                          {{ formatLastActivity(card.updated_at) }}
                         </span>
                       </div>
-                      <span class="text-[10px] text-n-slate-10 font-medium">
-                        {{ formatLastActivity(card.updated_at) }}
-                      </span>
-                    </div>
-                    <div v-if="card.assignee" class="mt-2 flex items-center gap-1">
-                      <fluent-icon icon="person" size="12" class="text-n-slate-10" />
-                      <span class="text-[10px] text-n-slate-11">{{ card.assignee }}</span>
                     </div>
                   </div>
-                  <span
-                    class="opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 flex-none i-lucide-grip-vertical text-n-slate-10 cursor-grab"
+                  <Icon
+                    icon="i-lucide-grip-vertical"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity size-4 flex-none text-n-slate-10 cursor-grab mt-1"
                     :class="{ 'cursor-grabbing': draggingCardId === card.id }"
                     :aria-label="$t('KANBAN.BOARD.DRAG_HANDLE_LABEL')"
                     aria-hidden="true"
@@ -285,13 +298,14 @@ const formatLastActivity = (timestamp) => {
               <template v-if="loadingForStage(stage.id)">
                 <li v-for="n in 3" :key="`s-${n}`" class="p-3 rounded-lg border border-n-weak bg-n-background animate-pulse">
                   <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 bg-n-slate-3 rounded-full" />
+                    <div class="w-7 h-7 bg-n-slate-3 rounded-full mt-1" />
                     <div class="flex-1">
-                      <div class="h-3 w-2/3 bg-n-slate-3 rounded mb-2" />
-                      <div class="h-2 w-1/2 bg-n-slate-3 rounded mb-2" />
-                      <div class="flex gap-1">
-                        <div class="h-2 w-12 bg-n-slate-3 rounded" />
-                        <div class="h-2 w-8 bg-n-slate-3 rounded" />
+                      <div class="h-4 w-2/3 bg-n-slate-3 rounded mb-2" />
+                      <div class="h-3 w-1/2 bg-n-slate-3 rounded mb-2" />
+                      <div class="flex items-center gap-2 h-6">
+                        <div class="h-4 w-12 bg-n-slate-3 rounded" />
+                        <div class="h-4 w-8 bg-n-slate-3 rounded" />
+                        <div class="h-3 w-16 bg-n-slate-3 rounded ml-auto" />
                       </div>
                     </div>
                   </div>
@@ -333,25 +347,20 @@ const formatLastActivity = (timestamp) => {
   cursor: grabbing;
 }
 
-/* Column drop zone styling */
-.drop-zone-active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-/* Card hover effects */
+/* Card hover effects - following InboxView patterns */
 .group:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Smooth transitions for all interactive elements */
 * {
   transition-property: transform, box-shadow, border-color, background-color, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 
-/* Loading skeleton animation */
+/* Loading skeleton animation - consistent with dashboard */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -365,16 +374,50 @@ const formatLastActivity = (timestamp) => {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Status indicator animations */
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Status indicator styling */
 .status-indicator {
+  position: relative;
+}
+
+.status-indicator::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
   animation: pulse 2s ease-in-out infinite;
 }
 
-/* Scroll indicator for infinite scroll */
-.scroll-indicator {
-  position: sticky;
-  bottom: 0;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
-  backdrop-filter: blur(4px);
+/* Consistent spacing and typography */
+.kanban-card {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.kanban-card-title {
+  font-weight: 500;
+  color: rgb(var(--n-slate-12));
+}
+
+.kanban-card-subtitle {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: rgb(var(--n-slate-11));
+}
+
+.kanban-card-meta {
+  font-size: 0.625rem;
+  line-height: 0.75rem;
+  color: rgb(var(--n-slate-10));
 }
 </style>
