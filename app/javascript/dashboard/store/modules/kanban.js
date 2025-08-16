@@ -98,7 +98,7 @@ export const actions = {
     }
   },
 
-  async createStage({ commit, dispatch }, { name, color }) {
+  async createStage({ commit }, { name, color }) {
     try {
       const response = await KanbanAPI.createStage({ name, color });
       const newStage = response.data;
@@ -136,7 +136,7 @@ export const actions = {
     }
   },
 
-  async reorderStages({ commit }, positions) {
+  async reorderStages(_, positions) {
     try {
       await KanbanAPI.reorderStages(positions);
       // The positions should already be updated in the UI

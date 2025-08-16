@@ -12,6 +12,7 @@ import Icon from 'dashboard/components-next/icon/Icon.vue';
 import InboxName from 'dashboard/components/widgets/InboxName.vue';
 import { conversationUrl } from 'dashboard/helper/URLHelper.js';
 import { useMapGetter } from 'dashboard/composables/store.js';
+import ConversationModal from './ConversationModal.vue';
 
 const store = useStore();
 const router = useRouter();
@@ -36,6 +37,15 @@ const selectedInbox = ref(null);
 const selectedAssignee = ref(null);
 const selectedLabels = ref([]);
 const dateRange = ref({ start: null, end: null });
+
+// Scroll refs
+const stagesContainer = ref(null);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
+
+// Modal refs
+const showConversationModal = ref(false);
+const selectedConversation = ref(null);
 
 const hasActiveFilters = computed(() =>
   Boolean((filters.value.q || '').trim()) ||
@@ -67,6 +77,12 @@ onMounted(() => {
   store.dispatch('inboxes/get');
   store.dispatch('agents/get');
   store.dispatch('labels/get');
+
+  // Setup scroll listeners
+  if (stagesContainer.value) {
+    stagesContainer.value.addEventListener('scroll', checkScrollButtons);
+    checkScrollButtons();
+  }
 });
 
 const updateFilters = () => {
@@ -104,6 +120,45 @@ const openConversation = (card) => {
     id: card.id,
   });
   router.push(`/app/${url}`);
+};
+
+// Modal functions
+const openConversationModal = (card) => {
+  selectedConversation.value = card;
+  showConversationModal.value = true;
+};
+
+const closeConversationModal = () => {
+  showConversationModal.value = false;
+  selectedConversation.value = null;
+};
+
+// Scroll functions
+const checkScrollButtons = () => {
+  if (stagesContainer.value) {
+    const container = stagesContainer.value;
+    canScrollLeft.value = container.scrollLeft > 0;
+    canScrollRight.value =
+      container.scrollLeft < container.scrollWidth - container.clientWidth;
+  }
+};
+
+const scrollLeft = () => {
+  if (stagesContainer.value) {
+    stagesContainer.value.scrollBy({
+      left: -320, // Width of one stage
+      behavior: 'smooth'
+    });
+  }
+};
+
+const scrollRight = () => {
+  if (stagesContainer.value) {
+    stagesContainer.value.scrollBy({
+      left: 320, // Width of one stage
+      behavior: 'smooth'
+    });
+  }
 };
 
 const onDragStart = (e, card, stageId) => {
@@ -292,8 +347,30 @@ const formatLastActivity = (timestamp) => {
       </div>
 
       <!-- Columns -->
-      <div class="flex-1 overflow-x-auto overflow-y-hidden">
-        <div class="flex gap-4 p-4 min-h-full snap-x snap-mandatory">
+      <div class="flex-1 overflow-hidden relative">
+        <!-- Scroll Left Button -->
+        <button
+          v-show="canScrollLeft"
+          @click="scrollLeft"
+          class="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-n-background border border-n-weak rounded-full p-2 shadow-lg hover:bg-n-alpha-2 transition-colors"
+        >
+          <Icon icon="i-lucide-chevron-left" class="size-5 text-n-slate-12" />
+        </button>
+
+        <!-- Scroll Right Button -->
+        <button
+          v-show="canScrollRight"
+          @click="scrollRight"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 bg-n-background border border-n-weak rounded-full p-2 shadow-lg hover:bg-n-alpha-2 transition-colors"
+        >
+          <Icon icon="i-lucide-chevron-right" class="size-5 text-n-slate-12" />
+        </button>
+
+        <div
+          ref="stagesContainer"
+          class="flex gap-4 p-4 min-h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth"
+          @scroll="checkScrollButtons"
+        >
           <section
             v-for="stage in stages"
             :key="stage.id"
@@ -336,11 +413,14 @@ const formatLastActivity = (timestamp) => {
                 :aria-grabbed="draggingCardId === card.id ? 'true' : 'false'"
                 @dragstart="e => onDragStart(e, card, stage.id)"
                 @dragend="onDragEnd"
+                @click="openConversationModal(card)"
               >
                 <!-- Open Conversation Button -->
                 <button
                   class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-n-brand text-white rounded-full p-1 hover:bg-n-brand-dark z-10"
-                  @click.stop="openConversation(card)"
+                  @click.stop="
+                  openConversation(card)
+                "
                   :title="$t('KANBAN.BOARD.OPEN_CONVERSATION')"
                 >
                   <Icon icon="i-lucide-external-link" class="size-3" />
@@ -471,6 +551,13 @@ const formatLastActivity = (timestamp) => {
         </div>
       </div>
     </div>
+
+    <!-- Conversation Modal -->
+    <ConversationModal
+      :show="showConversationModal"
+      :conversation="selectedConversation"
+      @close="closeConversationModal"
+    />
   </FeatureToggle>
 </template>
 
@@ -620,5 +707,44 @@ select[multiple] {
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
+}
+
+/* Horizontal scroll styles */
+.snap-x {
+  scroll-snap-type: x mandatory;
+}
+
+.snap-start {
+  scroll-snap-align: start;
+}
+
+/* Hide scrollbar but keep functionality */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: rgb(var(--n-slate-2));
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgb(var(--n-slate-6));
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--n-slate-8));
+}
+
+/* Scroll button styles */
+.scroll-button {
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.scroll-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 </style>
