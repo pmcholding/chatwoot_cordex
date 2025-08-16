@@ -122,6 +122,14 @@ Rails.application.routes.draw do
               resource :participants, only: [:show, :create, :update, :destroy]
               resource :direct_uploads, only: [:create]
               resource :draft_messages, only: [:show, :update, :destroy]
+              resource :kanban, only: [], controller: 'kanban' do
+                member do
+                  patch :move
+                end
+                collection do
+                  patch :bulk_move
+                end
+              end
             end
             member do
               post :mute
@@ -135,6 +143,13 @@ Rails.application.routes.draw do
               post :custom_attributes
               get :attachments
               get :inbox_assistant
+            end
+          end
+
+          resources :kanban_stages do
+            collection do
+              patch :reorder
+              get :board_data
             end
           end
 

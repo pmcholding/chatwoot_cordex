@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_15_013110) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_16_022637) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -61,6 +61,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_15_013110) do
     t.integer "status", default: 0
     t.jsonb "internal_attributes", default: {}, null: false
     t.jsonb "settings", default: {}
+    t.jsonb "features_enabled", default: {}
+    t.index ["features_enabled"], name: "idx_accounts_features_enabled_gin", using: :gin
     t.index ["status"], name: "index_accounts_on_status"
   end
 
@@ -669,9 +671,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_15_013110) do
     t.bigint "sla_policy_id"
     t.datetime "waiting_since"
     t.text "cached_label_list"
+    t.bigint "kanban_stage_id"
     t.index ["account_id", "display_id"], name: "index_conversations_on_account_id_and_display_id", unique: true
     t.index ["account_id", "id"], name: "index_conversations_on_id_and_account_id"
     t.index ["account_id", "inbox_id", "status", "assignee_id"], name: "conv_acid_inbid_stat_asgnid_idx"
+    t.index ["account_id", "kanban_stage_id"], name: "idx_conversations_account_kanban_stage"
     t.index ["account_id"], name: "index_conversations_on_account_id"
     t.index ["assignee_id", "account_id"], name: "index_conversations_on_assignee_id_and_account_id"
     t.index ["campaign_id"], name: "index_conversations_on_campaign_id"
@@ -679,6 +683,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_15_013110) do
     t.index ["contact_inbox_id"], name: "index_conversations_on_contact_inbox_id"
     t.index ["first_reply_created_at"], name: "index_conversations_on_first_reply_created_at"
     t.index ["inbox_id"], name: "index_conversations_on_inbox_id"
+    t.index ["kanban_stage_id", "updated_at"], name: "idx_conversations_kanban_stage_updated", order: { updated_at: :desc }
     t.index ["priority"], name: "index_conversations_on_priority"
     t.index ["status", "account_id"], name: "index_conversations_on_status_and_account_id"
     t.index ["status", "priority"], name: "index_conversations_on_status_and_priority"
@@ -886,6 +891,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_15_013110) do
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.jsonb "settings", default: {}
+  end
+
+  create_table "kanban_stages", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "name", limit: 255, null: false
+    t.string "color", limit: 7, default: "#6366f1", null: false
+    t.integer "position", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "name"], name: "idx_kanban_stages_account_name_unique", unique: true
+    t.index ["account_id", "position"], name: "idx_kanban_stages_account_position"
+    t.index ["account_id", "position"], name: "idx_kanban_stages_account_position_unique", unique: true
+    t.check_constraint "\"position\" >= 1 AND \"position\" <= 20", name: "check_kanban_stages_position_range"
+    t.check_constraint "color::text ~ '^#[0-9A-Fa-f]{6}$'::text", name: "check_kanban_stages_color_format"
   end
 
   create_table "labels", force: :cascade do |t|
@@ -1266,7 +1285,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_15_013110) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "conversations", "kanban_stages", on_delete: :nullify
   add_foreign_key "inboxes", "portals"
+  add_foreign_key "kanban_stages", "accounts", on_delete: :cascade
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").
       after(:insert).

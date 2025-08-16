@@ -1,34 +1,110 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import FeatureToggle from 'dashboard/components/widgets/FeatureToggle.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
 import Avatar from 'next/avatar/Avatar.vue';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
-import ChannelIcon from 'dashboard/components-next/icon/ChannelIcon.vue';
+
 import InboxName from 'dashboard/components/widgets/InboxName.vue';
+import { conversationUrl } from 'dashboard/helper/URLHelper.js';
+import { useMapGetter } from 'dashboard/composables/store.js';
 
 const store = useStore();
+const router = useRouter();
 const stages = computed(() => store.getters['kanban/orderedStages']);
 const rawCardsForStage = stageId => store.getters['kanban/cardsForStage'](stageId);
 const loadingForStage = stageId => store.getters['kanban/loadingForStage'](stageId);
 const hasMoreForStage = stageId => store.getters['kanban/hasMoreForStage'](stageId);
 const filters = computed(() => store.getters['kanban/filters']);
 
+// Store getters
+const accountId = useMapGetter('getCurrentAccountId');
+const inboxesList = useMapGetter('inboxes/getInboxes');
+const agentsList = useMapGetter('agents/getAgents');
+const labelsList = useMapGetter('labels/getLabels');
+
 const draggingCardId = ref(null);
 const dragOverStageId = ref(null);
 const dragOverCardId = ref(null);
-const hasActiveFilters = computed(() => Boolean((filters.value.q || '').trim()));
+
+// Filter refs
+const selectedInbox = ref(null);
+const selectedAssignee = ref(null);
+const selectedLabels = ref([]);
+const dateRange = ref({ start: null, end: null });
+
+const hasActiveFilters = computed(() =>
+  Boolean((filters.value.q || '').trim()) ||
+  selectedInbox.value ||
+  selectedAssignee.value ||
+  selectedLabels.value.length > 0 ||
+  dateRange.value.start ||
+  dateRange.value.end
+);
 
 const clearAllFilters = () => {
-  store.dispatch('kanban/setFilter', { q: '' });
+  store.dispatch('kanban/setFilter', {
+    q: '',
+    inbox_id: null,
+    assignee_id: null,
+    label_ids: [],
+    created_after: null,
+    created_before: null
+  });
+  selectedInbox.value = null;
+  selectedAssignee.value = null;
+  selectedLabels.value = [];
+  dateRange.value = { start: null, end: null };
 };
 
 onMounted(() => {
   store.dispatch('kanban/fetchInitial');
+  // Load filter options
+  store.dispatch('inboxes/get');
+  store.dispatch('agents/get');
+  store.dispatch('labels/get');
 });
+
+const updateFilters = () => {
+  const newFilters = {
+    q: filters.value.q || '',
+    inbox_id: selectedInbox.value?.id || null,
+    assignee_id: selectedAssignee.value?.id || null,
+    label_ids: selectedLabels.value.map(l => l.id) || [],
+    created_after: dateRange.value.start || null,
+    created_before: dateRange.value.end || null,
+  };
+  store.dispatch('kanban/setFilter', newFilters);
+};
+
+// Filter functions
+const applyInboxFilter = (inbox) => {
+  selectedInbox.value = inbox;
+  updateFilters();
+};
+
+const applyAssigneeFilter = (assignee) => {
+  selectedAssignee.value = assignee;
+  updateFilters();
+};
+
+const applyLabelsFilter = (labels) => {
+  selectedLabels.value = labels;
+  updateFilters();
+};
+
+// Navigation function
+const openConversation = (card) => {
+  const url = conversationUrl({
+    accountId: accountId.value,
+    id: card.id,
+  });
+  router.push(`/app/${url}`);
+};
 
 const onDragStart = (e, card, stageId) => {
   draggingCardId.value = card.id;
@@ -171,10 +247,47 @@ const formatLastActivity = (timestamp) => {
           </template>
         </Input>
         <div class="hidden md:flex gap-2">
-          <NextButton xs variant="ghost" color="slate" :label="$t('KANBAN.BOARD.INBOX')" />
-          <NextButton xs variant="ghost" color="slate" :label="$t('KANBAN.BOARD.ASSIGNEE')" />
-          <NextButton xs variant="ghost" color="slate" :label="$t('KANBAN.BOARD.LABELS')" />
-          <NextButton xs variant="ghost" color="slate" :label="$t('KANBAN.BOARD.DATE_RANGE')" />
+          <!-- Inbox Filter -->
+          <div class="relative">
+            <select
+              v-model="selectedInbox"
+              class="px-3 py-1 text-xs border border-n-weak rounded-md bg-n-background text-n-slate-12 focus:outline-none focus:ring-2 focus:ring-n-brand"
+              @change="applyInboxFilter(selectedInbox)"
+            >
+              <option :value="null">{{ $t('KANBAN.BOARD.INBOX') }}</option>
+              <option v-for="inbox in inboxesList" :key="inbox.id" :value="inbox">
+                {{ inbox.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Assignee Filter -->
+          <div class="relative">
+            <select
+              v-model="selectedAssignee"
+              class="px-3 py-1 text-xs border border-n-weak rounded-md bg-n-background text-n-slate-12 focus:outline-none focus:ring-2 focus:ring-n-brand"
+              @change="applyAssigneeFilter(selectedAssignee)"
+            >
+              <option :value="null">{{ $t('KANBAN.BOARD.ASSIGNEE') }}</option>
+              <option v-for="agent in agentsList" :key="agent.id" :value="agent">
+                {{ agent.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Labels Filter -->
+          <div class="relative">
+            <select
+              v-model="selectedLabels"
+              multiple
+              class="px-3 py-1 text-xs border border-n-weak rounded-md bg-n-background text-n-slate-12 focus:outline-none focus:ring-2 focus:ring-n-brand"
+              @change="applyLabelsFilter(selectedLabels)"
+            >
+              <option v-for="label in labelsList" :key="label.id" :value="label">
+                {{ label.title }}
+              </option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -206,14 +319,14 @@ const formatLastActivity = (timestamp) => {
 
             <ul
               role="list"
-              class="flex-1 overflow-y-auto p-2 space-y-2 scroll-smooth"
+              class="flex-1 overflow-y-auto p-2 space-y-2 scroll-smooth max-h-[calc(100vh-280px)] scrollbar-thin scrollbar-thumb-n-slate-6 scrollbar-track-n-slate-2"
               @scroll="e => onColumnScroll(e, stage.id)"
             >
               <!-- Cards -->
               <li
                 v-for="card in filteredCards(stage.id)"
                 :key="card.id"
-                class="p-3 rounded-lg border border-n-weak bg-n-background cursor-grab group transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-n-brand/30"
+                class="p-3 rounded-lg border border-n-weak bg-n-background cursor-grab group transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-n-brand/30 relative"
                 :class="{
                   'opacity-50 scale-95 rotate-2 shadow-xl ring-2 ring-n-brand/50': draggingCardId === card.id,
                   'cursor-grabbing': draggingCardId === card.id
@@ -224,9 +337,18 @@ const formatLastActivity = (timestamp) => {
                 @dragstart="e => onDragStart(e, card, stage.id)"
                 @dragend="onDragEnd"
               >
+                <!-- Open Conversation Button -->
+                <button
+                  class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-n-brand text-white rounded-full p-1 hover:bg-n-brand-dark z-10"
+                  @click.stop="openConversation(card)"
+                  :title="$t('KANBAN.BOARD.OPEN_CONVERSATION')"
+                >
+                  <Icon icon="i-lucide-external-link" class="size-3" />
+                </button>
+
                 <div class="flex items-start gap-3">
                   <div class="relative">
-                    <Avatar :name="card.contact_name || card.title" :size="28" rounded-full class="mt-1" />
+                    <Avatar :name="card.contact_name || card.title" :size="32" rounded-full class="mt-1" />
                     <span
                       v-if="card.status === 'open'"
                       class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-n-teal-10 border-2 border-white rounded-full"
@@ -237,12 +359,31 @@ const formatLastActivity = (timestamp) => {
                       class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-n-amber-9 border-2 border-white rounded-full"
                       :title="$t('CONVERSATION.STATUS.PENDING')"
                     />
+                    <span
+                      v-else-if="card.status === 'resolved'"
+                      class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-n-green-10 border-2 border-white rounded-full"
+                      :title="$t('CONVERSATION.STATUS.RESOLVED')"
+                    />
                   </div>
                   <div class="min-w-0 flex-1">
+                    <!-- Header with name and unread count -->
                     <div class="flex items-start justify-between mb-1">
-                      <p class="text-sm font-medium truncate text-n-slate-12 leading-5">
-                        {{ card.contact_name || card.title }}
-                      </p>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium truncate text-n-slate-12 leading-5">
+                          {{ card.contact_name || card.title }}
+                        </p>
+                        <!-- Contact info -->
+                        <div class="flex items-center gap-2 mt-1">
+                          <span v-if="card.contact_phone" class="text-[10px] text-n-slate-10 flex items-center gap-1">
+                            <Icon icon="i-lucide-phone" class="size-3" />
+                            {{ card.contact_phone }}
+                          </span>
+                          <span v-if="card.contact_email" class="text-[10px] text-n-slate-10 flex items-center gap-1">
+                            <Icon icon="i-lucide-mail" class="size-3" />
+                            {{ card.contact_email }}
+                          </span>
+                        </div>
+                      </div>
                       <span
                         v-if="card.unread_count && card.unread_count > 0"
                         class="inline-flex items-center justify-center rounded-full bg-n-ruby-9 text-white text-[10px] px-1.5 py-0.5 font-medium ml-2 flex-shrink-0"
@@ -251,37 +392,43 @@ const formatLastActivity = (timestamp) => {
                         {{ card.unread_count }}
                       </span>
                     </div>
+
+                    <!-- Message preview -->
                     <p class="text-xs text-n-slate-11 truncate mb-2 leading-4 line-clamp-2">
                       {{ card.subject || card.last_message || card.title }}
                     </p>
-                    <div class="flex items-center justify-between h-6 gap-2">
-                      <div class="flex items-center flex-1 min-w-0 gap-1">
-                        <div class="flex gap-1">
-                          <span
-                            v-for="l in (card.labels || []).slice(0,2)"
-                            :key="l"
-                            class="px-1.5 py-0.5 rounded bg-n-slate-3 text-[10px] text-n-slate-11"
-                          >
-                            {{ l }}
-                          </span>
-                          <span
-                            v-if="(card.labels || []).length > 2"
-                            class="px-1.5 py-0.5 rounded bg-n-slate-3 text-n-slate-11 text-[10px]"
-                          >
-                            {{ `+${(card.labels || []).length - 2}` }}
-                          </span>
-                        </div>
-                        <div v-if="card.assignee" class="w-px h-3 rounded-sm bg-n-slate-4" />
+
+                    <!-- Labels -->
+                    <div v-if="card.labels && card.labels.length > 0" class="flex flex-wrap gap-1 mb-2">
+                      <span
+                        v-for="label in (card.labels || []).slice(0,3)"
+                        :key="label.id || label"
+                        class="px-1.5 py-0.5 rounded text-[10px] text-white"
+                        :style="{ backgroundColor: label.color || '#6366f1' }"
+                      >
+                        {{ label.title || label }}
+                      </span>
+                      <span
+                        v-if="(card.labels || []).length > 3"
+                        class="px-1.5 py-0.5 rounded bg-n-slate-3 text-n-slate-11 text-[10px]"
+                      >
+                        +{{ (card.labels || []).length - 3 }}
+                      </span>
+                    </div>
+
+                    <!-- Footer with assignee, inbox, and timestamp -->
+                    <div class="flex items-center justify-between text-[10px] text-n-slate-10">
+                      <div class="flex items-center gap-2 min-w-0 flex-1">
                         <div v-if="card.assignee" class="flex items-center gap-1">
-                          <Icon icon="i-lucide-user" class="size-3 text-n-slate-10" />
-                          <span class="text-[10px] text-n-slate-11 truncate">{{ card.assignee }}</span>
+                          <Icon icon="i-lucide-user" class="size-3" />
+                          <span class="truncate">{{ card.assignee.name || card.assignee }}</span>
                         </div>
-                        <div v-if="card.inbox" class="w-px h-3 rounded-sm bg-n-slate-4" />
-                        <InboxName v-if="card.inbox" :inbox="card.inbox" />
-                        <span class="text-xs text-n-slate-10 ml-auto">
-                          {{ formatLastActivity(card.updated_at) }}
-                        </span>
+                        <div v-if="card.assignee && card.inbox" class="w-px h-3 bg-n-slate-4" />
+                        <InboxName v-if="card.inbox" :inbox="card.inbox" class="text-[10px]" />
                       </div>
+                      <span class="text-[10px] text-n-slate-10 ml-2 flex-shrink-0">
+                        {{ formatLastActivity(card.updated_at) }}
+                      </span>
                     </div>
                   </div>
                   <Icon
@@ -331,6 +478,24 @@ const formatLastActivity = (timestamp) => {
 /* Smooth scrolling for columns */
 .scroll-smooth {
   scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-n-slate-6::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--n-slate-6));
+  border-radius: 4px;
+}
+
+.scrollbar-track-n-slate-2::-webkit-scrollbar-track {
+  background-color: rgb(var(--n-slate-2));
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
 }
 
 /* Enhanced drag and drop visual feedback */
@@ -398,6 +563,33 @@ const formatLastActivity = (timestamp) => {
   animation: pulse 2s ease-in-out infinite;
 }
 
+/* Filter dropdown styles */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+select[multiple] {
+  background-image: none;
+  padding-right: 0.75rem;
+  min-height: 2rem;
+}
+
+/* Open conversation button */
+.group:hover .absolute.top-2.right-2 {
+  opacity: 1;
+}
+
+/* Enhanced card hover effects */
+.group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+}
+
 /* Consistent spacing and typography */
 .kanban-card {
   font-size: 0.875rem;
@@ -419,5 +611,14 @@ const formatLastActivity = (timestamp) => {
   font-size: 0.625rem;
   line-height: 0.75rem;
   color: rgb(var(--n-slate-10));
+}
+
+/* Better spacing for card content */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
 }
 </style>

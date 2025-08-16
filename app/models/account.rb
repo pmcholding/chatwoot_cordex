@@ -7,6 +7,7 @@
 #  custom_attributes     :jsonb
 #  domain                :string(100)
 #  feature_flags         :bigint           default(0), not null
+#  features_enabled      :jsonb
 #  internal_attributes   :jsonb            not null
 #  limits                :jsonb
 #  locale                :integer          default("en")
@@ -19,7 +20,8 @@
 #
 # Indexes
 #
-#  index_accounts_on_status  (status)
+#  idx_accounts_features_enabled_gin  (features_enabled) USING gin
+#  index_accounts_on_status           (status)
 #
 
 class Account < ApplicationRecord
@@ -97,6 +99,7 @@ class Account < ApplicationRecord
   has_many :webhooks, dependent: :destroy_async
   has_many :whatsapp_channels, dependent: :destroy_async, class_name: '::Channel::Whatsapp'
   has_many :working_hours, dependent: :destroy_async
+  has_many :kanban_stages, dependent: :destroy_async
 
   has_one_attached :contacts_export
 

@@ -27,6 +27,12 @@
     },
     "UNREAD_MESSAGES": "Mensagens não lidas",
     "UNREAD_MESSAGE": "Mensagem não lida",
+    "UNREAD_COUNT": "{count} não lidas",
+    "STATUS": {
+      "OPEN": "Aberta",
+      "PENDING": "Pendente",
+      "RESOLVED": "Resolvida"
+    },
     "CLICK_HERE": "Clique aqui",
     "LOADING_INBOXES": "Carregando caixas de entrada",
     "LOADING_CONVERSATIONS": "Carregando conversas",

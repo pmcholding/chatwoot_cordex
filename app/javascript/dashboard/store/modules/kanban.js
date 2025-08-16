@@ -1,84 +1,157 @@
-const delay = ms => new Promise(resolve => { setTimeout(resolve, ms); });
-
-const mockStages = [
-  { id: 1, name: 'New', color: '#3b82f6', position: 1, count: 2 },
-  { id: 2, name: 'In Progress', color: '#f59e0b', position: 2, count: 1 },
-  { id: 3, name: 'Review', color: '#10b981', position: 3, count: 0 },
-  { id: 4, name: 'Resolved', color: '#6366f1', position: 4, count: 0 },
-];
-
-const mockCards = [
-  { id: 101, stage_id: 1, title: 'Welcome email follow-up', assignee: 'John', labels: ['priority'], updated_at: '2025-01-16T10:00:00Z' },
-  { id: 102, stage_id: 1, title: 'Bug: chat widget not loading', assignee: 'Jane', labels: ['bug'], updated_at: '2025-01-16T09:45:00Z' },
-  { id: 103, stage_id: 2, title: 'Feature: canned responses grouping', assignee: 'Alex', labels: ['feature'], updated_at: '2025-01-16T08:20:00Z' },
-];
+import KanbanAPI from '../../api/kanban';
 
 const state = {
   stages: [],
   cardsByStage: {}, // { [stageId]: { items: [], loading: false, hasMore: true } }
-  filters: { q: '' },
+  filters: {
+    q: '',
+    inbox_id: null,
+    assignee_id: null,
+    label_ids: [],
+    created_after: null,
+    created_before: null
+  },
   ui: { isLoading: false },
 };
 
 export const getters = {
-  orderedStages: $state => [...$state.stages].sort((a, b) => a.position - b.position),
-  cardsForStage: $state => stageId => $state.cardsByStage[stageId]?.items || [],
-  loadingForStage: $state => stageId => $state.cardsByStage[stageId]?.loading || false,
-  hasMoreForStage: $state => stageId => $state.cardsByStage[stageId]?.hasMore || false,
+  orderedStages: $state =>
+    [...$state.stages].sort((a, b) => a.position - b.position),
+  cardsForStage: $state => stageId =>
+    $state.cardsByStage[stageId]?.items || [],
+  loadingForStage: $state => stageId =>
+    $state.cardsByStage[stageId]?.loading || false,
+  hasMoreForStage: $state => stageId =>
+    $state.cardsByStage[stageId]?.hasMore || false,
   filters: $state => $state.filters,
 };
 
 export const actions = {
-  async fetchInitial({ commit }) {
+  async fetchInitial({ commit, state: currentState }) {
     commit('SET_LOADING', true);
-    await delay(200);
-    commit('SET_STAGES', mockStages);
-    // seed cards per stage
-    const grouped = mockStages.reduce((acc, s) => {
-      acc[s.id] = { items: [], loading: false, hasMore: true };
-      return acc;
-    }, {});
-    mockCards.forEach(c => grouped[c.stage_id].items.push(c));
-    commit('SET_ALL_CARDS', grouped);
-    commit('RECALC_COUNTS');
-    commit('SET_LOADING', false);
+    try {
+      const response = await KanbanAPI.getBoardData(currentState.filters);
+      const { stages, conversations_by_stage } = response.data;
+
+      commit('SET_STAGES', stages);
+
+      // Transform conversations_by_stage to match our store structure
+      const grouped = stages.reduce((acc, stage) => {
+        acc[stage.id] = {
+          items: conversations_by_stage[stage.id] || [],
+          loading: false,
+          hasMore: false,
+        };
+        return acc;
+      }, {});
+
+      // Add unassigned conversations
+      if (conversations_by_stage.unassigned) {
+        grouped.unassigned = {
+          items: conversations_by_stage.unassigned,
+          loading: false,
+          hasMore: false,
+        };
+      }
+
+      commit('SET_ALL_CARDS', grouped);
+      commit('RECALC_COUNTS');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching kanban data:', error);
+      // Fallback to empty state
+      commit('SET_STAGES', []);
+      commit('SET_ALL_CARDS', {});
+    } finally {
+      commit('SET_LOADING', false);
+    }
   },
 
-  async loadMore({ commit, getters: rootGetters }, { stageId }) {
-    if (!rootGetters.hasMoreForStage(stageId)) return;
-    commit('SET_STAGE_LOADING', { stageId, loading: true });
-    await delay(300);
-    // mock: stop after one extra batch
-    commit('SET_STAGE_HAS_MORE', { stageId, hasMore: false });
-    commit('SET_STAGE_LOADING', { stageId, loading: false });
+  async loadMore() {
+    // For now, we load all conversations at once, so no pagination needed
+    // This could be implemented later if needed
   },
 
-  async moveCard({ commit }, { cardId, fromStageId, toStageId, toIndex }) {
-    // optimistic update
-    commit('MOVE_CARD', { cardId, fromStageId, toStageId, toIndex });
-    commit('RECALC_COUNTS');
-    await delay(200);
-    // assume success; rollback logic could be added here if needed
+  async moveCard(
+    { commit },
+    { cardId, fromStageId, toStageId, toIndex }
+  ) {
+    try {
+      // Optimistic update
+      commit('MOVE_CARD', { cardId, fromStageId, toStageId, toIndex });
+      commit('RECALC_COUNTS');
+
+      // API call
+      await KanbanAPI.moveConversation(cardId, toStageId);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error moving conversation:', error);
+      // Rollback optimistic update
+      commit('MOVE_CARD', {
+        cardId,
+        fromStageId: toStageId,
+        toStageId: fromStageId,
+        toIndex: 0,
+      });
+      commit('RECALC_COUNTS');
+      throw error;
+    }
   },
 
-  async createStage({ commit }, { name, color }) {
-    await delay(150);
-    commit('ADD_STAGE', { name, color });
+  async createStage({ commit, dispatch }, { name, color }) {
+    try {
+      const response = await KanbanAPI.createStage({ name, color });
+      const newStage = response.data;
+      commit('ADD_STAGE', newStage);
+      return newStage;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error creating stage:', error);
+      throw error;
+    }
   },
 
   async updateStage({ commit }, { id, name, color }) {
-    await delay(150);
-    commit('EDIT_STAGE', { id, name, color });
+    try {
+      const response = await KanbanAPI.updateStage(id, { name, color });
+      const updatedStage = response.data;
+      commit('EDIT_STAGE', updatedStage);
+      return updatedStage;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error updating stage:', error);
+      throw error;
+    }
   },
 
   async deleteStage({ commit }, { id }) {
-    await delay(150);
-    commit('DELETE_STAGE', { id });
-    commit('RECALC_COUNTS');
+    try {
+      await KanbanAPI.deleteStage(id);
+      commit('DELETE_STAGE', { id });
+      commit('RECALC_COUNTS');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error deleting stage:', error);
+      throw error;
+    }
   },
 
-  setFilter({ commit }, payload) {
+  async reorderStages({ commit }, positions) {
+    try {
+      await KanbanAPI.reorderStages(positions);
+      // The positions should already be updated in the UI
+      // If needed, we could refetch the stages here
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error reordering stages:', error);
+      throw error;
+    }
+  },
+
+  async setFilter({ commit, dispatch }, payload) {
     commit('SET_FILTER', payload);
+    // Refetch data with new filters
+    await dispatch('fetchInitial');
   },
 };
 
@@ -104,25 +177,26 @@ export const mutations = {
     const idx = from.findIndex(c => c.id === cardId);
     if (idx === -1) return;
     const [card] = from.splice(idx, 1);
-    card.stage_id = toStageId;
+    card.kanban_stage_id = toStageId;
     if (typeof toIndex === 'number' && toIndex >= 0 && toIndex <= to.length) {
       to.splice(toIndex, 0, card);
     } else {
       to.push(card);
     }
   },
-  ADD_STAGE($state, { name, color }) {
-    const nextPos = ($state.stages.at(-1)?.position || 0) + 1;
-    const nextId = Math.max(0, ...$state.stages.map(s => s.id)) + 1;
-    const stage = { id: nextId, name, color, position: nextPos, count: 0 };
+  ADD_STAGE($state, stage) {
     $state.stages.push(stage);
-    $state.cardsByStage[nextId] = { items: [], loading: false, hasMore: true };
+    $state.cardsByStage[stage.id] = {
+      items: [],
+      loading: false,
+      hasMore: false,
+    };
   },
-  EDIT_STAGE($state, { id, name, color }) {
-    const stg = $state.stages.find(x => x.id === id);
-    if (!stg) return;
-    if (name) stg.name = name;
-    if (color) stg.color = color;
+  EDIT_STAGE($state, updatedStage) {
+    const idx = $state.stages.findIndex(s => s.id === updatedStage.id);
+    if (idx !== -1) {
+      $state.stages.splice(idx, 1, updatedStage);
+    }
   },
   DELETE_STAGE($state, { id }) {
     $state.stages = $state.stages.filter(s => s.id !== id);
@@ -146,4 +220,3 @@ export default {
   actions,
   mutations,
 };
-

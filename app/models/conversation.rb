@@ -26,12 +26,15 @@
 #  contact_inbox_id       :bigint
 #  display_id             :integer          not null
 #  inbox_id               :integer          not null
+#  kanban_stage_id        :bigint
 #  sla_policy_id          :bigint
 #  team_id                :bigint
 #
 # Indexes
 #
 #  conv_acid_inbid_stat_asgnid_idx                    (account_id,inbox_id,status,assignee_id)
+#  idx_conversations_account_kanban_stage             (account_id,kanban_stage_id)
+#  idx_conversations_kanban_stage_updated             (kanban_stage_id,updated_at DESC)
 #  index_conversations_on_account_id                  (account_id)
 #  index_conversations_on_account_id_and_display_id   (account_id,display_id) UNIQUE
 #  index_conversations_on_assignee_id_and_account_id  (assignee_id,account_id)
@@ -47,6 +50,10 @@
 #  index_conversations_on_team_id                     (team_id)
 #  index_conversations_on_uuid                        (uuid) UNIQUE
 #  index_conversations_on_waiting_since               (waiting_since)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (kanban_stage_id => kanban_stages.id) ON DELETE => nullify
 #
 
 class Conversation < ApplicationRecord
@@ -101,6 +108,7 @@ class Conversation < ApplicationRecord
   belongs_to :contact_inbox
   belongs_to :team, optional: true
   belongs_to :campaign, optional: true
+  belongs_to :kanban_stage, optional: true
 
   has_many :mentions, dependent: :destroy_async
   has_many :messages, dependent: :destroy_async, autosave: true
@@ -195,7 +203,96 @@ class Conversation < ApplicationRecord
     dispatcher_dispatch(CONVERSATION_UPDATED, previous_changes)
   end
 
+  # Kanban-related methods
+  def move_to_kanban_stage!(stage)
+    update!(kanban_stage: stage)
+    broadcast_kanban_move
+  end
+
+  def kanban_stage_name
+    kanban_stage&.name || 'Unassigned'
+  end
+
+  def kanban_stage_color
+    kanban_stage&.color || '#6b7280'
+  end
+
+  scope :kanban_ordered, -> { order(:updated_at => :desc) }
+  scope :for_kanban_stage, ->(stage_id) { where(kanban_stage_id: stage_id) }
+  scope :unassigned_kanban, -> { where(kanban_stage_id: nil) }
+
+  def self.kanban_board_data(account, filters = {})
+    stages = account.kanban_stages.ordered.includes(:conversations)
+
+    base_query = account.conversations
+                        .includes(:contact, :assignee, :inbox, :labels)
+                        .kanban_ordered
+
+    # Apply filters if provided
+    base_query = apply_kanban_filters(base_query, filters) if filters.present?
+
+    # Group conversations by stage
+    conversations_by_stage = base_query.group_by(&:kanban_stage_id)
+
+    # Add unassigned conversations
+    unassigned = conversations_by_stage.delete(nil) || []
+    conversations_by_stage['unassigned'] = unassigned
+
+    {
+      stages: stages,
+      conversations_by_stage: conversations_by_stage,
+      total_count: base_query.count
+    }
+  end
+
+  def self.apply_kanban_filters(query, filters)
+    # Text search
+    if filters[:q].present?
+      search_term = "%#{filters[:q]}%"
+      query = query.joins(:contact)
+                   .where(
+                     'display_id::text ILIKE ? OR contacts.name ILIKE ? OR contacts.phone_number ILIKE ? OR contacts.email ILIKE ?',
+                     search_term, search_term, search_term, search_term
+                   )
+    end
+
+    # Filter by assignee
+    query = query.where(assignee_id: filters[:assignee_id]) if filters[:assignee_id].present?
+
+    # Filter by inbox
+    query = query.where(inbox_id: filters[:inbox_id]) if filters[:inbox_id].present?
+
+    # Filter by status
+    query = query.where(status: filters[:status]) if filters[:status].present?
+
+    # Filter by labels
+    if filters[:label_ids].present? && filters[:label_ids].any?
+      query = query.joins(:label_taggings)
+                   .where(label_taggings: { tag_id: filters[:label_ids] })
+                   .distinct
+    end
+
+    # Filter by date range
+    if filters[:created_after].present?
+      query = query.where('conversations.created_at >= ?', filters[:created_after])
+    end
+
+    if filters[:created_before].present?
+      query = query.where('conversations.created_at <= ?', filters[:created_before])
+    end
+
+    query
+  end
+
   private
+
+  def broadcast_kanban_move
+    # TODO: Implement ActionCable broadcasting for real-time kanban updates
+    # ActionCable.server.broadcast(
+    #   "kanban_#{account_id}",
+    #   { type: 'conversation_moved', conversation: self }
+    # )
+  end
 
   def execute_after_update_commit_callbacks
     handle_resolved_status_change
@@ -308,6 +405,8 @@ class Conversation < ApplicationRecord
 
     self['additional_attributes']['referer'] = nil unless url_valid?(additional_attributes['referer'])
   end
+
+
 
   # creating db triggers
   trigger.before(:insert).for_each(:row) do

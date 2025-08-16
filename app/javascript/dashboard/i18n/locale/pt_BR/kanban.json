@@ -26,7 +26,8 @@
       "DATE_RANGE": "Período",
       "DRAG_HANDLE_LABEL": "Alça para arrastar",
       "LOAD_MORE": "Carregar mais",
-      "END_OF_LIST": "Não há mais conversas para carregar"
+      "END_OF_LIST": "Não há mais conversas para carregar",
+      "OPEN_CONVERSATION": "Abrir conversa"
     }
   }
 }
