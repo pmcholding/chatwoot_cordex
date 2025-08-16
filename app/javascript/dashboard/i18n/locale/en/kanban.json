@@ -9,6 +9,27 @@
       "FOOTER": "This view is behind a feature flag and will evolve in next iterations.",
       "BACK": "Back"
     }
+
+    ,
+    "SETTINGS": {
+      "TITLE": "Kanban Settings",
+      "CREATE": "Create Stage",
+      "EDIT": "Edit Stage",
+      "DELETE": "Delete"
+    },
+    "BOARD": {
+      "TITLE": "Kanban",
+      "SEARCH": "Search...",
+      "REFRESH": "Refresh",
+      "SETTINGS": "Settings",
+      "INBOX": "Inbox",
+      "ASSIGNEE": "Assignee",
+      "LABELS": "Labels",
+      "DATE_RANGE": "Date range",
+      "DRAG_HANDLE_LABEL": "Drag handle",
+      "LOAD_MORE": "Load more",
+      "END_OF_LIST": "No more conversations to load"
+    }
   }
 }
 

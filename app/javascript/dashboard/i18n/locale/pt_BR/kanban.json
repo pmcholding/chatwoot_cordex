@@ -8,6 +8,25 @@
       "BODY": "Placeholder do Kanban Board",
       "FOOTER": "Esta visualização está atrás de feature flag e servirá como base para os próximos incrementos.",
       "BACK": "Voltar"
+    },
+    "SETTINGS": {
+      "TITLE": "Configurações do Kanban",
+      "CREATE": "Criar estágio",
+      "EDIT": "Editar estágio",
+      "DELETE": "Excluir"
+    },
+    "BOARD": {
+      "TITLE": "Kanban",
+      "SEARCH": "Pesquisar...",
+      "REFRESH": "Atualizar",
+      "SETTINGS": "Configurações",
+      "INBOX": "Inbox",
+      "ASSIGNEE": "Responsável",
+      "LABELS": "Rótulos",
+      "DATE_RANGE": "Período",
+      "DRAG_HANDLE_LABEL": "Alça para arrastar",
+      "LOAD_MORE": "Carregar mais",
+      "END_OF_LIST": "Não há mais conversas para carregar"
     }
   }
 }

@@ -9,6 +9,25 @@
       "FOOTER": "Esta vista está detrás de un feature flag y evolucionará en las próximas iteraciones.",
       "BACK": "Volver"
     }
+  ,
+    "SETTINGS": {
+      "TITLE": "Configuración de Kanban",
+      "CREATE": "Crear etapa",
+      "EDIT": "Editar etapa",
+      "DELETE": "Eliminar"
+    },
+    "BOARD": {
+      "TITLE": "Kanban",
+      "SEARCH": "Buscar...",
+      "REFRESH": "Actualizar",
+      "SETTINGS": "Configuración",
+      "INBOX": "Bandeja",
+      "ASSIGNEE": "Asignado",
+      "LABELS": "Etiquetas",
+      "DATE_RANGE": "Rango de fechas",
+      "DRAG_HANDLE_LABEL": "Asa para arrastrar",
+      "LOAD_MORE": "Cargar más",
+      "END_OF_LIST": "No hay más conversaciones para cargar"
+    }
   }
 }
-

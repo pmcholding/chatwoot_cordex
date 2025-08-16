@@ -5,6 +5,7 @@
       "PLACEHOLDER": "Search",
       "EMPTY_STATE": "No results found"
     },
-    "CLOSE": "Close"
+    "CLOSE": "Close",
+    "LOADING": "Loading…"
   }
 }
