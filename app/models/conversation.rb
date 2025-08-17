@@ -229,7 +229,7 @@ class Conversation < ApplicationRecord
                         .kanban_ordered
 
     # Apply filters if provided
-    base_query = apply_kanban_filters(base_query, filters) if filters.present?
+    base_query = apply_kanban_filters(base_query, filters, account) if filters.present?
 
     # Group conversations by stage
     conversations_by_stage = base_query.group_by(&:kanban_stage_id)
@@ -245,7 +245,7 @@ class Conversation < ApplicationRecord
     }
   end
 
-  def self.apply_kanban_filters(query, filters)
+  def self.apply_kanban_filters(query, filters, account = nil)
     # Text search
     if filters[:q].present?
       search_term = "%#{filters[:q]}%"
@@ -267,19 +267,26 @@ class Conversation < ApplicationRecord
 
     # Filter by labels
     if filters[:label_ids].present? && filters[:label_ids].any?
-      query = query.joins(:label_taggings)
-                   .where(label_taggings: { tag_id: filters[:label_ids] })
+      label_scope = Label.where(id: filters[:label_ids])
+      label_scope = label_scope.where(account_id: account.id) if account.present?
+      label_titles = label_scope.pluck(:title)
+
+      return query.none unless label_titles.any?
+
+      # Filter conversations that are tagged with any of the selected label titles
+      query = query.joins("INNER JOIN taggings ON taggings.taggable_type = 'Conversation' AND taggings.taggable_id = conversations.id AND taggings.context = 'labels'")
+                   .joins('INNER JOIN tags ON tags.id = taggings.tag_id')
+                   .where(tags: { name: label_titles })
                    .distinct
+
+      # If provided label ids don't resolve to titles, return none
+
     end
 
     # Filter by date range
-    if filters[:created_after].present?
-      query = query.where('conversations.created_at >= ?', filters[:created_after])
-    end
+    query = query.where('conversations.created_at >= ?', filters[:created_after]) if filters[:created_after].present?
 
-    if filters[:created_before].present?
-      query = query.where('conversations.created_at <= ?', filters[:created_before])
-    end
+    query = query.where('conversations.created_at <= ?', filters[:created_before]) if filters[:created_before].present?
 
     query
   end
@@ -405,8 +412,6 @@ class Conversation < ApplicationRecord
 
     self['additional_attributes']['referer'] = nil unless url_valid?(additional_attributes['referer'])
   end
-
-
 
   # creating db triggers
   trigger.before(:insert).for_each(:row) do

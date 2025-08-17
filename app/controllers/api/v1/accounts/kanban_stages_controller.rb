@@ -175,7 +175,7 @@ class Api::V1::Accounts::KanbanStagesController < Api::V1::Accounts::BaseControl
           },
           status: conversation.status,
           priority: conversation.priority,
-          labels: conversation.labels.map do |label|
+          labels: Current.account.labels.where(title: conversation.cached_label_list_array).map do |label|
             {
               id: label.id,
               title: label.title,
