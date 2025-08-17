@@ -67,7 +67,22 @@
       "END_OF_LIST": "No more conversations to load",
       "CLEAR_FILTERS": "Clear filters",
       "FILTERS_ACTIVE": "Filters active",
-      "OPEN_CONVERSATION": "Open conversation"
+      "OPEN_CONVERSATION": "Open conversation",
+      "CHANGE_STAGE": "Change Stage",
+      "SELECT_STAGE": "Select stage",
+      "STAGE_CHANGED_SUCCESS": "Stage changed successfully",
+      "STAGE_CHANGED_ERROR": "Failed to change stage"
+    },
+    "STAGE": {
+      "TITLE": "Kanban Stage",
+      "UNASSIGNED": "Unassigned",
+      "SELECT_PLACEHOLDER": "Select stage",
+      "NO_RESULTS": "No stages found",
+      "INPUT_PLACEHOLDER": "Search stages..."
+    },
+    "CONVERSATION": {
+      "STAGE_CHANGED": "Conversation moved to {stage}",
+      "STAGE_CHANGE_ERROR": "Failed to change conversation stage"
     }
   }
 }

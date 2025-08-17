@@ -10,6 +10,8 @@ import { CONVERSATION_PRIORITY } from '../../../../shared/constants/messages';
 import { CONVERSATION_EVENTS } from '../../../helper/AnalyticsHelper/events';
 import { useTrack } from 'dashboard/composables';
 import NextButton from 'dashboard/components-next/button/Button.vue';
+import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import FeatureToggle from 'dashboard/components/widgets/FeatureToggle.vue';
 
 export default {
   components: {
@@ -17,6 +19,7 @@ export default {
     MultiselectDropdown,
     ConversationLabels,
     NextButton,
+    FeatureToggle,
   },
   props: {
     conversationId: {
@@ -32,6 +35,7 @@ export default {
   },
   data() {
     return {
+      FEATURE_FLAGS,
       priorityOptions: [
         {
           id: null,
@@ -66,6 +70,7 @@ export default {
       currentChat: 'getSelectedChat',
       currentUser: 'getCurrentUser',
       teams: 'teams/getTeams',
+      kanbanStages: 'kanban/orderedStages',
     }),
     hasAnAssignedTeam() {
       return !!this.currentChat?.meta?.team;
@@ -154,6 +159,59 @@ export default {
       }
       return false;
     },
+    kanbanStageOptions() {
+      return [
+        {
+          id: null,
+          name: this.$t('KANBAN.STAGE.UNASSIGNED'),
+          color: '#667085',
+          thumbnail: '',
+        },
+        ...this.kanbanStages.map(stage => ({
+          id: stage.id,
+          name: stage.name,
+          color: stage.color,
+          thumbnail: '',
+        })),
+      ];
+    },
+    assignedKanbanStage: {
+      get() {
+        const stageId = this.currentChat?.kanban_stage?.id;
+        const selectedStage = this.kanbanStageOptions.find(
+          stage => stage.id === stageId
+        );
+        return selectedStage || this.kanbanStageOptions[0];
+      },
+      set(stage) {
+        const conversationId = this.currentChat.id;
+        const stageId = stage ? stage.id : null;
+
+        this.$store
+          .dispatch('kanban/moveConversation', {
+            cardId: conversationId,
+            fromStageId: this.currentChat?.kanban_stage?.id,
+            toStageId: stageId,
+            toIndex: 0,
+          })
+          .then(() => {
+            useAlert(
+              this.$t('KANBAN.CONVERSATION.STAGE_CHANGED', {
+                stage: stage ? stage.name : this.$t('KANBAN.STAGE.UNASSIGNED'),
+              })
+            );
+          })
+          .catch(error => {
+            useAlert(this.$t('KANBAN.CONVERSATION.STAGE_CHANGE_ERROR'));
+            // eslint-disable-next-line no-console
+            console.error('Error changing kanban stage:', error);
+          });
+      },
+    },
+  },
+  mounted() {
+    // Load kanban stages when component mounts
+    this.$store.dispatch('kanban/fetchInitial');
   },
   methods: {
     onSelfAssign() {
@@ -201,6 +259,14 @@ export default {
         this.assignedPriority.id === selectedPriorityItem.id;
 
       this.assignedPriority = isSamePriority ? null : selectedPriorityItem;
+    },
+
+    onClickAssignKanbanStage(selectedStage) {
+      const isSameStage =
+        this.assignedKanbanStage &&
+        this.assignedKanbanStage.id === selectedStage.id;
+
+      this.assignedKanbanStage = isSameStage ? null : selectedStage;
     },
   },
 };
@@ -276,6 +342,39 @@ export default {
         @select="onClickAssignPriority"
       />
     </div>
+    <FeatureToggle :feature-key="FEATURE_FLAGS.KANBAN">
+      <div class="multiselect-wrap--small">
+        <ContactDetailsItem compact :title="$t('KANBAN.STAGE.TITLE')" />
+        <MultiselectDropdown
+          :options="kanbanStageOptions"
+          :selected-item="assignedKanbanStage"
+          :multiselector-title="$t('KANBAN.STAGE.TITLE')"
+          :multiselector-placeholder="$t('KANBAN.STAGE.SELECT_PLACEHOLDER')"
+          :no-search-result="$t('KANBAN.STAGE.NO_RESULTS')"
+          :input-placeholder="$t('KANBAN.STAGE.INPUT_PLACEHOLDER')"
+          @select="onClickAssignKanbanStage"
+        >
+          <template #item="{ option }">
+            <div class="flex items-center">
+              <div
+                class="w-3 h-3 rounded-full mr-2"
+                :style="{ backgroundColor: option.color }"
+              />
+              <span>{{ option.name }}</span>
+            </div>
+          </template>
+          <template #selected="{ option }">
+            <div class="flex items-center">
+              <div
+                class="w-3 h-3 rounded-full mr-2"
+                :style="{ backgroundColor: option.color }"
+              />
+              <span>{{ option.name }}</span>
+            </div>
+          </template>
+        </MultiselectDropdown>
+      </div>
+    </FeatureToggle>
     <ContactDetailsItem
       compact
       :title="$t('CONVERSATION_SIDEBAR.ACCORDION.CONVERSATION_LABELS')"

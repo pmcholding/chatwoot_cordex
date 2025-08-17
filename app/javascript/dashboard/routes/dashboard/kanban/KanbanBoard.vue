@@ -32,7 +32,6 @@ const filters = computed(() => store.getters['kanban/filters']);
 const accountId = useMapGetter('getCurrentAccountId');
 const inboxesList = useMapGetter('inboxes/getInboxes');
 const agentsList = useMapGetter('agents/getAgents');
-const labelsList = useMapGetter('labels/getLabels');
 
 const draggingCardId = ref(null);
 const dragOverStageId = ref(null);
@@ -69,13 +68,6 @@ const assigneeOptions = computed(() => [
     label: agent.name,
   })),
 ]);
-
-const labelOptions = computed(() =>
-  labelsList.value.map(label => ({
-    value: label.id,
-    label: label.title,
-  }))
-);
 
 const hasActiveFilters = computed(
   () =>
@@ -117,7 +109,6 @@ onMounted(() => {
   // Load filter options
   store.dispatch('inboxes/get');
   store.dispatch('agents/get');
-  store.dispatch('labels/get');
 
   // Setup scroll listeners
   if (stagesContainer.value) {
@@ -149,11 +140,6 @@ const onAssigneeChange = assigneeId => {
   updateFilters();
 };
 
-const onLabelsChange = labelIds => {
-  selectedLabels.value = Array.isArray(labelIds) ? labelIds : [];
-  updateFilters();
-};
-
 // Navigation function
 const openConversation = card => {
   const url = conversationUrl({
@@ -177,7 +163,7 @@ const closeConversationModal = () => {
 const scrollLeft = () => {
   if (stagesContainer.value) {
     stagesContainer.value.scrollBy({
-      left: -380, // Width of one stage + gap
+      left: -330, // Width of one stage + gap (300px + 30px gap)
       behavior: 'smooth',
     });
   }
@@ -186,7 +172,7 @@ const scrollLeft = () => {
 const scrollRight = () => {
   if (stagesContainer.value) {
     stagesContainer.value.scrollBy({
-      left: 380, // Width of one stage + gap
+      left: 330, // Width of one stage + gap (300px + 30px gap)
       behavior: 'smooth',
     });
   }
@@ -469,7 +455,7 @@ const formatLastActivity = timestamp => {
           <section
             v-for="stage in stages"
             :key="stage.id"
-            class="min-w-[350px] w-[350px] max-w-[350px] flex flex-col border border-n-weak rounded-xl bg-n-background/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0 hover:-translate-y-0.5"
+            class="min-w-[300px] w-[300px] max-w-[300px] flex flex-col border border-n-weak rounded-xl bg-n-background/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0 hover:-translate-y-0.5"
             :class="{
               'ring-2 ring-n-brand/60 shadow-lg scale-[1.02] bg-n-brand/5':
                 dragOverStageId === stage.id,
@@ -494,7 +480,9 @@ const formatLastActivity = timestamp => {
               </div>
               <span
                 class="text-xs text-n-slate-11 rounded-full px-2 py-0.5 bg-n-alpha-black2"
-                >{{ stage.count }}</span>
+              >
+                {{ stage.count }}
+              </span>
             </header>
 
             <ul
@@ -561,8 +549,11 @@ const formatLastActivity = timestamp => {
                         >
                           {{ card.contact_name || card.title }}
                         </p>
-                        <!-- Contact info -->
-                        <div class="flex items-center gap-2 mt-1">
+                        <!-- Contact info - coalesced phone/email -->
+                        <div
+                          v-if="card.contact_phone || card.contact_email"
+                          class="flex items-center gap-2 mt-1"
+                        >
                           <span
                             v-if="card.contact_phone"
                             class="text-[10px] text-n-slate-10 flex items-center gap-1"
@@ -571,7 +562,7 @@ const formatLastActivity = timestamp => {
                             {{ card.contact_phone }}
                           </span>
                           <span
-                            v-if="card.contact_email"
+                            v-else-if="card.contact_email"
                             class="text-[10px] text-n-slate-10 flex items-center gap-1"
                           >
                             <Icon icon="i-lucide-mail" class="size-3" />
