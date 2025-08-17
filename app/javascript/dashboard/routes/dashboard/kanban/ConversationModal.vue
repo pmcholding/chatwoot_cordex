@@ -18,16 +18,30 @@ const emit = defineEmits(['close']);
 
 const store = useStore();
 
+const ensureActiveChat = async conversationData => {
+  if (!conversationData || !conversationData.id) return;
+  try {
+    await store.dispatch('getConversation', conversationData.id);
+  } catch (e) {
+    // ignore
+  }
+  const conversationsList = store.getters.getAllConversations || [];
+  const fullConversation =
+    conversationsList.find(item => item.id === conversationData.id) ||
+    conversationData;
+  try {
+    await store.dispatch('setActiveChat', { data: fullConversation });
+  } catch (e) {
+    // ignore
+  }
+  store.dispatch('fetchAllAttachments', fullConversation.id);
+};
+
 watch(
   () => props.conversation,
-  newConversation => {
+  async newConversation => {
     if (newConversation) {
-      store.dispatch('setActiveChat', { data: newConversation });
-      store.dispatch('fetchPreviousMessages', {
-        conversationId: newConversation.id,
-        before: null,
-      });
-      store.dispatch('fetchAllAttachments', newConversation.id);
+      await ensureActiveChat(newConversation);
     } else {
       store.dispatch('clearSelectedState');
     }
@@ -36,12 +50,7 @@ watch(
 
 onMounted(() => {
   if (props.conversation) {
-    store.dispatch('setActiveChat', { data: props.conversation });
-    store.dispatch('fetchPreviousMessages', {
-      conversationId: props.conversation.id,
-      before: null,
-    });
-    store.dispatch('fetchAllAttachments', props.conversation.id);
+    ensureActiveChat(props.conversation);
   }
 });
 </script>

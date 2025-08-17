@@ -2,12 +2,14 @@
 import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import FeatureToggle from 'dashboard/components/widgets/FeatureToggle.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
 import Avatar from 'next/avatar/Avatar.vue';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
+import ComboBox from 'dashboard/components-next/combobox/ComboBox.vue';
 
 import InboxName from 'dashboard/components/widgets/InboxName.vue';
 import { conversationUrl } from 'dashboard/helper/URLHelper.js';
@@ -16,6 +18,7 @@ import ConversationModal from './ConversationModal.vue';
 
 const store = useStore();
 const router = useRouter();
+const { t } = useI18n();
 const stages = computed(() => store.getters['kanban/orderedStages']);
 const rawCardsForStage = stageId =>
   store.getters['kanban/cardsForStage'](stageId);
@@ -49,6 +52,30 @@ const canScrollRight = ref(false);
 // Modal refs
 const showConversationModal = ref(false);
 const selectedConversation = ref(null);
+
+// ComboBox options
+const inboxOptions = computed(() => [
+  { value: null, label: `All ${t('KANBAN.BOARD.INBOX')}s` },
+  ...inboxesList.value.map(inbox => ({
+    value: inbox.id,
+    label: inbox.name,
+  })),
+]);
+
+const assigneeOptions = computed(() => [
+  { value: null, label: `All ${t('KANBAN.BOARD.ASSIGNEE')}s` },
+  ...agentsList.value.map(agent => ({
+    value: agent.id,
+    label: agent.name,
+  })),
+]);
+
+const labelOptions = computed(() =>
+  labelsList.value.map(label => ({
+    value: label.id,
+    label: label.title,
+  }))
+);
 
 const hasActiveFilters = computed(
   () =>
@@ -102,9 +129,9 @@ onMounted(() => {
 const updateFilters = () => {
   const newFilters = {
     q: filters.value.q || '',
-    inbox_id: selectedInbox.value?.id || null,
-    assignee_id: selectedAssignee.value?.id || null,
-    label_ids: selectedLabels.value.map(l => l.id) || [],
+    inbox_id: selectedInbox.value || null,
+    assignee_id: selectedAssignee.value || null,
+    label_ids: selectedLabels.value || [],
     created_after: dateRange.value.start || null,
     created_before: dateRange.value.end || null,
   };
@@ -112,18 +139,18 @@ const updateFilters = () => {
 };
 
 // Filter functions
-const applyInboxFilter = inbox => {
-  selectedInbox.value = inbox;
+const onInboxChange = inboxId => {
+  selectedInbox.value = inboxId;
   updateFilters();
 };
 
-const applyAssigneeFilter = assignee => {
-  selectedAssignee.value = assignee;
+const onAssigneeChange = assigneeId => {
+  selectedAssignee.value = assigneeId;
   updateFilters();
 };
 
-const applyLabelsFilter = labels => {
-  selectedLabels.value = labels;
+const onLabelsChange = labelIds => {
+  selectedLabels.value = Array.isArray(labelIds) ? labelIds : [];
   updateFilters();
 };
 
@@ -303,17 +330,14 @@ const formatLastActivity = timestamp => {
             {{ $t('KANBAN.BOARD.TITLE') }}
           </h1>
           <div class="flex items-center gap-2 overflow-x-auto">
-            <!-- Active filter chips -->
-            <NextButton
+            <!-- Active filter indicators -->
+            <div
               v-if="hasActiveFilters"
-              xs
-              variant="faded"
-              color="slate"
-              :label="$t('KANBAN.BOARD.SEARCH') + ': ' + (filters.q || '')"
-              icon="i-lucide-x"
-              trailing-icon
-              @click="clearAllFilters"
-            />
+              class="flex items-center gap-1 text-xs text-n-slate-11"
+            >
+              <Icon icon="i-lucide-filter" class="size-3" />
+              <span>{{ $t('KANBAN.BOARD.FILTERS_ACTIVE') }}</span>
+            </div>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -341,78 +365,66 @@ const formatLastActivity = timestamp => {
 
       <!-- Secondary filter row - Fixed below header -->
       <div
-        class="border-b p-4 flex gap-3 items-center bg-n-background/95 backdrop-blur-sm z-20"
+        class="border-b border-n-weak bg-n-background/95 backdrop-blur-sm z-20"
       >
-        <Input
-          :model-value="filters.q"
-          :placeholder="$t('KANBAN.BOARD.SEARCH')"
-          class="w-72"
-          custom-input-class="!pl-9"
-          @update:model-value="
-            val => store.dispatch('kanban/setFilter', { q: val })
-          "
-        >
-          <template #prefix>
-            <div
-              class="pointer-events-none absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-n-slate-10"
-            >
-              <Icon icon="i-lucide-search" class="size-4" />
+        <div class="p-4">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-3">
+            <!-- Search Input -->
+            <div class="flex-1 min-w-0">
+              <Input
+                :model-value="filters.q"
+                :placeholder="$t('KANBAN.BOARD.SEARCH')"
+                class="w-full max-w-md"
+                custom-input-class="!pl-9"
+                @update:model-value="
+                  val => store.dispatch('kanban/setFilter', { q: val })
+                "
+              >
+                <template #prefix>
+                  <div
+                    class="pointer-events-none absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-n-slate-10"
+                  >
+                    <Icon icon="i-lucide-search" class="size-4" />
+                  </div>
+                </template>
+              </Input>
             </div>
-          </template>
-        </Input>
-        <div class="hidden md:flex gap-2">
-          <!-- Inbox Filter -->
-          <div class="relative">
-            <select
-              v-model="selectedInbox"
-              class="px-3 py-1 text-xs border border-n-weak rounded-md bg-n-background text-n-slate-12 focus:outline-none focus:ring-2 focus:ring-n-brand appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e')] bg-no-repeat bg-right-2 bg-[length:1.5em_1.5em] pr-10"
-              @change="applyInboxFilter(selectedInbox)"
-            >
-              <option :value="null">{{ $t('KANBAN.BOARD.INBOX') }}</option>
-              <option
-                v-for="inbox in inboxesList"
-                :key="inbox.id"
-                :value="inbox"
-              >
-                {{ inbox.name }}
-              </option>
-            </select>
-          </div>
 
-          <!-- Assignee Filter -->
-          <div class="relative">
-            <select
-              v-model="selectedAssignee"
-              class="px-3 py-1 text-xs border border-n-weak rounded-md bg-n-background text-n-slate-12 focus:outline-none focus:ring-2 focus:ring-n-brand appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e')] bg-no-repeat bg-right-2 bg-[length:1.5em_1.5em] pr-10"
-              @change="applyAssigneeFilter(selectedAssignee)"
-            >
-              <option :value="null">{{ $t('KANBAN.BOARD.ASSIGNEE') }}</option>
-              <option
-                v-for="agent in agentsList"
-                :key="agent.id"
-                :value="agent"
-              >
-                {{ agent.name }}
-              </option>
-            </select>
-          </div>
+            <!-- Filter Controls -->
+            <div class="flex flex-wrap gap-3 items-center">
+              <!-- Inbox Filter -->
+              <div class="min-w-[160px]">
+                <ComboBox
+                  :model-value="selectedInbox"
+                  :options="inboxOptions"
+                  :placeholder="$t('KANBAN.BOARD.INBOX')"
+                  class="w-full"
+                  @update:model-value="onInboxChange"
+                />
+              </div>
 
-          <!-- Labels Filter -->
-          <div class="relative">
-            <select
-              v-model="selectedLabels"
-              multiple
-              class="px-3 py-1 text-xs border border-n-weak rounded-md bg-n-background text-n-slate-12 focus:outline-none focus:ring-2 focus:ring-n-brand min-h-8"
-              @change="applyLabelsFilter(selectedLabels)"
-            >
-              <option
-                v-for="label in labelsList"
-                :key="label.id"
-                :value="label"
-              >
-                {{ label.title }}
-              </option>
-            </select>
+              <!-- Assignee Filter -->
+              <div class="min-w-[160px]">
+                <ComboBox
+                  :model-value="selectedAssignee"
+                  :options="assigneeOptions"
+                  :placeholder="$t('KANBAN.BOARD.ASSIGNEE')"
+                  class="w-full"
+                  @update:model-value="onAssigneeChange"
+                />
+              </div>
+
+              <!-- Clear Filters Button -->
+              <NextButton
+                v-if="hasActiveFilters"
+                size="sm"
+                variant="outline"
+                color="slate"
+                :label="$t('KANBAN.BOARD.CLEAR_FILTERS')"
+                icon="i-lucide-x"
+                @click="clearAllFilters"
+              />
+            </div>
           </div>
         </div>
       </div>

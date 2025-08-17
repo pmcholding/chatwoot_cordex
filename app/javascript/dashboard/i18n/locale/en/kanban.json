@@ -28,7 +28,10 @@
       "DATE_RANGE": "Date range",
       "DRAG_HANDLE_LABEL": "Drag handle",
       "LOAD_MORE": "Load more",
-      "END_OF_LIST": "No more conversations to load"
+      "END_OF_LIST": "No more conversations to load",
+      "CLEAR_FILTERS": "Clear filters",
+      "FILTERS_ACTIVE": "Filters active",
+      "OPEN_CONVERSATION": "Open conversation"
     }
   }
 }
