@@ -71,6 +71,16 @@ const clearAllFilters = () => {
   dateRange.value = { start: null, end: null };
 };
 
+// Scroll functions
+const checkScrollButtons = () => {
+  if (stagesContainer.value) {
+    const container = stagesContainer.value;
+    canScrollLeft.value = container.scrollLeft > 0;
+    canScrollRight.value =
+      container.scrollLeft < container.scrollWidth - container.clientWidth;
+  }
+};
+
 onMounted(() => {
   store.dispatch('kanban/fetchInitial');
   // Load filter options
@@ -133,20 +143,10 @@ const closeConversationModal = () => {
   selectedConversation.value = null;
 };
 
-// Scroll functions
-const checkScrollButtons = () => {
-  if (stagesContainer.value) {
-    const container = stagesContainer.value;
-    canScrollLeft.value = container.scrollLeft > 0;
-    canScrollRight.value =
-      container.scrollLeft < container.scrollWidth - container.clientWidth;
-  }
-};
-
 const scrollLeft = () => {
   if (stagesContainer.value) {
     stagesContainer.value.scrollBy({
-      left: -320, // Width of one stage
+      left: -380, // Width of one stage + gap
       behavior: 'smooth'
     });
   }
@@ -155,7 +155,7 @@ const scrollLeft = () => {
 const scrollRight = () => {
   if (stagesContainer.value) {
     stagesContainer.value.scrollBy({
-      left: 320, // Width of one stage
+      left: 380, // Width of one stage + gap
       behavior: 'smooth'
     });
   }
@@ -242,9 +242,9 @@ const formatLastActivity = (timestamp) => {
 
 <template>
   <FeatureToggle :feature-key="FEATURE_FLAGS.KANBAN">
-    <div class="flex flex-col h-full w-full overflow-hidden">
-      <!-- Header / Filter bar -->
-      <div class="flex items-center justify-between w-full gap-2 border-b px-3 h-12 border-n-weak flex-shrink-0">
+    <div class="flex flex-col h-screen w-screen fixed inset-0 overflow-hidden bg-n-background">
+      <!-- Header / Filter bar - Fixed at top -->
+      <div class="flex items-center justify-between w-full gap-2 border-b px-4 h-14 border-n-weak flex-shrink-0 bg-n-background/95 backdrop-blur-sm z-30 fixed top-0 left-0 right-0">
         <div class="flex items-center gap-4 min-w-0 flex-1">
           <h1 class="min-w-0 text-base font-medium truncate text-n-slate-12">
             {{ $t('KANBAN.BOARD.TITLE') }}
@@ -286,8 +286,8 @@ const formatLastActivity = (timestamp) => {
         </div>
       </div>
 
-      <!-- Secondary filter row -->
-      <div class="border-b p-3 flex gap-3 items-center bg-n-background">
+      <!-- Secondary filter row - Fixed below header -->
+      <div class="border-b p-4 flex gap-3 items-center bg-n-background/95 backdrop-blur-sm z-20 fixed top-14 left-0 right-0">
         <Input
           :model-value="filters.q"
           :placeholder="$t('KANBAN.BOARD.SEARCH')"
@@ -346,8 +346,8 @@ const formatLastActivity = (timestamp) => {
         </div>
       </div>
 
-      <!-- Columns -->
-      <div class="flex-1 overflow-hidden relative">
+      <!-- Columns Container - Scrollable area below fixed headers -->
+      <div class="pt-32 h-screen overflow-x-auto overflow-y-hidden relative bg-gradient-to-br from-n-background via-n-background to-n-alpha-2">
         <!-- Scroll Left Button -->
         <button
           v-show="canScrollLeft"
@@ -366,15 +366,19 @@ const formatLastActivity = (timestamp) => {
           <Icon icon="i-lucide-chevron-right" class="size-5 text-n-slate-12" />
         </button>
 
+        <!-- Scroll fade indicators -->
+        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-n-background/80 to-transparent z-10 pointer-events-none opacity-0 transition-opacity duration-300" :class="{ 'opacity-100': canScrollLeft }" />
+        <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-n-background/80 to-transparent z-10 pointer-events-none opacity-0 transition-opacity duration-300" :class="{ 'opacity-100': canScrollRight }" />
+
         <div
           ref="stagesContainer"
-          class="flex gap-4 p-4 min-h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth"
+          class="stages-container flex gap-6 p-6 h-full snap-x snap-mandatory scroll-smooth relative"
           @scroll="checkScrollButtons"
         >
           <section
             v-for="stage in stages"
             :key="stage.id"
-            class="min-w-[320px] max-w-[380px] flex flex-col border border-n-weak rounded-xl bg-n-alpha-black2 dark:bg-n-alpha-2 snap-start transition-all duration-200"
+            class="min-w-[350px] w-[350px] max-w-[350px] flex flex-col border border-n-weak rounded-xl bg-n-background/80 backdrop-blur-sm shadow-sm hover:shadow-md snap-start transition-all duration-200 flex-shrink-0"
             :class="{
               'ring-2 ring-n-brand/60 shadow-lg scale-[1.02] bg-n-brand/5': dragOverStageId === stage.id,
               'shadow-sm': dragOverStageId !== stage.id
@@ -396,7 +400,7 @@ const formatLastActivity = (timestamp) => {
 
             <ul
               role="list"
-              class="flex-1 overflow-y-auto p-2 space-y-2 scroll-smooth max-h-[calc(100vh-280px)] scrollbar-thin scrollbar-thumb-n-slate-6 scrollbar-track-n-slate-2"
+              class="flex-1 overflow-y-auto p-2 space-y-2 scroll-smooth max-h-[calc(100vh-200px)] scrollbar-thin scrollbar-thumb-n-slate-6 scrollbar-track-n-slate-2"
               @scroll="e => onColumnScroll(e, stage.id)"
             >
               <!-- Cards -->
@@ -709,7 +713,7 @@ select[multiple] {
   word-break: break-word;
 }
 
-/* Horizontal scroll styles */
+/* Horizontal scroll styles - Enhanced */
 .snap-x {
   scroll-snap-type: x mandatory;
 }
@@ -718,23 +722,21 @@ select[multiple] {
   scroll-snap-align: start;
 }
 
-/* Hide scrollbar but keep functionality */
-.overflow-x-auto::-webkit-scrollbar {
-  height: 8px;
+/* Stages container scroll behavior */
+.stages-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 3200px;
+  width: max-content;
 }
 
-.overflow-x-auto::-webkit-scrollbar-track {
-  background: rgb(var(--n-slate-2));
-  border-radius: 4px;
+/* Fade indicators */
+.scroll-fade-left {
+  background: linear-gradient(90deg, rgba(var(--n-background), 0.9), transparent);
 }
 
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background: rgb(var(--n-slate-6));
-  border-radius: 4px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--n-slate-8));
+.scroll-fade-right {
+  background: linear-gradient(270deg, rgba(var(--n-background), 0.9), transparent);
 }
 
 /* Scroll button styles */

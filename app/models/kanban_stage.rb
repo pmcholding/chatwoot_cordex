@@ -48,8 +48,12 @@ class KanbanStage < ApplicationRecord
     [
       { name: 'New', color: '#3b82f6', position: 1 },
       { name: 'In Progress', color: '#f59e0b', position: 2 },
-      { name: 'Waiting', color: '#8b5cf6', position: 3 },
-      { name: 'Resolved', color: '#10b981', position: 4 }
+      { name: 'Review', color: '#8b5cf6', position: 3 },
+      { name: 'Resolved', color: '#10b981', position: 4 },
+      { name: 'Closed', color: '#6b7280', position: 5 },
+      { name: 'Blocked', color: '#ef4444', position: 6 },
+      { name: 'Testing', color: '#06b6d4', position: 7 },
+      { name: 'Approved', color: '#84cc16', position: 8 }
     ].map { |attrs| account.kanban_stages.build(attrs) }
   end
 
