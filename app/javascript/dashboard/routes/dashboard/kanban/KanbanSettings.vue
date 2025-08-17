@@ -7,10 +7,9 @@ import { FEATURE_FLAGS } from 'dashboard/featureFlags';
   <FeatureToggle :feature-key="FEATURE_FLAGS.KANBAN">
     <div class="p-4 space-y-3">
       <h1 class="text-xl font-semibold">{{ $t('KANBAN.SETTINGS.TITLE') }}</h1>
-      <div class="text-sm text-gray-600">
-        Mock de configurações: aqui teremos lista de estágios, criação/edição/remoção e reorder.
-      </div>
+      <p class="text-sm text-gray-600">
+        {{ $t('KANBAN.SETTINGS.MOCK_TEXT') }}
+      </p>
     </div>
   </FeatureToggle>
 </template>
-

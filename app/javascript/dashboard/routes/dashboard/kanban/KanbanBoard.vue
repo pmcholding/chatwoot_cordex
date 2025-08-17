@@ -165,6 +165,35 @@ const scrollRight = () => {
   }
 };
 
+let scrollInterval = null;
+
+const handleDragOver = e => {
+  if (!stagesContainer.value) return;
+
+  const containerRect = stagesContainer.value.getBoundingClientRect();
+  const positionX = e.clientX;
+  const deadZone = 150; // 150px from the edges
+
+  // Stop any existing scroll interval
+  if (scrollInterval) {
+    clearInterval(scrollInterval);
+    scrollInterval = null;
+  }
+
+  // Scroll left
+  if (positionX < containerRect.left + deadZone) {
+    scrollInterval = setInterval(() => {
+      stagesContainer.value.scrollLeft -= 80; // Scroll speed
+    }, 100); // Scroll interval
+  }
+  // Scroll right
+  else if (positionX > containerRect.right - deadZone) {
+    scrollInterval = setInterval(() => {
+      stagesContainer.value.scrollLeft += 80; // Scroll speed
+    }, 100); // Scroll interval
+  }
+};
+
 const onDragStart = (e, card, stageId) => {
   draggingCardId.value = card.id;
   e.dataTransfer.setData('text/plain', String(card.id));
@@ -180,6 +209,10 @@ const onDragEnd = e => {
   dragOverStageId.value = null;
   dragOverCardId.value = null;
   e.target.style.opacity = '';
+  if (scrollInterval) {
+    clearInterval(scrollInterval);
+    scrollInterval = null;
+  }
 };
 
 const onDrop = (e, stageId) => {
@@ -203,6 +236,7 @@ const onDragOver = (e, stageId) => {
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
   dragOverStageId.value = stageId;
+  handleDragOver(e);
 };
 
 const onDragLeave = e => {
@@ -258,11 +292,11 @@ const formatLastActivity = timestamp => {
 <template>
   <FeatureToggle :feature-key="FEATURE_FLAGS.KANBAN">
     <div
-      class="flex flex-col h-screen w-screen fixed inset-0 overflow-hidden bg-n-background"
+      class="flex flex-col h-full w-full max-w-[calc(100vw-200px)] overflow-hidden bg-n-background"
     >
       <!-- Header / Filter bar - Fixed at top -->
       <div
-        class="flex items-center justify-between w-full gap-2 border-b px-4 h-14 border-n-weak flex-shrink-0 bg-n-background/95 backdrop-blur-sm z-30 fixed top-0 left-0 right-0"
+        class="flex items-center justify-between w-full gap-2 border-b px-4 h-14 border-n-weak flex-shrink-0 bg-n-background/95 backdrop-blur-sm z-30"
       >
         <div class="flex items-center gap-4 min-w-0 flex-1">
           <h1 class="min-w-0 text-base font-medium truncate text-n-slate-12">
@@ -307,7 +341,7 @@ const formatLastActivity = timestamp => {
 
       <!-- Secondary filter row - Fixed below header -->
       <div
-        class="border-b p-4 flex gap-3 items-center bg-n-background/95 backdrop-blur-sm z-20 fixed top-14 left-0 right-0"
+        class="border-b p-4 flex gap-3 items-center bg-n-background/95 backdrop-blur-sm z-20"
       >
         <Input
           :model-value="filters.q"
@@ -383,9 +417,9 @@ const formatLastActivity = timestamp => {
         </div>
       </div>
 
-      <!-- Columns Container - Scrollable area below fixed headers -->
+      <!-- Columns Container - Scrollable area below headers -->
       <div
-        class="pt-32 h-screen overflow-x-auto overflow-y-hidden relative bg-gradient-to-br from-n-background via-n-background to-n-alpha-2"
+        class="flex-1 h-full w-full overflow-x-hidden overflow-y-hidden relative bg-gradient-to-br from-n-background via-n-background to-n-alpha-2 max-w-full"
       >
         <!-- Scroll Left Button -->
         <button
@@ -417,7 +451,7 @@ const formatLastActivity = timestamp => {
 
         <div
           ref="stagesContainer"
-          class="stages-container flex gap-6 p-6 h-full scroll-smooth relative overflow-x-auto overflow-y-hidden min-w-[3200px] w-max"
+          class="stages-container flex gap-6 p-6 h-full w-full scroll-smooth relative overflow-x-auto overflow-y-hidden"
           @scroll="checkScrollButtons"
         >
           <section

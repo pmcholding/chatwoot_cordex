@@ -9,7 +9,7 @@ const state = {
     assignee_id: null,
     label_ids: [],
     created_after: null,
-    created_before: null
+    created_before: null,
   },
   ui: { isLoading: false },
 };
@@ -17,8 +17,7 @@ const state = {
 export const getters = {
   orderedStages: $state =>
     [...$state.stages].sort((a, b) => a.position - b.position),
-  cardsForStage: $state => stageId =>
-    $state.cardsByStage[stageId]?.items || [],
+  cardsForStage: $state => stageId => $state.cardsByStage[stageId]?.items || [],
   loadingForStage: $state => stageId =>
     $state.cardsByStage[stageId]?.loading || false,
   hasMoreForStage: $state => stageId =>
@@ -72,10 +71,7 @@ export const actions = {
     // This could be implemented later if needed
   },
 
-  async moveCard(
-    { commit },
-    { cardId, fromStageId, toStageId, toIndex }
-  ) {
+  async moveCard({ commit }, { cardId, fromStageId, toStageId, toIndex }) {
     try {
       // Optimistic update
       commit('MOVE_CARD', { cardId, fromStageId, toStageId, toIndex });
