@@ -49,6 +49,16 @@ json.timestamp conversation.last_activity_at.to_i
 json.first_reply_created_at conversation.first_reply_created_at.to_i
 json.unread_count conversation.unread_incoming_messages.count
 json.last_non_activity_message conversation.messages.where(account_id: conversation.account_id).non_activity_messages.first.try(:push_event_data)
+
+# Kanban stage information to power sidebar stage selector
+json.kanban_stage_id conversation.kanban_stage_id
+if conversation.kanban_stage.present?
+  json.kanban_stage do
+    json.id conversation.kanban_stage.id
+    json.name conversation.kanban_stage.name
+    json.color conversation.kanban_stage.color
+  end
+end
 json.last_activity_at conversation.last_activity_at.to_i
 json.priority conversation.priority
 json.waiting_since conversation.waiting_since.to_i.to_i

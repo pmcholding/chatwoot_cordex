@@ -494,6 +494,28 @@ const actions = {
   setCurrentChatPriority({ commit }, { priority, conversationId }) {
     commit(types.ASSIGN_PRIORITY, { priority, conversationId });
   },
+  updateConversationKanbanStage: async (
+    { dispatch },
+    { conversationId, stageId }
+  ) => {
+    await ConversationApi.updateKanbanStage({
+      conversationId,
+      stageId,
+    });
+    dispatch('setCurrentChatKanbanStage', {
+      stageId,
+      conversationId,
+    });
+  },
+  setCurrentChatKanbanStage(
+    { commit, rootGetters },
+    { stageId, conversationId }
+  ) {
+    // Get the full stage data from kanban store
+    const kanbanStages = rootGetters['kanban/orderedStages'] || [];
+    const stage = stageId ? kanbanStages.find(s => s.id === stageId) : null;
+    commit(types.ASSIGN_KANBAN_STAGE, { stageId, stage, conversationId });
+  },
 
   setContextMenuChatId({ commit }, chatId) {
     commit(types.SET_CONTEXT_MENU_CHAT_ID, chatId);

@@ -177,7 +177,9 @@ export default {
     },
     assignedKanbanStage: {
       get() {
-        const stageId = this.currentChat?.kanban_stage?.id;
+        const stageId =
+          this.currentChat?.kanban_stage?.id ||
+          this.currentChat?.kanban_stage_id;
         const selectedStage = this.kanbanStageOptions.find(
           stage => stage.id === stageId
         );
@@ -187,12 +189,11 @@ export default {
         const conversationId = this.currentChat.id;
         const stageId = stage ? stage.id : null;
 
+        // Update conversation stage via API
         this.$store
-          .dispatch('kanban/moveConversation', {
-            cardId: conversationId,
-            fromStageId: this.currentChat?.kanban_stage?.id,
-            toStageId: stageId,
-            toIndex: 0,
+          .dispatch('updateConversationKanbanStage', {
+            conversationId,
+            stageId,
           })
           .then(() => {
             useAlert(
