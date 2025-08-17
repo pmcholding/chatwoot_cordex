@@ -4,8 +4,8 @@ import { useStore } from 'vuex';
 import { useAlert } from 'dashboard/composables';
 import FeatureToggle from 'dashboard/components/widgets/FeatureToggle.vue';
 import SettingsSection from 'dashboard/components/SettingsSection.vue';
-import SettingIntroBanner from 'dashboard/components/widgets/SettingIntroBanner.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
+import BackButton from 'dashboard/components/widgets/BackButton.vue';
 import wootModal from 'dashboard/components/Modal.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import { useI18n } from 'vue-i18n';
@@ -213,19 +213,30 @@ onMounted(() => {
 
 <template>
   <FeatureToggle :feature-key="FEATURE_FLAGS.KANBAN">
-    <div class="flex flex-col h-screen w-full min-w-0 settings">
-      <SettingIntroBanner
-        header-image=""
-        :header-title="t('KANBAN.SETTINGS.TITLE')"
-      >
-        <p class="text-n-slate-11 text-sm">
-          {{ t('KANBAN.SETTINGS.SUBTITLE') }}
-        </p>
-      </SettingIntroBanner>
+    <div class="flex flex-col h-screen w-full min-w-0">
+      <!-- Header Section -->
+      <section class="flex flex-col gap-1 pt-10 pb-5 px-8">
+        <div>
+          <BackButton compact />
+        </div>
+        <div class="flex justify-between w-full gap-5">
+          <div class="flex flex-col gap-2">
+            <div>
+              <span class="text-xl font-medium text-n-slate-12">
+                {{ t('KANBAN.SETTINGS.TITLE') }}
+              </span>
+              <p class="text-n-slate-11 text-sm mt-2">
+                {{ t('KANBAN.SETTINGS.SUBTITLE') }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <section class="flex-1 overflow-y-auto mx-auto w-full max-w-6xl">
-        <!-- Stages Management Section -->
-        <div class="mx-8">
+      <!-- Content Section -->
+      <section class="flex-1 overflow-y-auto px-8">
+        <div class="flex flex-col gap-3">
+          <!-- Stages Management Section -->
           <SettingsSection
             :title="t('KANBAN.SETTINGS.STAGES.TITLE')"
             :sub-title="t('KANBAN.SETTINGS.STAGES.SUBTITLE')"

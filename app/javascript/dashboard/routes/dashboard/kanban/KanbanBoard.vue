@@ -350,7 +350,7 @@ const formatLastActivity = timestamp => {
             class="[&>.truncate]:hidden md:[&>.truncate]:block"
             @click="store.dispatch('kanban/fetchInitial')"
           />
-          <router-link :to="{ name: 'kanban_settings' }">
+          <router-link :to="{ name: 'kanban_settings_index' }">
             <NextButton
               :label="$t('KANBAN.BOARD.SETTINGS')"
               icon="i-lucide-sliders-horizontal"

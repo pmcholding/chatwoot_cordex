@@ -502,6 +502,12 @@ const menuItems = computed(() => {
           icon: 'i-lucide-credit-card',
           to: accountScopedRoute('billing_settings_index'),
         },
+        {
+          name: 'Settings Kanban',
+          label: t('SIDEBAR.KANBAN'),
+          icon: 'i-lucide-kanban-square',
+          to: accountScopedRoute('kanban_settings_index'),
+        },
       ],
     },
   ];
