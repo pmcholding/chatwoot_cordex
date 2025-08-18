@@ -161,6 +161,7 @@ class Api::V1::Accounts::KanbanStagesController < Api::V1::Accounts::BaseControl
           contact_name: conversation.contact.name,
           contact_phone: conversation.contact.phone_number,
           contact_email: conversation.contact.email,
+          contact_avatar: conversation.contact.avatar_url,
           assignee: if conversation.assignee
                       {
                         id: conversation.assignee.id,

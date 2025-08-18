@@ -519,6 +519,7 @@ const formatLastActivity = timestamp => {
                 <div class="flex items-start gap-3">
                   <div class="relative">
                     <Avatar
+                      :src="card.contact_avatar"
                       :name="card.contact_name || card.title"
                       :size="32"
                       rounded-full
