@@ -153,7 +153,7 @@ class Api::V1::Accounts::KanbanStagesController < Api::V1::Accounts::BaseControl
         last_message = conversation.messages.order(:created_at).last
 
         {
-          id: conversation.id,
+          id: conversation.display_id,
           display_id: conversation.display_id,
           title: last_message&.content || "Conversation ##{conversation.display_id}",
           subject: last_message&.content,
