@@ -4,7 +4,7 @@ class Api::V1::Accounts::Conversations::KanbanController < Api::V1::Accounts::Co
   # Move conversation to a different kanban stage
   def move
     stage_id = params[:kanban_stage_id]
-    
+
     if stage_id.present?
       stage = Current.account.kanban_stages.find(stage_id)
       @conversation.move_to_kanban_stage!(stage)
@@ -14,7 +14,7 @@ class Api::V1::Accounts::Conversations::KanbanController < Api::V1::Accounts::Co
     end
 
     render json: {
-      id: @conversation.id,
+      id: @conversation.display_id,
       display_id: @conversation.display_id,
       kanban_stage_id: @conversation.kanban_stage_id,
       kanban_stage_name: @conversation.kanban_stage_name,
@@ -30,9 +30,9 @@ class Api::V1::Accounts::Conversations::KanbanController < Api::V1::Accounts::Co
   def bulk_move
     conversation_ids = params[:conversation_ids]
     stage_id = params[:kanban_stage_id]
-    
-    conversations = Current.account.conversations.where(id: conversation_ids)
-    
+
+    conversations = Current.account.conversations.where(display_id: conversation_ids)
+
     if stage_id.present?
       stage = Current.account.kanban_stages.find(stage_id)
       conversations.update_all(kanban_stage_id: stage.id)
@@ -53,7 +53,7 @@ class Api::V1::Accounts::Conversations::KanbanController < Api::V1::Accounts::Co
   private
 
   def set_conversation
-    @conversation = Current.account.conversations.find(params[:conversation_id])
+    @conversation = Current.account.conversations.find_by!(display_id: params[:conversation_id])
     authorize @conversation.inbox, :show?
   end
 end
