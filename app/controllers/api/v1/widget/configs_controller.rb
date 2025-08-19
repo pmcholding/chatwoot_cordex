@@ -9,7 +9,8 @@ class Api::V1::Widget::ConfigsController < Api::V1::Widget::BaseController
   private
 
   def set_global_config
-    @global_config = GlobalConfig.get('LOGO_THUMBNAIL', 'BRAND_NAME', 'WIDGET_BRAND_URL')
+    @global_config = GlobalConfig.get('LOGO_THUMBNAIL', 'BRAND_NAME', 'WIDGET_BRAND_URL', 'INSTALLATION_NAME')
+    @global_config['INSTALLATION_NAME'] ||= ENV.fetch('INSTALLATION_NAME', 'Cordex')
   end
 
   def set_contact

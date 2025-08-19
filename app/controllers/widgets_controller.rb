@@ -14,7 +14,9 @@ class WidgetsController < ActionController::Base
   private
 
   def set_global_config
-    @global_config = GlobalConfig.get('LOGO_THUMBNAIL', 'BRAND_NAME', 'WIDGET_BRAND_URL', 'DIRECT_UPLOADS_ENABLED')
+    @global_config = GlobalConfig.get('LOGO_THUMBNAIL', 'BRAND_NAME', 'WIDGET_BRAND_URL', 'DIRECT_UPLOADS_ENABLED', 'INSTALLATION_NAME')
+    # Ensure installation name is available for Branding.vue replacement
+    @global_config['INSTALLATION_NAME'] ||= ENV.fetch('INSTALLATION_NAME', 'Cordex')
   end
 
   def set_web_widget

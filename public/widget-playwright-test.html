@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Chatwoot Widget Playwright Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <h1>Chatwoot Widget Playwright Test</h1>
+  <p>Carregando widget...</p>
+  <script>
+    (function(d,t) {
+      var BASE_URL = "https://app.cordex.ai";
+      var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      // add cache-busting to avoid stale CDN/browser cache
+      g.src = BASE_URL + "/packs/js/sdk.js?v=" + Date.now();
+      g.async = true;
+      s.parentNode.insertBefore(g,s);
+      g.onload = function(){
+        window.chatwootSDK.run({
+          websiteToken: 'e87gAuixx9QUJUjeCF7BiahG',
+          baseUrl: BASE_URL
+        })
+      }
+    })(document,"script");
+  </script>
+</body>
+</html>
+

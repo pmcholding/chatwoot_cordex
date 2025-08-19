@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Chatwoot Widget Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 24px; }
+    pre { background: #f6f8fa; padding: 12px; border-radius: 8px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>Chatwoot Widget Test</h1>
+  <p>Este arquivo testa o widget usando o SDK em produção e o token informado.</p>
+
+  <pre id="log"></pre>
+  <script>
+    (function(d,t) {
+      var BASE_URL = "https://app.cordex.ai";
+      var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      g.src = BASE_URL + "/packs/js/sdk.js";
+      g.async = true;
+      s.parentNode.insertBefore(g, s);
+      g.onload = function() {
+        window.chatwootSDK.run({
+          websiteToken: 'e87gAuixx9QUJUjeCF7BiahG',
+          baseUrl: BASE_URL
+        });
+      };
+    })(document, "script");
+
+    function log(msg) {
+      var el = document.getElementById('log');
+      el.textContent += msg + "\n";
+      console.log(msg);
+    }
+
+    window.addEventListener('chatwoot:ready', function() {
+      log('EVENT chatwoot:ready');
+    });
+    window.addEventListener('chatwoot:opened', function() {
+      log('EVENT chatwoot:opened');
+    });
+    window.addEventListener('chatwoot:closed', function() {
+      log('EVENT chatwoot:closed');
+    });
+    window.addEventListener('chatwoot:error', function(e) {
+      log('EVENT chatwoot:error ' + JSON.stringify(e.detail || {}));
+    });
+  </script>
+</body>
+</html>
+

@@ -52,23 +52,22 @@ const updateCampaignReadStatus = baseDomain => {
 
 const sanitizeURL = url => {
   if (url === '') return '';
-
   try {
     // any invalid url will not be accepted
     // example - JaVaScRiP%0at:alert(document.domain)"
     // this has an obfuscated javascript protocol
     const parsedURL = new URL(url);
-
     // filter out dangerous protocols like `javascript`, `data`, `vbscript`
-    if (!['https', 'http'].includes(parsedURL.protocol)) {
+    if (!['https:', 'http:'].includes(parsedURL.protocol)) {
       throw new Error('Invalid Protocol');
     }
+    // return the safe origin so downstream code can build absolute URLs
+    return parsedURL.origin;
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('Invalid URL', e);
+    return 'about:blank';
   }
-
-  return 'about:blank'; // blank page URL
 };
 
 export const IFrameHelper = {
@@ -124,10 +123,20 @@ export const IFrameHelper = {
   },
   initPostMessageCommunication: () => {
     window.onmessage = e => {
+      const expectedOrigin = (() => {
+        try {
+          const baseUrl = window.$chatwoot?.baseUrl || '';
+          const sanitized = sanitizeURL(baseUrl);
+          return sanitized || window.location.origin;
+        } catch (_e) {
+          return window.location.origin;
+        }
+      })();
+
       if (
         typeof e.data !== 'string' ||
         e.data.indexOf('chatwoot-widget:') !== 0 ||
-        e.origin !== window.location.origin
+        e.origin !== expectedOrigin
       ) {
         return;
       }
