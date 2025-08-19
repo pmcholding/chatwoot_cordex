@@ -3,7 +3,7 @@ import { mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
 import router from 'dashboard/routes';
-import NextButton from 'shared/components/Button/NextButton.vue';
+import NextButton from 'dashboard/components-next/button/Button.vue';
 import { useAlert } from 'dashboard/composables';
 
 export default {
