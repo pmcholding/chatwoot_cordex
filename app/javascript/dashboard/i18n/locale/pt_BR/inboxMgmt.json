@@ -218,8 +218,8 @@
         }
       },
       "WHATSAPP": {
-        "TITLE": "Canal do WhatsApp",
-        "DESC": "Comece a oferecer suporte a seus clientes pelo WhatsApp.",
+        "TITLE": "Canal WABA",
+        "DESC": "Comece a oferecer suporte a seus clientes pelo WhatsApp Business API.",
         "PROVIDERS": {
           "LABEL": "Provedor de API",
           "WHATSAPP_EMBEDDED": "WhatsApp Business",
@@ -300,6 +300,23 @@
         },
         "API": {
           "ERROR_MESSAGE": "Não foi possível salvar o canal do WhatsApp"
+        }
+      },
+      "EVOLUTION_WHATSAPP": {
+        "TITLE": "WhatsApp Evolution API",
+        "DESC": "Conecte seu WhatsApp usando Evolution API com autenticação por código QR.",
+        "INBOX_NAME": {
+          "LABEL": "Nome da Caixa de Entrada",
+          "PLACEHOLDER": "Digite um nome para a caixa de entrada",
+          "ERROR": "Este campo é obrigatório"
+        },
+        "INFO": {
+          "TITLE": "Como funciona",
+          "DESC": "Após criar a caixa de entrada, você poderá conectar sua conta do WhatsApp usando escaneamento de código QR. Isso fornece uma conexão direta ao WhatsApp sem exigir verificação do Meta Business."
+        },
+        "SUBMIT_BUTTON": "Criar Canal WhatsApp",
+        "API": {
+          "ERROR_MESSAGE": "Não foi possível salvar o canal WhatsApp Evolution"
         }
       },
       "VOICE": {
@@ -550,6 +567,7 @@
     "TABS": {
       "SETTINGS": "Configurações",
       "COLLABORATORS": "Agentes",
+      "WHATSAPP_QR_CODE": "Código QR do WhatsApp",
       "CONFIGURATION": "Configuração",
       "CAMPAIGN": "Campanhas",
       "PRE_CHAT_FORM": "Formulário Chat Pré",
@@ -884,6 +902,70 @@
       "API": "Canal da API",
       "INSTAGRAM": "Instagram",
       "VOICE": "Voice"
+    },
+    "WHATSAPP_QR": {
+      "INITIALIZING": "Inicializando instância do WhatsApp...",
+      "CONNECTED": "WhatsApp Conectado",
+      "NOT_CONNECTED": "WhatsApp Não Conectado",
+      "INSTANCE_INFO": {
+        "TITLE": "Informações da Instância",
+        "SUBTITLE": "Detalhes sobre sua instância da Evolution API do WhatsApp"
+      },
+      "INSTANCE_NAME": "Nome da Instância",
+      "WEBHOOK_URL": "URL do Webhook",
+      "CONNECTION": {
+        "TITLE": "Conexão WhatsApp",
+        "SUBTITLE": "Conecte sua conta do WhatsApp usando QR Code ou número de telefone"
+      },
+      "CONNECT_QR": "Conectar com QR Code",
+      "CONNECT_PHONE": "Conectar com Número de Telefone",
+      "SCAN_QR": "Escanear QR Code",
+      "QR_INSTRUCTIONS": "Abra o WhatsApp no seu telefone, vá em Configurações > Aparelhos Conectados > Conectar um Aparelho, e escaneie este QR code.",
+      "SECONDS_LEFT": "segundos restantes",
+      "QR_EXPIRED": "QR Code expirou. Por favor, gere um novo.",
+      "PAIRING_CODE": "Código de Pareamento",
+      "PAIRING_INSTRUCTIONS": "Abra o WhatsApp no seu telefone, vá em Configurações > Aparelhos Conectados > Conectar um Aparelho > Conectar com número de telefone, e digite este código.",
+      "CONNECTED": {
+        "TITLE": "WhatsApp Conectado",
+        "SUBTITLE": "Sua conta do WhatsApp está conectada com sucesso",
+        "STATUS": "Conectado"
+      },
+      "DISCONNECT": "Desconectar",
+      "DISCONNECTED": "WhatsApp desconectado com sucesso",
+      "DISCONNECT_ERROR": "Falha ao desconectar WhatsApp",
+      "PHONE_MODAL": {
+        "TITLE": "Conectar com Número de Telefone",
+        "SUBTITLE": "Digite seu número de telefone para receber um código de pareamento",
+        "PHONE_NUMBER_LABEL": "Número de Telefone",
+        "PHONE_NUMBER_PLACEHOLDER": "Digite seu número de telefone",
+        "CONNECT": "Conectar",
+        "CANCEL": "Cancelar"
+      },
+      "QR_GENERATED": "QR Code gerado com sucesso",
+      "QR_ERROR": "Erro ao gerar QR Code",
+      "PAIRING_CODE_GENERATED": "Código de pareamento gerado com sucesso",
+      "PHONE_ERROR": "Erro ao conectar com número de telefone",
+      "SETTINGS": {
+        "TITLE": "Configurações",
+        "SUBTITLE": "Configure as opções do seu WhatsApp",
+        "CURRENT_STATUS": "Configurações Atuais da Instância",
+        "LOADED_FROM_INSTANCE": "Configurações carregadas da instância do WhatsApp",
+        "REJECT_CALL": "Rejeitar Chamadas",
+        "REJECT_CALL_DESC": "Rejeitar automaticamente chamadas recebidas",
+        "GROUPS_IGNORE": "Ignorar Grupos",
+        "GROUPS_IGNORE_DESC": "Ignorar mensagens de grupos",
+        "ALWAYS_ONLINE": "Sempre Online",
+        "ALWAYS_ONLINE_DESC": "Manter status sempre online",
+        "READ_MESSAGES": "Ler Mensagens",
+        "READ_MESSAGES_DESC": "Marcar mensagens como lidas automaticamente",
+        "READ_STATUS": "Status de Leitura",
+        "READ_STATUS_DESC": "Enviar confirmação de leitura",
+        "SYNC_FULL_HISTORY": "Sincronizar Histórico Completo",
+        "SYNC_FULL_HISTORY_DESC": "Sincronizar todo o histórico de mensagens",
+        "SAVE_SETTINGS": "Salvar Configurações"
+      },
+      "SETTINGS_SAVED": "Configurações salvas com sucesso",
+      "SETTINGS_ERROR": "Erro ao salvar configurações"
     }
   }
 }

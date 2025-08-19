@@ -218,8 +218,8 @@
         }
       },
       "WHATSAPP": {
-        "TITLE": "Canal de WhatsApp",
-        "DESC": "Comience a apoyar a sus clientes mediante WhatsApp.",
+        "TITLE": "Canal WABA",
+        "DESC": "Comience a apoyar a sus clientes mediante WhatsApp Business API.",
         "PROVIDERS": {
           "LABEL": "Proveedor de API",
           "WHATSAPP_EMBEDDED": "WhatsApp Business",
@@ -300,6 +300,23 @@
         },
         "API": {
           "ERROR_MESSAGE": "No pudimos guardar el canal de WhatsApp"
+        }
+      },
+      "EVOLUTION_WHATSAPP": {
+        "TITLE": "WhatsApp Evolution API",
+        "DESC": "Conecta tu WhatsApp usando Evolution API con autenticación por código QR.",
+        "INBOX_NAME": {
+          "LABEL": "Nombre de la Bandeja de Entrada",
+          "PLACEHOLDER": "Ingresa un nombre para la bandeja de entrada",
+          "ERROR": "Este campo es obligatorio"
+        },
+        "INFO": {
+          "TITLE": "Cómo funciona",
+          "DESC": "Después de crear la bandeja de entrada, podrás conectar tu cuenta de WhatsApp usando escaneo de código QR. Esto proporciona una conexión directa a WhatsApp sin requerir verificación de Meta Business."
+        },
+        "SUBMIT_BUTTON": "Crear Canal WhatsApp",
+        "API": {
+          "ERROR_MESSAGE": "No pudimos guardar el canal WhatsApp Evolution"
         }
       },
       "VOICE": {
@@ -550,6 +567,7 @@
     "TABS": {
       "SETTINGS": "Ajustes",
       "COLLABORATORS": "Colaboradores",
+      "WHATSAPP_QR_CODE": "Código QR de WhatsApp",
       "CONFIGURATION": "Configuración",
       "CAMPAIGN": "Campañas",
       "PRE_CHAT_FORM": "Pre-formulario de chat",
@@ -884,6 +902,55 @@
       "API": "Canal API",
       "INSTAGRAM": "Instagram",
       "VOICE": "Voice"
+    },
+    "WHATSAPP_QR": {
+      "INITIALIZING": "Inicializando instancia de WhatsApp...",
+      "CONNECTED": "WhatsApp Conectado",
+      "NOT_CONNECTED": "WhatsApp No Conectado",
+      "CONNECTION": {
+        "TITLE": "Conexión WhatsApp",
+        "SUBTITLE": "Conecta tu cuenta de WhatsApp usando código QR"
+      },
+      "CONNECT_QR": "Conectar con Código QR",
+      "SCAN_QR": "Escanear Código QR",
+      "QR_INSTRUCTIONS": "Abre WhatsApp en tu teléfono, ve a Configuración > Dispositivos Vinculados > Vincular un Dispositivo, y escanea este código QR.",
+      "SECONDS_LEFT": "segundos restantes",
+      "QR_EXPIRED": "Código QR expirado. Por favor, genera uno nuevo.",
+      "PAIRING_CODE": "Código de Emparejamiento",
+      "PAIRING_INSTRUCTIONS": "Abre WhatsApp en tu teléfono, ve a Configuración > Dispositivos Vinculados > Vincular un Dispositivo > Vincular con número de teléfono, y ingresa este código.",
+      "CONNECTED": {
+        "TITLE": "WhatsApp Conectado",
+        "SUBTITLE": "Tu cuenta de WhatsApp está conectada exitosamente",
+        "STATUS": "Conectado"
+      },
+      "DISCONNECT": "Desconectar",
+      "DISCONNECTED": "WhatsApp desconectado exitosamente",
+      "DISCONNECT_ERROR": "Error al desconectar WhatsApp",
+      "SETTINGS": {
+        "TITLE": "Configuraciones",
+        "SUBTITLE": "Configura las opciones de tu WhatsApp",
+        "CURRENT_STATUS": "Configuraciones Actuales de la Instancia",
+        "LOADED_FROM_INSTANCE": "Configuraciones cargadas desde la instancia de WhatsApp",
+        "REJECT_CALL": "Rechazar Llamadas",
+        "REJECT_CALL_DESC": "Rechazar automáticamente llamadas entrantes",
+        "MSG_CALL": "Mensaje de Rechazo de Llamada",
+        "MSG_CALL_PLACEHOLDER": "Lo siento, no puedo atender llamadas ahora. Por favor envía un mensaje.",
+        "GROUPS_IGNORE": "Ignorar Grupos",
+        "GROUPS_IGNORE_DESC": "Ignorar mensajes de grupos de WhatsApp",
+        "ALWAYS_ONLINE": "Siempre En Línea",
+        "ALWAYS_ONLINE_DESC": "Mostrar como siempre en línea en WhatsApp",
+        "READ_MESSAGES": "Leer Mensajes",
+        "READ_MESSAGES_DESC": "Marcar mensajes como leídos automáticamente",
+        "READ_STATUS": "Estado de Lectura",
+        "READ_STATUS_DESC": "Enviar confirmación de lectura",
+        "SYNC_FULL_HISTORY": "Sincronizar Historial Completo",
+        "SYNC_FULL_HISTORY_DESC": "Sincronizar todo el historial de mensajes",
+        "SAVE_SETTINGS": "Guardar Configuraciones"
+      },
+      "QR_GENERATED": "Código QR generado exitosamente",
+      "QR_ERROR": "Error al generar código QR",
+      "SETTINGS_SAVED": "Configuraciones guardadas exitosamente",
+      "SETTINGS_ERROR": "Error al guardar configuraciones"
     }
   }
 }

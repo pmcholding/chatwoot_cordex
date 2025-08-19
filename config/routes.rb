@@ -205,6 +205,17 @@ Rails.application.routes.draw do
             post :set_agent_bot, on: :member
             delete :avatar, on: :member
             post :sync_templates, on: :member
+
+            # Evolution WhatsApp API routes
+            resource :evolution_whatsapp, only: [], controller: 'inboxes/evolution_whatsapp' do
+              post :initialize_instance
+              get :connection_status
+              post :connect_qr_code
+              post :connect_with_number
+              delete :disconnect
+              patch :update_settings
+              get :webhook_info
+            end
           end
           resources :inbox_members, only: [:create, :show], param: :inbox_id do
             collection do
@@ -511,6 +522,7 @@ Rails.application.routes.draw do
   post 'webhooks/whatsapp/:phone_number', to: 'webhooks/whatsapp#process_payload'
   get 'webhooks/instagram', to: 'webhooks/instagram#verify'
   post 'webhooks/instagram', to: 'webhooks/instagram#events'
+  post 'webhooks/evolution/:instance_name', to: 'api/v1/webhooks/evolution#process_payload'
 
   namespace :twitter do
     resource :callback, only: [:show]

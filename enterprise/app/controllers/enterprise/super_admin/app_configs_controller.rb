@@ -10,7 +10,8 @@ module Enterprise::SuperAdmin::AppConfigsController
     when 'internal'
       @allowed_configs = internal_config_options
     when 'captain'
-      @allowed_configs = %w[CAPTAIN_OPEN_AI_API_KEY CAPTAIN_OPEN_AI_MODEL CAPTAIN_OPEN_AI_ENDPOINT CAPTAIN_FIRECRAWL_API_KEY CAPTAIN_INSTRUCTION_GENERATOR_PROMPT]
+      @allowed_configs = %w[CAPTAIN_OPEN_AI_API_KEY CAPTAIN_OPEN_AI_MODEL CAPTAIN_OPEN_AI_ENDPOINT CAPTAIN_FIRECRAWL_API_KEY
+                            CAPTAIN_INSTRUCTION_GENERATOR_PROMPT]
     else
       super
     end

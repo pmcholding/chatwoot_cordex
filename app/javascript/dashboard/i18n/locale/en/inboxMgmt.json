@@ -218,8 +218,8 @@
         }
       },
       "WHATSAPP": {
-        "TITLE": "WhatsApp Channel",
-        "DESC": "Start supporting your customers via WhatsApp.",
+        "TITLE": "WABA Channel",
+        "DESC": "Start supporting your customers via WhatsApp Business API.",
         "PROVIDERS": {
           "LABEL": "API Provider",
           "WHATSAPP_EMBEDDED": "WhatsApp Business",
@@ -272,7 +272,7 @@
           "WEBHOOK_URL": "Webhook URL",
           "WEBHOOK_VERIFICATION_TOKEN": "Webhook Verification Token"
         },
-        "SUBMIT_BUTTON": "Create WhatsApp Channel",
+        "SUBMIT_BUTTON": "Create WABA Channel",
         "EMBEDDED_SIGNUP": {
           "TITLE": "Quick Setup with Meta",
           "DESC": "You will be redirected to Meta to log into your WhatsApp Business account. Having admin access will help make the setup smooth and easy.",
@@ -302,6 +302,23 @@
         },
         "API": {
           "ERROR_MESSAGE": "We were not able to save the WhatsApp channel"
+        }
+      },
+      "EVOLUTION_WHATSAPP": {
+        "TITLE": "WhatsApp Evolution API",
+        "DESC": "Connect your WhatsApp using Evolution API with QR Code authentication.",
+        "INBOX_NAME": {
+          "LABEL": "Inbox Name",
+          "PLACEHOLDER": "Please enter an inbox name",
+          "ERROR": "This field is required"
+        },
+        "INFO": {
+          "TITLE": "How it works",
+          "DESC": "After creating the inbox, you'll be able to connect your WhatsApp account using QR Code scanning. This provides a direct connection to WhatsApp without requiring Meta Business verification."
+        },
+        "SUBMIT_BUTTON": "Create WhatsApp Channel",
+        "API": {
+          "ERROR_MESSAGE": "We couldn't save the WhatsApp Evolution channel"
         }
       },
       "VOICE": {
@@ -552,6 +569,7 @@
     "TABS": {
       "SETTINGS": "Settings",
       "COLLABORATORS": "Collaborators",
+      "WHATSAPP_QR_CODE": "WhatsApp QR Code",
       "CONFIGURATION": "Configuration",
       "CAMPAIGN": "Campaigns",
       "PRE_CHAT_FORM": "Pre Chat Form",
@@ -886,6 +904,75 @@
       "API": "API Channel",
       "INSTAGRAM": "Instagram",
       "VOICE": "Voice"
+    },
+    "WHATSAPP_QR": {
+      "INITIALIZING": "Initializing WhatsApp instance...",
+      "CONNECTED": "WhatsApp Connected",
+      "NOT_CONNECTED": "WhatsApp Not Connected",
+      "INSTANCE_INFO": {
+        "TITLE": "Instance Information",
+        "SUBTITLE": "Details about your WhatsApp Evolution API instance"
+      },
+      "INSTANCE_NAME": "Instance Name",
+      "WEBHOOK_URL": "Webhook URL",
+      "CONNECTION": {
+        "TITLE": "WhatsApp Connection",
+        "SUBTITLE": "Connect your WhatsApp account using QR Code or phone number"
+      },
+      "CONNECT_QR": "Connect with QR Code",
+      "CONNECT_PHONE": "Connect with Phone Number",
+      "SCAN_QR": "Scan QR Code",
+      "QR_INSTRUCTIONS": "Open WhatsApp on your phone, go to Settings > Linked Devices > Link a Device, and scan this QR code.",
+      "SECONDS_LEFT": "seconds left",
+      "QR_EXPIRED": "QR Code expired. Please generate a new one.",
+      "PAIRING_CODE": "Pairing Code",
+      "PAIRING_INSTRUCTIONS": "Open WhatsApp on your phone, go to Settings > Linked Devices > Link a Device > Link with phone number instead, and enter this code.",
+      "CONNECTED": {
+        "TITLE": "WhatsApp Connected",
+        "SUBTITLE": "Your WhatsApp account is successfully connected",
+        "STATUS": "Connected"
+      },
+      "DISCONNECT": "Disconnect",
+      "DISCONNECTED": "WhatsApp disconnected successfully",
+      "DISCONNECT_ERROR": "Failed to disconnect WhatsApp",
+      "PHONE_MODAL": {
+        "TITLE": "Connect with Phone Number",
+        "PHONE_LABEL": "Phone Number",
+        "PHONE_PLACEHOLDER": "+1234567890",
+        "PHONE_HELP": "Enter your phone number with country code (e.g., +1234567890)",
+        "CANCEL": "Cancel",
+        "CONNECT": "Connect"
+      },
+      "SETTINGS": {
+        "TITLE": "WhatsApp Settings",
+        "SUBTITLE": "Configure WhatsApp behavior and features",
+        "CURRENT_STATUS": "Current Settings from Instance",
+        "LOADED_FROM_INSTANCE": "Settings loaded from WhatsApp instance",
+        "REJECT_CALL": "Reject Calls",
+        "REJECT_CALL_DESC": "Automatically reject incoming calls",
+        "MSG_CALL": "Call Rejection Message",
+        "MSG_CALL_PLACEHOLDER": "Sorry, I can't take calls right now. Please send a message.",
+        "GROUPS_IGNORE": "Ignore Groups",
+        "GROUPS_IGNORE_DESC": "Ignore messages from WhatsApp groups",
+        "ALWAYS_ONLINE": "Always Online",
+        "ALWAYS_ONLINE_DESC": "Show as always online on WhatsApp",
+        "READ_MESSAGES": "Read Messages",
+        "READ_MESSAGES_DESC": "Automatically mark messages as read",
+        "READ_STATUS": "Read Status",
+        "READ_STATUS_DESC": "Show read receipts for messages",
+        "SYNC_FULL_HISTORY": "Sync Full History",
+        "SYNC_FULL_HISTORY_DESC": "Synchronize complete message history"
+      },
+      "SAVE_SETTINGS": "Save Settings",
+      "INSTANCE_FOUND": "Existing WhatsApp instance found",
+      "INSTANCE_CREATED": "New WhatsApp instance created successfully",
+      "INITIALIZATION_ERROR": "Failed to initialize WhatsApp instance",
+      "QR_GENERATED": "QR Code generated successfully",
+      "QR_ERROR": "Failed to generate QR Code",
+      "PAIRING_CODE_GENERATED": "Pairing code generated successfully",
+      "PHONE_ERROR": "Failed to connect with phone number",
+      "SETTINGS_SAVED": "Settings saved successfully",
+      "SETTINGS_ERROR": "Failed to save settings"
     }
   }
 }

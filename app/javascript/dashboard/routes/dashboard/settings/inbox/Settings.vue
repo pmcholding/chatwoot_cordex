@@ -21,6 +21,7 @@ import CustomerSatisfactionPage from './settingsPage/CustomerSatisfactionPage.vu
 import CollaboratorsPage from './settingsPage/CollaboratorsPage.vue';
 import WidgetBuilder from './WidgetBuilder.vue';
 import BotConfiguration from './components/BotConfiguration.vue';
+import WhatsAppQRCode from './components/WhatsAppQRCode.vue';
 import { FEATURE_FLAGS } from '../../../../featureFlags';
 import SenderNameExamplePreview from './components/SenderNameExamplePreview.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
@@ -51,6 +52,7 @@ export default {
     DuplicateInboxBanner,
     Editor,
     Avatar,
+    WhatsAppQRCode,
   },
   mixins: [inboxMixin],
   setup() {
@@ -116,6 +118,21 @@ export default {
           key: 'collaborators',
           name: this.$t('INBOX_MGMT.TABS.COLLABORATORS'),
         },
+      ];
+
+      // Add WhatsApp QR Code tab for API channels
+      if (this.isAPIInbox) {
+        visibleToAllChannelTabs = [
+          ...visibleToAllChannelTabs,
+          {
+            key: 'whatsappQRCode',
+            name: this.$t('INBOX_MGMT.TABS.WHATSAPP_QR_CODE'),
+          },
+        ];
+      }
+
+      visibleToAllChannelTabs = [
+        ...visibleToAllChannelTabs,
         {
           key: 'businesshours',
           name: this.$t('INBOX_MGMT.TABS.BUSINESS_HOURS'),
@@ -829,6 +846,9 @@ export default {
 
       <div v-if="selectedTabKey === 'collaborators'" class="mx-8">
         <CollaboratorsPage :inbox="inbox" />
+      </div>
+      <div v-if="selectedTabKey === 'whatsappQRCode'">
+        <WhatsAppQRCode :inbox="inbox" />
       </div>
       <div v-if="selectedTabKey === 'configuration'">
         <ConfigurationPage :inbox="inbox" />
