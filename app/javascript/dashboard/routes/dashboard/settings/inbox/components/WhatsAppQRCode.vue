@@ -10,7 +10,7 @@ export default {
   components: {
     SettingsSection,
     NextButton,
-    WootSwitch: Switch,
+    Switch,
   },
   props: {},
   data() {
@@ -543,7 +543,7 @@ export default {
                 {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.REJECT_CALL_DESC') }}
               </p>
             </div>
-            <WootSwitch v-model="settings.reject_call" />
+            <Switch v-model="settings.reject_call" />
           </div>
 
           <!-- Call Message -->
@@ -572,7 +572,7 @@ export default {
                   {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.GROUPS_IGNORE_DESC') }}
                 </p>
               </div>
-              <WootSwitch v-model="settings.groups_ignore" />
+              <Switch v-model="settings.groups_ignore" />
             </div>
 
             <div class="flex items-center justify-between">
@@ -584,7 +584,7 @@ export default {
                   {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.ALWAYS_ONLINE_DESC') }}
                 </p>
               </div>
-              <WootSwitch v-model="settings.always_online" />
+              <Switch v-model="settings.always_online" />
             </div>
 
             <div class="flex items-center justify-between">
@@ -596,7 +596,7 @@ export default {
                   {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.READ_MESSAGES_DESC') }}
                 </p>
               </div>
-              <WootSwitch v-model="settings.read_messages" />
+              <Switch v-model="settings.read_messages" />
             </div>
 
             <div class="flex items-center justify-between">
@@ -608,7 +608,7 @@ export default {
                   {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.READ_STATUS_DESC') }}
                 </p>
               </div>
-              <WootSwitch v-model="settings.read_status" />
+              <Switch v-model="settings.read_status" />
             </div>
 
             <div class="flex items-center justify-between">
@@ -622,7 +622,7 @@ export default {
                   }}
                 </p>
               </div>
-              <WootSwitch v-model="settings.sync_full_history" />
+              <Switch v-model="settings.sync_full_history" />
             </div>
           </div>
 
