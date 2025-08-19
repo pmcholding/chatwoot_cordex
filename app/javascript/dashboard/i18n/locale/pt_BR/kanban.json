@@ -11,23 +11,76 @@
     },
     "SETTINGS": {
       "TITLE": "Configurações do Kanban",
+      "SUBTITLE": "Configure as preferências e opções do seu quadro kanban",
       "CREATE": "Criar estágio",
       "EDIT": "Editar estágio",
-      "DELETE": "Excluir"
+      "DELETE": "Excluir",
+      "STAGES": {
+        "TITLE": "Gerenciamento de Estágios",
+        "SUBTITLE": "Crie e gerencie os estágios do seu quadro kanban",
+        "ADD_STAGE": "Adicionar novo estágio",
+        "REORDER": "Arraste para reordenar os estágios",
+        "NAME_LABEL": "Nome do estágio",
+        "NAME_PLACEHOLDER": "Insira o nome do estágio",
+        "COLOR_LABEL": "Cor do estágio",
+        "SAVE": "Salvar",
+        "CANCEL": "Cancelar",
+        "DELETE_CONFIRM": "Tem certeza de que deseja excluir este estágio?",
+        "DELETE_WARNING": "Esta ação não pode ser desfeita. Todas as conversas neste estágio serão movidas para o estágio padrão.",
+        "CONVERSATIONS_COUNT": "{count} conversas"
+      },
+      "GENERAL": {
+        "TITLE": "Configurações gerais",
+        "SUBTITLE": "Defina preferências gerais do quadro kanban",
+        "AUTO_ASSIGN": "Atribuir conversas automaticamente aos estágios",
+        "AUTO_ASSIGN_HELP": "Atribuir automaticamente novas conversas ao primeiro estágio",
+        "SHOW_CONVERSATION_COUNT": "Mostrar contagem de conversas nos estágios",
+        "SHOW_CONVERSATION_COUNT_HELP": "Exibir o número de conversas em cada estágio",
+        "DEFAULT_STAGE": "Estágio padrão",
+        "DEFAULT_STAGE_HELP": "Selecione o estágio padrão para novas conversas",
+        "DEFAULT_STAGE_SELECT": "Selecionar estágio padrão"
+      },
+      "FILTERS": {
+        "TITLE": "Filtros padrão",
+        "SUBTITLE": "Defina filtros padrão aplicados ao carregar o quadro kanban",
+        "INBOX_FILTER": "Filtro de Caixa de Entrada padrão",
+        "ASSIGNEE_FILTER": "Filtro de Responsável padrão",
+        "LABELS_FILTER": "Filtro de Etiquetas padrão",
+        "ALL_INBOXES": "Todas as Caixas de Entrada",
+        "ALL_ASSIGNEES": "Todos os responsáveis"
+      },
+      "SAVE_SETTINGS": "Salvar configurações"
     },
     "BOARD": {
       "TITLE": "Kanban",
       "SEARCH": "Pesquisar...",
       "REFRESH": "Atualizar",
       "SETTINGS": "Configurações",
-      "INBOX": "Inbox",
+      "INBOX": "Caixa de Entrada",
       "ASSIGNEE": "Responsável",
-      "LABELS": "Rótulos",
+      "LABELS": "Etiquetas",
       "DATE_RANGE": "Período",
       "DRAG_HANDLE_LABEL": "Alça para arrastar",
       "LOAD_MORE": "Carregar mais",
       "END_OF_LIST": "Não há mais conversas para carregar",
-      "OPEN_CONVERSATION": "Abrir conversa"
+      "CLEAR_FILTERS": "Limpar filtros",
+      "FILTERS_ACTIVE": "Filtros ativos",
+      "OPEN_CONVERSATION": "Abrir conversa",
+      "CHANGE_STAGE": "Alterar estágio",
+      "SELECT_STAGE": "Selecionar estágio",
+      "STAGE_CHANGED_SUCCESS": "Estágio alterado com sucesso",
+      "STAGE_CHANGED_ERROR": "Falha ao alterar estágio"
+    },
+    "STAGE": {
+      "TITLE": "Estágio do Kanban",
+      "UNASSIGNED": "Não atribuído",
+      "SELECT_PLACEHOLDER": "Selecionar estágio",
+      "NO_RESULTS": "Nenhum estágio encontrado",
+      "INPUT_PLACEHOLDER": "Pesquisar estágios..."
+    },
+    "CONVERSATION": {
+      "STAGE_CHANGED": "Conversa movida para {stage}",
+      "STAGE_CHANGE_ERROR": "Falha ao alterar estágio da conversa"
     }
   }
 }

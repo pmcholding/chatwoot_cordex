@@ -8,13 +8,48 @@
       "BODY": "Marcador de posición del tablero Kanban",
       "FOOTER": "Esta vista está detrás de un feature flag y evolucionará en las próximas iteraciones.",
       "BACK": "Volver"
-    }
-  ,
+    },
     "SETTINGS": {
       "TITLE": "Configuración de Kanban",
+      "SUBTITLE": "Configura los ajustes y preferencias de tu tablero kanban",
       "CREATE": "Crear etapa",
       "EDIT": "Editar etapa",
-      "DELETE": "Eliminar"
+      "DELETE": "Eliminar",
+      "STAGES": {
+        "TITLE": "Gestión de Etapas",
+        "SUBTITLE": "Crea y gestiona las etapas de tu tablero kanban",
+        "ADD_STAGE": "Agregar nueva etapa",
+        "REORDER": "Arrastra para reordenar las etapas",
+        "NAME_LABEL": "Nombre de la etapa",
+        "NAME_PLACEHOLDER": "Ingresa el nombre de la etapa",
+        "COLOR_LABEL": "Color de la etapa",
+        "SAVE": "Guardar",
+        "CANCEL": "Cancelar",
+        "DELETE_CONFIRM": "¿Estás seguro de que deseas eliminar esta etapa?",
+        "DELETE_WARNING": "Esta acción no se puede deshacer. Todas las conversaciones en esta etapa se moverán a la etapa predeterminada.",
+        "CONVERSATIONS_COUNT": "{count} conversaciones"
+      },
+      "GENERAL": {
+        "TITLE": "Configuración general",
+        "SUBTITLE": "Configura las preferencias generales del tablero kanban",
+        "AUTO_ASSIGN": "Asignar conversaciones automáticamente a etapas",
+        "AUTO_ASSIGN_HELP": "Asignar automáticamente nuevas conversaciones a la primera etapa",
+        "SHOW_CONVERSATION_COUNT": "Mostrar conteo de conversaciones en las etapas",
+        "SHOW_CONVERSATION_COUNT_HELP": "Mostrar el número de conversaciones en cada etapa",
+        "DEFAULT_STAGE": "Etapa predeterminada",
+        "DEFAULT_STAGE_HELP": "Selecciona la etapa predeterminada para nuevas conversaciones",
+        "DEFAULT_STAGE_SELECT": "Seleccionar etapa predeterminada"
+      },
+      "FILTERS": {
+        "TITLE": "Filtros predeterminados",
+        "SUBTITLE": "Configura filtros predeterminados que se aplicarán cuando cargue el tablero kanban",
+        "INBOX_FILTER": "Filtro de Bandeja predeterminado",
+        "ASSIGNEE_FILTER": "Filtro de Asignado predeterminado",
+        "LABELS_FILTER": "Filtro de Etiquetas predeterminado",
+        "ALL_INBOXES": "Todas las bandejas",
+        "ALL_ASSIGNEES": "Todos los asignados"
+      },
+      "SAVE_SETTINGS": "Guardar configuración"
     },
     "BOARD": {
       "TITLE": "Kanban",
@@ -27,7 +62,25 @@
       "DATE_RANGE": "Rango de fechas",
       "DRAG_HANDLE_LABEL": "Asa para arrastrar",
       "LOAD_MORE": "Cargar más",
-      "END_OF_LIST": "No hay más conversaciones para cargar"
+      "END_OF_LIST": "No hay más conversaciones para cargar",
+      "CLEAR_FILTERS": "Limpiar filtros",
+      "FILTERS_ACTIVE": "Filtros activos",
+      "OPEN_CONVERSATION": "Abrir conversación",
+      "CHANGE_STAGE": "Cambiar etapa",
+      "SELECT_STAGE": "Seleccionar etapa",
+      "STAGE_CHANGED_SUCCESS": "Etapa cambiada exitosamente",
+      "STAGE_CHANGED_ERROR": "No se pudo cambiar la etapa"
+    },
+    "STAGE": {
+      "TITLE": "Etapa de Kanban",
+      "UNASSIGNED": "Sin asignar",
+      "SELECT_PLACEHOLDER": "Seleccionar etapa",
+      "NO_RESULTS": "No se encontraron etapas",
+      "INPUT_PLACEHOLDER": "Buscar etapas..."
+    },
+    "CONVERSATION": {
+      "STAGE_CHANGED": "Conversación movida a {stage}",
+      "STAGE_CHANGE_ERROR": "No se pudo cambiar la etapa de la conversación"
     }
   }
 }

@@ -163,7 +163,7 @@ const onViewPricing = () => {
         @click="onManageSubscription"
       >
         <i class="i-lucide-credit-card mr-2" />
-        {{ $t('BILLING_SETTINGS.MANAGE_SUBSCRIPTION') }}
+        {{ $t('BILLING_SETTINGS.MANAGE_SUBSCRIPTION.BUTTON_TXT') }}
       </ButtonV4>
 
       <ButtonV4 faded slate @click="onViewPricing">

@@ -27,6 +27,9 @@ const loadingForStage = stageId =>
 const hasMoreForStage = stageId =>
   store.getters['kanban/hasMoreForStage'](stageId);
 const filters = computed(() => store.getters['kanban/filters']);
+const kanbanSettings = computed(
+  () => store.getters['kanbanSettings/getSettings']
+);
 
 // Store getters
 const accountId = useMapGetter('getCurrentAccountId');
@@ -104,19 +107,6 @@ const checkScrollButtons = () => {
   }
 };
 
-onMounted(() => {
-  store.dispatch('kanban/fetchInitial');
-  // Load filter options
-  store.dispatch('inboxes/get');
-  store.dispatch('agents/get');
-
-  // Setup scroll listeners
-  if (stagesContainer.value) {
-    stagesContainer.value.addEventListener('scroll', checkScrollButtons);
-    checkScrollButtons();
-  }
-});
-
 const updateFilters = () => {
   const newFilters = {
     q: filters.value.q || '',
@@ -128,6 +118,34 @@ const updateFilters = () => {
   };
   store.dispatch('kanban/setFilter', newFilters);
 };
+
+onMounted(async () => {
+  // Load saved kanban settings
+  await store.dispatch('kanbanSettings/get');
+  const s = store.getters['kanbanSettings/getSettings'];
+
+  // Apply default filters from settings, if present
+  if (s?.default_filters) {
+    selectedInbox.value = s.default_filters.inboxId || null;
+    selectedAssignee.value = s.default_filters.assigneeId || null;
+    selectedLabels.value = s.default_filters.labelIds || [];
+    // Push into store filters before first fetch
+    updateFilters();
+  }
+
+  // Initial board load
+  await store.dispatch('kanban/fetchInitial');
+
+  // Load filter options
+  store.dispatch('inboxes/get');
+  store.dispatch('agents/get');
+
+  // Setup scroll listeners
+  if (stagesContainer.value) {
+    stagesContainer.value.addEventListener('scroll', checkScrollButtons);
+    checkScrollButtons();
+  }
+});
 
 // Filter functions
 const onInboxChange = inboxId => {
@@ -479,6 +497,7 @@ const formatLastActivity = timestamp => {
                 </h3>
               </div>
               <span
+                v-if="kanbanSettings?.show_conversation_count !== false"
                 class="text-xs text-n-slate-11 rounded-full px-2 py-0.5 bg-n-alpha-black2"
               >
                 {{ stage.count }}

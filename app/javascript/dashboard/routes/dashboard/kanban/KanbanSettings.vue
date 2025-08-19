@@ -195,7 +195,6 @@ const saveGeneralSettings = async () => {
       default_filters: defaultFilters.value,
     };
 
-    // Save to backend or store
     await store.dispatch('kanbanSettings/update', settings);
     useAlert('Settings saved successfully');
   } catch (error) {
@@ -203,7 +202,20 @@ const saveGeneralSettings = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await store.dispatch('kanbanSettings/get');
+  const s = store.getters['kanbanSettings/getSettings'];
+  autoAssignConversations.value = !!s.auto_assign_conversations;
+  showConversationCount.value = s.show_conversation_count !== false;
+  defaultStageId.value = s.default_stage_id || null;
+  if (s.default_filters) {
+    defaultFilters.value = {
+      inboxId: s.default_filters.inboxId || null,
+      assigneeId: s.default_filters.assigneeId || null,
+      labelIds: s.default_filters.labelIds || [],
+    };
+  }
+
   fetchStages();
   store.dispatch('inboxes/get');
   store.dispatch('agents/get');

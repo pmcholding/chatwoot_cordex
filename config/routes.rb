@@ -153,6 +153,8 @@ Rails.application.routes.draw do
             end
           end
 
+          resource :kanban_settings, only: [:show, :update]
+
           resources :search, only: [:index] do
             collection do
               get :conversations
