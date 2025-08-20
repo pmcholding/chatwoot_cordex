@@ -6,7 +6,6 @@ import { useStore } from 'vuex';
 import Twilio from './Twilio.vue';
 import ThreeSixtyDialogWhatsapp from './360DialogWhatsapp.vue';
 import CloudWhatsapp from './CloudWhatsapp.vue';
-import WhatsappQrcode from './WhatsappQrcode.vue';
 import WhatsappEmbeddedSignup from './WhatsappEmbeddedSignup.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 
@@ -21,7 +20,6 @@ const PROVIDER_TYPES = {
   WHATSAPP_CLOUD: 'whatsapp_cloud',
   WHATSAPP_EMBEDDED: 'whatsapp_embedded',
   THREE_SIXTY_DIALOG: '360dialog',
-  WHATSAPP_QRCODE: 'whatsapp_qrcode',
 };
 
 const hasWhatsappAppId = computed(() => {
@@ -46,12 +44,6 @@ const showProviderSelection = computed(() => !selectedProvider.value);
 const showConfiguration = computed(() => Boolean(selectedProvider.value));
 
 const availableProviders = computed(() => [
-  {
-    value: PROVIDER_TYPES.WHATSAPP_QRCODE,
-    label: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_QRCODE'),
-    description: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_QRCODE_DESC'),
-    icon: '/assets/images/dashboard/channels/whatsapp.png',
-  },
   {
     value: PROVIDER_TYPES.WHATSAPP,
     label: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.WHATSAPP_CLOUD'),
@@ -156,9 +148,6 @@ const shouldShowCloudWhatsapp = provider => {
         />
         <ThreeSixtyDialogWhatsapp
           v-else-if="selectedProvider === PROVIDER_TYPES.THREE_SIXTY_DIALOG"
-        />
-        <WhatsappQrcode
-          v-else-if="selectedProvider === PROVIDER_TYPES.WHATSAPP_QRCODE"
         />
         <CloudWhatsapp v-else />
       </div>
