@@ -109,7 +109,7 @@ class Account < ApplicationRecord
   scope :with_auto_resolve, -> { where("(settings ->> 'auto_resolve_after')::int IS NOT NULL") }
 
   before_validation :validate_limit_keys
-  after_create_commit :notify_creation
+  after_create_commit :notify_creation, :create_default_kanban_stages
   after_destroy :remove_account_sequences
 
   def agents
@@ -177,6 +177,10 @@ class Account < ApplicationRecord
 
   def validate_limit_keys
     # method overridden in enterprise module
+  end
+
+  def create_default_kanban_stages
+    KanbanStage.create_default_stages_for_account!(self)
   end
 
   def remove_account_sequences
