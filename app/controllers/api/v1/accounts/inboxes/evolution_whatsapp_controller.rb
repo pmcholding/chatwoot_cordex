@@ -6,29 +6,44 @@ class Api::V1::Accounts::Inboxes::EvolutionWhatsappController < Api::V1::Account
   before_action :initialize_evolution_service
 
   def initialize_instance
-    # Check if instance already exists
-    if @inbox.channel.has_evolution_instance?
-      instance_name = @inbox.channel.evolution_instance_name
+    # Generate instance name from current inbox configuration
+    instance_name = if @inbox.channel.has_evolution_instance?
+                      @inbox.channel.evolution_instance_name
+                    else
+                      @inbox.channel.generate_evolution_instance_name
+                    end
+
+    webhook_url = @inbox.channel.evolution_webhook_url(instance_name)
+
+    begin
+      # Try to get connection state first to check if instance exists
       connection_state = @evolution_service.get_connection_state(instance_name)
 
+      # Instance exists, return its state
       render json: {
         instance_name: instance_name,
-        webhook_url: @inbox.channel.webhook_url,
+        webhook_url: webhook_url,
         connection_state: connection_state,
         existing_instance: true
       }
-    else
-      # Create new instance
-      instance_name = @inbox.channel.generate_evolution_instance_name
-      webhook_url = @inbox.channel.evolution_webhook_url(instance_name)
+    rescue StandardError => e
+      # If instance doesn't exist (404 error), create it
+      raise e unless e.message.include?('Not Found') || e.message.include?('does not exist')
+
+      Rails.logger.info "Instance #{instance_name} does not exist, creating new instance"
 
       result = @evolution_service.create_instance(instance_name, @inbox.account_id, @inbox.name)
 
-      # Save webhook URL to database
-      @inbox.channel.update!(webhook_url: webhook_url)
+      # Save webhook URL to database if not already saved
+      @inbox.channel.update!(webhook_url: webhook_url) unless @inbox.channel.webhook_url == webhook_url
 
-      # Get initial connection state
-      connection_state = @evolution_service.get_connection_state(instance_name)
+      # Get initial connection state after creation
+      begin
+        connection_state = @evolution_service.get_connection_state(instance_name)
+      rescue StandardError => state_error
+        Rails.logger.warn "Could not get connection state after creation: #{state_error.message}"
+        connection_state = { instance: { state: 'close' } }
+      end
 
       render json: {
         instance_name: instance_name,
@@ -73,14 +88,25 @@ class Api::V1::Accounts::Inboxes::EvolutionWhatsappController < Api::V1::Account
     instance_name = @inbox.channel.evolution_instance_name
     return render json: { error: 'No Evolution instance configured' }, status: :not_found unless instance_name
 
-    result = @evolution_service.connect_instance(instance_name)
+    begin
+      result = @evolution_service.connect_instance(instance_name)
 
-    render json: {
-      instance_name: instance_name,
-      qr_code: result['base64'],
-      pairing_code: result['pairingCode'],
-      count: result['count']
-    }
+      render json: {
+        instance_name: instance_name,
+        qr_code: result['base64'],
+        pairing_code: result['pairingCode'],
+        count: result['count']
+      }
+    rescue StandardError => e
+      # If instance doesn't exist, try to initialize it first
+      raise e unless e.message.include?('Not Found') || e.message.include?('does not exist')
+
+      Rails.logger.info "Instance #{instance_name} does not exist, initializing instance first"
+
+      # Call initialize_instance to create the instance
+      initialize_instance
+      return
+    end
   rescue StandardError => e
     Rails.logger.error "Evolution API Error: #{e.message}"
     render json: { error: e.message }, status: :unprocessable_entity
@@ -107,7 +133,7 @@ class Api::V1::Accounts::Inboxes::EvolutionWhatsappController < Api::V1::Account
     return render json: { error: 'No Evolution instance configured' }, status: :not_found unless instance_name
 
     phone_number = params[:phone_number]
-    return render json: { error: 'Phone number is required' }, status: :bad_request unless phone_number.present?
+    return render json: { error: 'Phone number is required' }, status: :bad_request if phone_number.blank?
 
     result = @evolution_service.connect_instance(instance_name, phone_number)
 
@@ -126,7 +152,7 @@ class Api::V1::Accounts::Inboxes::EvolutionWhatsappController < Api::V1::Account
     return render json: { error: 'No Evolution instance configured' }, status: :not_found unless instance_name
 
     settings = params[:settings]
-    return render json: { error: 'Settings are required' }, status: :bad_request unless settings.present?
+    return render json: { error: 'Settings are required' }, status: :bad_request if settings.blank?
 
     result = @evolution_service.update_settings(instance_name, settings.permit!)
 
