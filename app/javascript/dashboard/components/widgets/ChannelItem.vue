@@ -50,7 +50,6 @@ export default {
         'twilio',
         'api',
         'whatsapp',
-        'evolution_whatsapp',
         'sms',
         'telegram',
         'line',
@@ -69,10 +68,6 @@ export default {
     getChannelThumbnail() {
       if (this.channel.key === 'api' && this.channel.thumbnail) {
         return this.channel.thumbnail;
-      }
-      // Use the same image as WABA for evolution_whatsapp
-      if (this.channel.key === 'evolution_whatsapp') {
-        return '/assets/images/dashboard/channels/whatsapp.png';
       }
       return `/assets/images/dashboard/channels/${this.channel.key}.png`;
     },

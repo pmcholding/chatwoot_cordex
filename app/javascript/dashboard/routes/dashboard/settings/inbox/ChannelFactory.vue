@@ -7,7 +7,6 @@ import Api from './channels/Api.vue';
 import Email from './channels/Email.vue';
 import Sms from './channels/Sms.vue';
 import Whatsapp from './channels/Whatsapp.vue';
-import EvolutionWhatsapp from './channels/EvolutionWhatsapp.vue';
 import Line from './channels/Line.vue';
 import Telegram from './channels/Telegram.vue';
 import Instagram from './channels/Instagram.vue';
@@ -21,7 +20,6 @@ const channelViewList = {
   email: Email,
   sms: Sms,
   whatsapp: Whatsapp,
-  evolution_whatsapp: EvolutionWhatsapp,
   line: Line,
   telegram: Telegram,
   instagram: Instagram,

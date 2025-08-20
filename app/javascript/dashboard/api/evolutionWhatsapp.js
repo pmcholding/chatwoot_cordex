@@ -7,10 +7,10 @@ class EvolutionWhatsappAPI extends ApiClient {
   }
 
   // Get inbox ID from current route
-  static getInboxIdFromRoute() {
-    const isInsideInboxScopedURLs = window.location.pathname.includes(
-      '/inboxes/'
-    );
+  // eslint-disable-next-line class-methods-use-this
+  get inboxIdFromRoute() {
+    const isInsideInboxScopedURLs =
+      window.location.pathname.includes('/inboxes/');
 
     if (isInsideInboxScopedURLs) {
       const pathParts = window.location.pathname.split('/');
@@ -19,33 +19,49 @@ class EvolutionWhatsappAPI extends ApiClient {
         return pathParts[inboxIndex + 1];
       }
     }
+
     return null;
   }
 
-  initializeInstance(inboxId) {
-    return axios.post(`${this.url}/${inboxId}/initialize`);
+  // Override url to include inbox_id
+  get url() {
+    const inboxId = this.inboxIdFromRoute;
+    if (inboxId) {
+      return `${this.baseUrl()}/inboxes/${inboxId}/${this.resource}`;
+    }
+    return `${this.baseUrl()}/${this.resource}`;
   }
 
-  getConnectionStatus(inboxId) {
-    return axios.get(`${this.url}/${inboxId}/status`);
+  initializeInstance() {
+    return axios.post(`${this.url}/initialize_instance`);
   }
 
-  connectWithQRCode(inboxId) {
-    return axios.post(`${this.url}/${inboxId}/connect_qr`);
+  getConnectionStatus() {
+    return axios.get(`${this.url}/connection_status`);
   }
 
-  connectWithPhoneNumber(inboxId, phoneNumber) {
-    return axios.post(`${this.url}/${inboxId}/connect_phone`, {
+  connectQRCode() {
+    return axios.post(`${this.url}/connect_qr_code`);
+  }
+
+  connectWithNumber(phoneNumber) {
+    return axios.post(`${this.url}/connect_with_number`, {
       phone_number: phoneNumber,
     });
   }
 
-  disconnect(inboxId) {
-    return axios.post(`${this.url}/${inboxId}/disconnect`);
+  disconnect() {
+    return axios.delete(`${this.url}/disconnect`);
   }
 
-  updateSettings(inboxId, settings) {
-    return axios.put(`${this.url}/${inboxId}/settings`, { settings });
+  updateSettings(settings) {
+    return axios.patch(`${this.url}/update_settings`, {
+      settings,
+    });
+  }
+
+  getWebhookInfo() {
+    return axios.get(`${this.url}/webhook_info`);
   }
 }
 

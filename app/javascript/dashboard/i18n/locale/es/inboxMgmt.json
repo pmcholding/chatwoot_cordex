@@ -218,8 +218,8 @@
         }
       },
       "WHATSAPP": {
-        "TITLE": "Canal WABA",
-        "DESC": "Comience a apoyar a sus clientes mediante WhatsApp Business API.",
+        "TITLE": "Canal de WhatsApp",
+        "DESC": "Comience a apoyar a sus clientes mediante WhatsApp.",
         "PROVIDERS": {
           "LABEL": "Proveedor de API",
           "WHATSAPP_EMBEDDED": "WhatsApp Business",
@@ -300,23 +300,6 @@
         },
         "API": {
           "ERROR_MESSAGE": "No pudimos guardar el canal de WhatsApp"
-        }
-      },
-      "EVOLUTION_WHATSAPP": {
-        "TITLE": "WhatsApp Evolution API",
-        "DESC": "Conecta tu WhatsApp usando Evolution API con autenticación por código QR.",
-        "INBOX_NAME": {
-          "LABEL": "Nombre de la Bandeja de Entrada",
-          "PLACEHOLDER": "Ingresa un nombre para la bandeja de entrada",
-          "ERROR": "Este campo es obligatorio"
-        },
-        "INFO": {
-          "TITLE": "Cómo funciona",
-          "DESC": "Después de crear la bandeja de entrada, podrás conectar tu cuenta de WhatsApp usando escaneo de código QR. Esto proporciona una conexión directa a WhatsApp sin requerir verificación de Meta Business."
-        },
-        "SUBMIT_BUTTON": "Crear Canal WhatsApp",
-        "API": {
-          "ERROR_MESSAGE": "No pudimos guardar el canal WhatsApp Evolution"
         }
       },
       "VOICE": {

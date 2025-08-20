@@ -218,8 +218,8 @@
         }
       },
       "WHATSAPP": {
-        "TITLE": "WABA Channel",
-        "DESC": "Start supporting your customers via WhatsApp Business API.",
+        "TITLE": "WhatsApp Channel",
+        "DESC": "Start supporting your customers via WhatsApp.",
         "PROVIDERS": {
           "LABEL": "API Provider",
           "WHATSAPP_EMBEDDED": "WhatsApp Business",
@@ -272,7 +272,7 @@
           "WEBHOOK_URL": "Webhook URL",
           "WEBHOOK_VERIFICATION_TOKEN": "Webhook Verification Token"
         },
-        "SUBMIT_BUTTON": "Create WABA Channel",
+        "SUBMIT_BUTTON": "Create WhatsApp Channel",
         "EMBEDDED_SIGNUP": {
           "TITLE": "Quick Setup with Meta",
           "DESC": "You will be redirected to Meta to log into your WhatsApp Business account. Having admin access will help make the setup smooth and easy.",
@@ -302,23 +302,6 @@
         },
         "API": {
           "ERROR_MESSAGE": "We were not able to save the WhatsApp channel"
-        }
-      },
-      "EVOLUTION_WHATSAPP": {
-        "TITLE": "WhatsApp Evolution API",
-        "DESC": "Connect your WhatsApp using Evolution API with QR Code authentication.",
-        "INBOX_NAME": {
-          "LABEL": "Inbox Name",
-          "PLACEHOLDER": "Please enter an inbox name",
-          "ERROR": "This field is required"
-        },
-        "INFO": {
-          "TITLE": "How it works",
-          "DESC": "After creating the inbox, you'll be able to connect your WhatsApp account using QR Code scanning. This provides a direct connection to WhatsApp without requiring Meta Business verification."
-        },
-        "SUBMIT_BUTTON": "Create WhatsApp Channel",
-        "API": {
-          "ERROR_MESSAGE": "We couldn't save the WhatsApp Evolution channel"
         }
       },
       "VOICE": {

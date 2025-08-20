@@ -2,7 +2,7 @@
 import { useAlert } from 'dashboard/composables';
 import SettingsSection from '../../../../../components/SettingsSection.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
-import Switch from 'dashboard/components-next/switch/Switch.vue';
+import WootSwitch from 'dashboard/components-next/switch/Switch.vue';
 import EvolutionWhatsappAPI from '../../../../../api/evolutionWhatsapp';
 
 export default {
@@ -10,9 +10,16 @@ export default {
   components: {
     SettingsSection,
     NextButton,
-    Switch,
+    WootSwitch,
   },
-  props: {},
+  props: {
+    // Used by parent component for API calls
+    // eslint-disable-next-line vue/no-unused-properties
+    inbox: {
+      type: Object,
+      required: true,
+    },
+  },
   data() {
     return {
       isInitializing: true,
@@ -85,6 +92,7 @@ export default {
             : this.$t('INBOX_MGMT.WHATSAPP_QR.INSTANCE_CREATED')
         );
       } catch (error) {
+        // Failed to initialize Evolution instance
         useAlert(
           error.response?.data?.error ||
             this.$t('INBOX_MGMT.WHATSAPP_QR.INITIALIZATION_ERROR')
@@ -113,7 +121,7 @@ export default {
           }
         }
       } catch (error) {
-        // Silently handle connection check errors
+        // Failed to check connection status
       }
     },
 
@@ -135,6 +143,7 @@ export default {
 
         useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.QR_GENERATED'));
       } catch (error) {
+        // Failed to generate QR code
         useAlert(
           error.response?.data?.error ||
             this.$t('INBOX_MGMT.WHATSAPP_QR.QR_ERROR')
@@ -163,6 +172,7 @@ export default {
 
         useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.PAIRING_CODE_GENERATED'));
       } catch (error) {
+        console.error('Failed to connect with phone number:', error);
         useAlert(
           error.response?.data?.error ||
           this.$t('INBOX_MGMT.WHATSAPP_QR.PHONE_ERROR')
@@ -189,6 +199,7 @@ export default {
         // Refresh connection status
         await this.checkConnectionStatus();
       } catch (error) {
+        // Failed to disconnect instance
         useAlert(
           error.response?.data?.error ||
             this.$t('INBOX_MGMT.WHATSAPP_QR.DISCONNECT_ERROR')
@@ -206,6 +217,7 @@ export default {
 
         useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS_SAVED'));
       } catch (error) {
+        // Failed to update settings
         useAlert(
           error.response?.data?.error ||
             this.$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS_ERROR')
@@ -294,29 +306,34 @@ export default {
         :sub-title="$t('INBOX_MGMT.WHATSAPP_QR.CONNECTION.SUBTITLE')"
       >
         <div class="space-y-4">
-          <!-- Connection Buttons -->
-          <div class="flex space-x-4">
-            <NextButton :is-loading="isConnectingQR" @click="connectWithQRCode">
-              {{ $t('INBOX_MGMT.WHATSAPP_QR.CONNECT_QR') }}
-            </NextButton>
-            <!-- Phone number connection temporarily disabled - API not working -->
-            <!--
-            <NextButton
-              variant="hollow"
-              @click="showPhoneModal = true"
-            >
-              {{ $t('INBOX_MGMT.WHATSAPP_QR.CONNECT_PHONE') }}
-            </NextButton>
-            -->
-          </div>
+          <!-- Connection Buttons and Status -->
+          <div class="flex items-center justify-between">
+            <div class="flex space-x-4">
+              <NextButton
+                :is-loading="isConnectingQR"
+                @click="connectWithQRCode"
+              >
+                {{ $t('INBOX_MGMT.WHATSAPP_QR.CONNECT_QR') }}
+              </NextButton>
+              <!-- Phone number connection temporarily disabled - API not working -->
+              <!--
+              <NextButton
+                variant="hollow"
+                @click="showPhoneModal = true"
+              >
+                {{ $t('INBOX_MGMT.WHATSAPP_QR.CONNECT_PHONE') }}
+              </NextButton>
+              -->
+            </div>
 
-          <!-- Connection Status -->
-          <div v-if="!isConnected && !qrCode" class="mt-4 flex justify-center">
-            <div
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800"
-            >
-              <div class="w-2 h-2 bg-red-400 rounded-full mr-2" />
-              {{ $t('INBOX_MGMT.WHATSAPP_QR.NOT_CONNECTED') }}
+            <!-- Connection Status -->
+            <div v-if="!isConnected && !qrCode">
+              <div
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800"
+              >
+                <div class="w-2 h-2 bg-red-400 rounded-full mr-2" />
+                {{ $t('INBOX_MGMT.WHATSAPP_QR.NOT_CONNECTED') }}
+              </div>
             </div>
           </div>
 
@@ -543,7 +560,7 @@ export default {
                 {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.REJECT_CALL_DESC') }}
               </p>
             </div>
-            <Switch v-model="settings.reject_call" />
+            <WootSwitch v-model="settings.reject_call" />
           </div>
 
           <!-- Call Message -->
@@ -572,7 +589,7 @@ export default {
                   {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.GROUPS_IGNORE_DESC') }}
                 </p>
               </div>
-              <Switch v-model="settings.groups_ignore" />
+              <WootSwitch v-model="settings.groups_ignore" />
             </div>
 
             <div class="flex items-center justify-between">
@@ -584,7 +601,7 @@ export default {
                   {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.ALWAYS_ONLINE_DESC') }}
                 </p>
               </div>
-              <Switch v-model="settings.always_online" />
+              <WootSwitch v-model="settings.always_online" />
             </div>
 
             <div class="flex items-center justify-between">
@@ -596,7 +613,7 @@ export default {
                   {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.READ_MESSAGES_DESC') }}
                 </p>
               </div>
-              <Switch v-model="settings.read_messages" />
+              <WootSwitch v-model="settings.read_messages" />
             </div>
 
             <div class="flex items-center justify-between">
@@ -608,7 +625,7 @@ export default {
                   {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.READ_STATUS_DESC') }}
                 </p>
               </div>
-              <Switch v-model="settings.read_status" />
+              <WootSwitch v-model="settings.read_status" />
             </div>
 
             <div class="flex items-center justify-between">
@@ -622,7 +639,7 @@ export default {
                   }}
                 </p>
               </div>
-              <Switch v-model="settings.sync_full_history" />
+              <WootSwitch v-model="settings.sync_full_history" />
             </div>
           </div>
 
