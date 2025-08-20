@@ -2,7 +2,7 @@
 
 class Api::V1::Webhooks::EvolutionController < ApplicationController
   skip_before_action :authenticate_user!, raise: false
-  skip_before_action :verify_authenticity_token
+  skip_before_action :set_current_user
 
   def process_payload
     instance_name = params[:instance_name]
