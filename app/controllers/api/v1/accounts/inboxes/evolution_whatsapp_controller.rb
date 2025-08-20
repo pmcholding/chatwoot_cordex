@@ -171,7 +171,9 @@ class Api::V1::Accounts::Inboxes::EvolutionWhatsappController < Api::V1::Account
   end
 
   def initialize_evolution_service
-    @evolution_service = EvolutionApiService.new
+    # Get the current user's access token for Evolution API
+    user_token = Current.user&.access_token&.token
+    @evolution_service = EvolutionApiService.new(user_token: user_token)
   rescue StandardError => e
     render json: { error: "Evolution API configuration error: #{e.message}" }, status: :service_unavailable
   end

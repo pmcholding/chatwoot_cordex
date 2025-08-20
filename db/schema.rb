@@ -61,8 +61,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_17_160000) do
     t.integer "status", default: 0
     t.jsonb "internal_attributes", default: {}, null: false
     t.jsonb "settings", default: {}
-    t.jsonb "features_enabled", default: {}
-    t.index ["features_enabled"], name: "idx_accounts_features_enabled_gin", using: :gin
     t.index ["status"], name: "index_accounts_on_status"
   end
 
@@ -143,47 +141,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_17_160000) do
     t.string "language", default: "en", null: false
     t.index ["language"], name: "index_agent_templates_on_language"
     t.index ["name"], name: "index_agent_templates_on_name"
-  end
-
-  create_table "ai_agent_assistants", force: :cascade do |t|
-    t.string "name", null: false
-    t.bigint "account_id", null: false
-    t.string "description"
-    t.jsonb "config", default: {}, null: false
-    t.jsonb "guardrails", default: {}
-    t.jsonb "response_guidelines", default: {}
-    t.bigint "agent_bot_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id", "name"], name: "index_ai_agent_assistants_on_account_id_and_name", unique: true
-    t.index ["account_id"], name: "index_ai_agent_assistants_on_account_id"
-    t.index ["agent_bot_id"], name: "index_ai_agent_assistants_on_agent_bot_id"
-  end
-
-  create_table "ai_agent_inboxes", force: :cascade do |t|
-    t.bigint "ai_agent_assistant_id", null: false
-    t.bigint "inbox_id", null: false
-    t.boolean "auto_assign", default: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["ai_agent_assistant_id", "inbox_id"], name: "index_ai_agent_inboxes_unique", unique: true
-    t.index ["ai_agent_assistant_id"], name: "index_ai_agent_inboxes_on_ai_agent_assistant_id"
-    t.index ["inbox_id"], name: "index_ai_agent_inboxes_on_inbox_id", unique: true
-  end
-
-  create_table "ai_agent_responses", force: :cascade do |t|
-    t.string "question", null: false
-    t.text "answer", null: false
-    t.vector "embedding", limit: 1536
-    t.bigint "assistant_id", null: false
-    t.bigint "account_id", null: false
-    t.string "status", default: "active"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_ai_agent_responses_on_account_id"
-    t.index ["assistant_id"], name: "index_ai_agent_responses_on_assistant_id"
-    t.index ["embedding"], name: "vector_idx_ai_agent_responses_embedding", using: :ivfflat
-    t.index ["status"], name: "index_ai_agent_responses_on_status"
   end
 
   create_table "applied_slas", force: :cascade do |t|
@@ -683,7 +640,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_17_160000) do
     t.index ["contact_inbox_id"], name: "index_conversations_on_contact_inbox_id"
     t.index ["first_reply_created_at"], name: "index_conversations_on_first_reply_created_at"
     t.index ["inbox_id"], name: "index_conversations_on_inbox_id"
-    t.index ["kanban_stage_id", "updated_at"], name: "idx_conversations_kanban_stage_updated", order: { updated_at: :desc }
+    t.index ["kanban_stage_id", "updated_at"], name: "idx_conversations_kanban_stage_updated"
+    t.index ["kanban_stage_id"], name: "index_conversations_on_kanban_stage_id"
     t.index ["priority"], name: "index_conversations_on_priority"
     t.index ["status", "account_id"], name: "index_conversations_on_status_and_account_id"
     t.index ["status", "priority"], name: "index_conversations_on_status_and_priority"
@@ -912,11 +870,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_17_160000) do
     t.integer "position", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id", "name"], name: "idx_kanban_stages_account_name_unique", unique: true
-    t.index ["account_id", "position"], name: "idx_kanban_stages_account_position"
-    t.index ["account_id", "position"], name: "idx_kanban_stages_account_position_unique", unique: true
-    t.check_constraint "\"position\" >= 1 AND \"position\" <= 20", name: "check_kanban_stages_position_range"
-    t.check_constraint "color::text ~ '^#[0-9A-Fa-f]{6}$'::text", name: "check_kanban_stages_color_format"
+    t.index ["account_id", "name"], name: "unique_stage_name_per_account", unique: true
+    t.index ["account_id", "position"], name: "idx_kanban_stages_account_position", unique: true
+    t.index ["account_id"], name: "idx_kanban_stages_account_id"
+    t.index ["account_id"], name: "index_kanban_stages_on_account_id"
+    t.check_constraint "color::text ~ '^#[0-9A-Fa-f]{6}$'::text", name: "valid_color_format"
   end
 
   create_table "labels", force: :cascade do |t|

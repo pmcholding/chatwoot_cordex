@@ -21,9 +21,10 @@ Add the following environment variables to your `.env` file:
 # Evolution API Configuration
 EVOLUTION_API_URL=https://evo.cordex.ai
 EVOLUTION_API_KEY=your_evolution_api_key
-CHATWOOT_TOKEN=your_chatwoot_token
 FRONTEND_URL=https://your-chatwoot-domain.com
 ```
+
+**Note**: The `CHATWOOT_TOKEN` is now dynamically obtained from the current user's access token. Each user has their own unique access token that is used for Evolution API integration, ensuring proper user-specific authentication.
 
 ### Required Variables
 

@@ -3,11 +3,13 @@
 class EvolutionApiService
   include HTTParty
 
-  def initialize
+  def initialize(user_token: nil)
     @base_url = Rails.application.credentials.dig(:evolution_api, :url) || ENV.fetch('EVOLUTION_API_URL', nil)
     @api_key = Rails.application.credentials.dig(:evolution_api, :key) || ENV.fetch('EVOLUTION_API_KEY', nil)
-    @chatwoot_token = Rails.application.credentials.dig(:evolution_api, :chatwoot_token) || ENV.fetch('CHATWOOT_TOKEN', nil)
     @frontend_url = Rails.application.credentials.dig(:evolution_api, :frontend_url) || ENV.fetch('FRONTEND_URL', nil)
+
+    # Use the provided user token or fallback to environment variable for backward compatibility
+    @chatwoot_token = user_token || Rails.application.credentials.dig(:evolution_api, :chatwoot_token) || ENV.fetch('CHATWOOT_TOKEN', nil)
 
     raise 'Evolution API configuration missing' unless @base_url && @api_key && @chatwoot_token && @frontend_url
 

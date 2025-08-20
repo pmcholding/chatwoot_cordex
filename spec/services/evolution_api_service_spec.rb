@@ -3,7 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe EvolutionApiService do
-  let(:service) { described_class.new }
+  let(:user_token) { 'test-user-token' }
+  let(:service) { described_class.new(user_token: user_token) }
   let(:instance_name) { 'test_instance' }
   let(:account_id) { 1 }
   let(:inbox_name) { 'Test Inbox' }
@@ -22,16 +23,22 @@ RSpec.describe EvolutionApiService do
   end
 
   describe '#initialize' do
-    it 'sets up the service with correct configuration' do
+    it 'sets up the service with correct configuration using user token' do
       expect(service.instance_variable_get(:@base_url)).to eq('https://test-api.com')
       expect(service.instance_variable_get(:@api_key)).to eq('test-key')
-      expect(service.instance_variable_get(:@chatwoot_token)).to eq('test-token')
+      expect(service.instance_variable_get(:@chatwoot_token)).to eq('test-user-token')
       expect(service.instance_variable_get(:@frontend_url)).to eq('https://test-frontend.com')
+    end
+
+    it 'falls back to environment token when user token is not provided' do
+      service_without_token = described_class.new
+      expect(service_without_token.instance_variable_get(:@chatwoot_token)).to eq('test-token')
     end
 
     it 'raises error when configuration is missing' do
       allow(Rails.application.credentials).to receive(:dig).and_return(nil)
       allow(ENV).to receive(:[]).and_return(nil)
+      allow(ENV).to receive(:fetch).and_return(nil)
 
       expect { described_class.new }.to raise_error('Evolution API configuration missing')
     end
@@ -43,7 +50,7 @@ RSpec.describe EvolutionApiService do
         instanceName: instance_name,
         integration: 'WHATSAPP-BAILEYS',
         chatwootAccountId: account_id.to_s,
-        chatwootToken: 'test-token',
+        chatwootToken: 'test-user-token',
         chatwootUrl: 'https://test-frontend.com',
         chatwootSignMsg: false,
         chatwootReopenConversation: false,
@@ -145,7 +152,7 @@ RSpec.describe EvolutionApiService do
     it 'handles error responses' do
       response_double = double('response', code: 400, parsed_response: { 'error' => 'Bad request' })
 
-      expect { service.send(:handle_response, response_double) }.to raise_error(StandardError, 'Bad Request: {"error"=>"Bad request"}')
+      expect { service.send(:handle_response, response_double) }.to raise_error(StandardError, 'Bad Request: {"error" => "Bad request"}')
     end
   end
 end

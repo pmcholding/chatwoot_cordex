@@ -18,13 +18,14 @@ Integrar a Evolution API ao Chatwoot para permitir conexão de instâncias Whats
 ```bash
 EVOLUTION_API_URL=https://evo.cordex.ai
 EVOLUTION_API_KEY=0a128ed725af4c594b33bda5cbb7b4ae
-CHATWOOT_TOKEN=6RKJyENK4tChTuPiQBK3z3gJ
 FRONTEND_URL=https://app.cordex.ai
 ```
 
 ### 2.2 Observações
 - `chatwootAccountId` deve ser obtido dinamicamente do contexto da requisição
 - `FRONTEND_URL` é usado como `chatwootUrl` na Evolution API
+- `CHATWOOT_TOKEN` agora é obtido dinamicamente do access token do usuário atual
+- Cada usuário possui seu próprio access token único para autenticação com a Evolution API
 
 ## 3. Fluxo Funcional
 
