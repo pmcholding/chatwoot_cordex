@@ -218,8 +218,8 @@
         }
       },
       "WHATSAPP": {
-        "TITLE": "Canal do WhatsApp",
-        "DESC": "Comece a oferecer suporte a seus clientes pelo WhatsApp.",
+        "TITLE": "Canal WABA",
+        "DESC": "Comece a oferecer suporte a seus clientes pelo WhatsApp Business API.",
         "PROVIDERS": {
           "LABEL": "Provedor de API",
           "WHATSAPP_EMBEDDED": "WhatsApp Business",
@@ -300,6 +300,19 @@
         },
         "API": {
           "ERROR_MESSAGE": "Não foi possível salvar o canal do WhatsApp"
+        }
+      },
+      "WHATSAPP_EVOLUTION": {
+        "TITLE": "WhatsApp Evolution",
+        "DESC": "Conecte via código QR usando Evolution API para integração fácil do WhatsApp.",
+        "INBOX_NAME": {
+          "LABEL": "Nome da Caixa de Entrada",
+          "PLACEHOLDER": "Por favor, insira um nome para a caixa de entrada",
+          "ERROR": "Este campo é obrigatório"
+        },
+        "SUBMIT_BUTTON": "Criar Canal do WhatsApp",
+        "API": {
+          "ERROR_MESSAGE": "Não foi possível salvar o canal do WhatsApp Evolution"
         }
       },
       "VOICE": {
@@ -477,7 +490,12 @@
       "MESSAGE": "Agora você ja pode oferecer uma excelente experiência no atendimento de seus clientes através do seu novo Canal",
       "BUTTON_TEXT": "Leva-me lá",
       "MORE_SETTINGS": "Mais configurações",
-      "WEBSITE_SUCCESS": "Você concluiu a criação de um canal de site. Copie o código mostrado abaixo e cole-o no seu site. Na próxima vez que um cliente usar o bate-papo ao vivo, a conversa aparecerá automaticamente na sua caixa de entrada."
+      "WEBSITE_SUCCESS": "Você concluiu a criação de um canal de site. Copie o código mostrado abaixo e cole-o no seu site. Na próxima vez que um cliente usar o bate-papo ao vivo, a conversa aparecerá automaticamente na sua caixa de entrada.",
+      "WHATSAPP_EVOLUTION": {
+        "MESSAGE": "Seu canal WhatsApp Evolution está pronto! Conecte sua conta do WhatsApp usando o código QR abaixo para começar a receber mensagens.",
+        "MORE_SETTINGS": "Mais configurações",
+        "TAKE_ME_THERE": "Leva-me lá"
+      }
     },
     "REAUTH": "Reautorizar",
     "VIEW": "Visualizar",

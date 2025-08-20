@@ -50,6 +50,8 @@ export default {
         'twilio',
         'api',
         'whatsapp',
+        'waba',
+        'whatsapp_evolution',
         'sms',
         'telegram',
         'line',

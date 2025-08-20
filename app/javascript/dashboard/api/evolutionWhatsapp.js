@@ -9,11 +9,24 @@ class EvolutionWhatsappAPI extends ApiClient {
   // Get inbox ID from current route
   // eslint-disable-next-line class-methods-use-this
   get inboxIdFromRoute() {
-    const isInsideInboxScopedURLs =
-      window.location.pathname.includes('/inboxes/');
+    const pathname = window.location.pathname;
 
-    if (isInsideInboxScopedURLs) {
-      const pathParts = window.location.pathname.split('/');
+    // Handle inbox creation flow: /app/accounts/1/settings/inboxes/new/{inbox_id}/finish
+    if (pathname.includes('/inboxes/new/')) {
+      const pathParts = pathname.split('/');
+      const newIndex = pathParts.indexOf('new');
+      if (
+        newIndex !== -1 &&
+        pathParts[newIndex + 1] &&
+        pathParts[newIndex + 1] !== 'finish'
+      ) {
+        return pathParts[newIndex + 1];
+      }
+    }
+
+    // Handle regular inbox URLs: /app/accounts/1/inboxes/{inbox_id}
+    if (pathname.includes('/inboxes/')) {
+      const pathParts = pathname.split('/');
       const inboxIndex = pathParts.indexOf('inboxes');
       if (inboxIndex !== -1 && pathParts[inboxIndex + 1]) {
         return pathParts[inboxIndex + 1];

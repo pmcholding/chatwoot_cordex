@@ -1,5 +1,4 @@
 <script>
-import { useAlert } from 'dashboard/composables';
 import SettingsSection from '../../../../../components/SettingsSection.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import WootSwitch from 'dashboard/components-next/switch/Switch.vue';
@@ -131,18 +130,8 @@ export default {
         if (this.isConnected) {
           await this.loadInstanceSettings();
         }
-
-        useAlert(
-          data.existing_instance
-            ? this.$t('INBOX_MGMT.WHATSAPP_QR.INSTANCE_FOUND')
-            : this.$t('INBOX_MGMT.WHATSAPP_QR.INSTANCE_CREATED')
-        );
       } catch (error) {
         // Failed to initialize Evolution instance
-        useAlert(
-          error.response?.data?.error ||
-            this.$t('INBOX_MGMT.WHATSAPP_QR.INITIALIZATION_ERROR')
-        );
       } finally {
         this.isInitializing = false;
       }
@@ -159,7 +148,6 @@ export default {
         if (this.isConnected) {
           this.stopStatusPolling();
           this.clearQRCode();
-          useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.CONNECTED'));
 
           // Load settings from instance when state is open
           await this.loadInstanceSettings();
@@ -184,14 +172,8 @@ export default {
         // Start QR timer and connection polling
         this.startQRTimer();
         this.startStatusPolling();
-
-        useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.QR_GENERATED'));
       } catch (error) {
         // Failed to generate QR code
-        useAlert(
-          error.response?.data?.error ||
-            this.$t('INBOX_MGMT.WHATSAPP_QR.QR_ERROR')
-        );
       } finally {
         this.isConnectingQR = false;
       }
@@ -214,13 +196,10 @@ export default {
         // Start polling to check for connection
         this.startStatusPolling();
 
-        useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.PAIRING_CODE_GENERATED'));
+
       } catch (error) {
         console.error('Failed to connect with phone number:', error);
-        useAlert(
-          error.response?.data?.error ||
-          this.$t('INBOX_MGMT.WHATSAPP_QR.PHONE_ERROR')
-        );
+
       } finally {
         this.isConnectingPhone = false;
       }
@@ -238,16 +217,10 @@ export default {
         this.qrCode = null;
         this.pairingCode = null;
 
-        useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.DISCONNECTED'));
-
         // Refresh connection status
         await this.checkConnectionStatus();
       } catch (error) {
         // Failed to disconnect instance
-        useAlert(
-          error.response?.data?.error ||
-            this.$t('INBOX_MGMT.WHATSAPP_QR.DISCONNECT_ERROR')
-        );
       } finally {
         this.isDisconnecting = false;
       }
@@ -258,14 +231,8 @@ export default {
         this.isSavingSettings = true;
 
         await EvolutionWhatsappAPI.updateSettings(this.settings);
-
-        useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS_SAVED'));
       } catch (error) {
         // Failed to update settings
-        useAlert(
-          error.response?.data?.error ||
-            this.$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS_ERROR')
-        );
       } finally {
         this.isSavingSettings = false;
       }
@@ -283,10 +250,6 @@ export default {
           // Silent save - no notification for auto-saves
         } catch (error) {
           // Show error for failed auto-save
-          useAlert(
-            error.response?.data?.error ||
-              this.$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS_ERROR')
-          );
         }
       }, 500); // Wait 500ms before saving
     },
@@ -312,7 +275,6 @@ export default {
       };
 
       // Show notification that settings were loaded from instance
-      useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.LOADED_FROM_INSTANCE'));
     },
 
     async loadInstanceSettings() {
@@ -350,7 +312,6 @@ export default {
         if (this.qrTimeLeft <= 0) {
           this.stopQRTimer();
           this.clearQRCode();
-          useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.QR_EXPIRED'));
         }
       }, 1000);
     },

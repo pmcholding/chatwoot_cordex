@@ -2,12 +2,14 @@
 import EmptyState from '../../../../components/widgets/EmptyState.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import DuplicateInboxBanner from './channels/instagram/DuplicateInboxBanner.vue';
+import WhatsAppQRCode from './components/WhatsAppQRCode.vue';
 import { INBOX_TYPES } from 'dashboard/helper/inbox';
 export default {
   components: {
     EmptyState,
     NextButton,
     DuplicateInboxBanner,
+    WhatsAppQRCode,
   },
   computed: {
     currentInbox() {
@@ -54,7 +56,18 @@ export default {
         this.currentInbox.provider_config?.source !== 'embedded_signup'
       );
     },
+    isEvolutionWhatsApp() {
+      return (
+        this.currentInbox?.channel_type === 'Channel::Api' &&
+        this.currentInbox?.additional_attributes?.provider ===
+          'evolution_whatsapp'
+      );
+    },
     message() {
+      if (this.isEvolutionWhatsApp) {
+        return this.$t('INBOX_MGMT.FINISH.WHATSAPP_EVOLUTION.MESSAGE');
+      }
+
       if (this.isATwilioInbox) {
         return `${this.$t('INBOX_MGMT.FINISH.MESSAGE')}. ${this.$t(
           'INBOX_MGMT.ADD.TWILIO.API_CALLBACK.SUBTITLE'
@@ -101,7 +114,52 @@ export default {
       v-if="hasDuplicateInstagramInbox"
       :content="$t('INBOX_MGMT.ADD.INSTAGRAM.NEW_INBOX_SUGGESTION')"
     />
+    <!-- Evolution WhatsApp QR Code Interface -->
+    <div v-if="isEvolutionWhatsApp" class="max-w-4xl">
+      <div class="mb-6">
+        <h2 class="text-2xl font-semibold text-n-slate-12 mb-2">
+          {{ $t('INBOX_MGMT.FINISH.TITLE') }}
+        </h2>
+        <p class="text-n-slate-11">
+          {{ message }}
+        </p>
+      </div>
+
+      <!-- WhatsApp QR Code Component -->
+      <WhatsAppQRCode :inbox="currentInbox" />
+
+      <!-- Action Buttons -->
+      <div class="flex justify-center gap-4 mt-8">
+        <router-link
+          :to="{
+            name: 'settings_inbox_show',
+            params: { inboxId: $route.params.inbox_id },
+          }"
+        >
+          <NextButton
+            outline
+            slate
+            :label="$t('INBOX_MGMT.FINISH.WHATSAPP_EVOLUTION.MORE_SETTINGS')"
+          />
+        </router-link>
+        <router-link
+          :to="{
+            name: 'inbox_dashboard',
+            params: { inboxId: $route.params.inbox_id },
+          }"
+        >
+          <NextButton
+            solid
+            teal
+            :label="$t('INBOX_MGMT.FINISH.WHATSAPP_EVOLUTION.TAKE_ME_THERE')"
+          />
+        </router-link>
+      </div>
+    </div>
+
+    <!-- Standard Finish Interface -->
     <EmptyState
+      v-else
       :title="$t('INBOX_MGMT.FINISH.TITLE')"
       :message="message"
       :button-text="$t('INBOX_MGMT.FINISH.BUTTON_TEXT')"

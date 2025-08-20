@@ -218,8 +218,8 @@
         }
       },
       "WHATSAPP": {
-        "TITLE": "WhatsApp Channel",
-        "DESC": "Start supporting your customers via WhatsApp.",
+        "TITLE": "WABA Channel",
+        "DESC": "Start supporting your customers via WhatsApp Business API.",
         "PROVIDERS": {
           "LABEL": "API Provider",
           "WHATSAPP_EMBEDDED": "WhatsApp Business",
@@ -302,6 +302,19 @@
         },
         "API": {
           "ERROR_MESSAGE": "We were not able to save the WhatsApp channel"
+        }
+      },
+      "WHATSAPP_EVOLUTION": {
+        "TITLE": "WhatsApp Evolution",
+        "DESC": "Connect via QR Code using Evolution API for easy WhatsApp integration.",
+        "INBOX_NAME": {
+          "LABEL": "Inbox Name",
+          "PLACEHOLDER": "Please enter an inbox name",
+          "ERROR": "This field is required"
+        },
+        "SUBMIT_BUTTON": "Create WhatsApp Channel",
+        "API": {
+          "ERROR_MESSAGE": "We were not able to save the WhatsApp Evolution channel"
         }
       },
       "VOICE": {
@@ -479,7 +492,12 @@
       "MESSAGE": "You can now engage with your customers through your new Channel. Happy supporting",
       "BUTTON_TEXT": "Take me there",
       "MORE_SETTINGS": "More settings",
-      "WEBSITE_SUCCESS": "You have successfully finished creating a website channel. Copy the code shown below and paste it on your website. Next time a customer use the live chat, the conversation will automatically appear on your inbox."
+      "WEBSITE_SUCCESS": "You have successfully finished creating a website channel. Copy the code shown below and paste it on your website. Next time a customer use the live chat, the conversation will automatically appear on your inbox.",
+      "WHATSAPP_EVOLUTION": {
+        "MESSAGE": "Your WhatsApp Evolution channel is ready! Connect your WhatsApp account using the QR Code below to start receiving messages.",
+        "MORE_SETTINGS": "More configurations",
+        "TAKE_ME_THERE": "Take me there"
+      }
     },
     "REAUTH": "Reauthorize",
     "VIEW": "View",
