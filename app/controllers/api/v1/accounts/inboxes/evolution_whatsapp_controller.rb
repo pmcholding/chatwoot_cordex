@@ -149,6 +149,14 @@ class Api::V1::Accounts::Inboxes::EvolutionWhatsappController < Api::V1::Account
     }
   end
 
+  def instance_settings
+    instance_name = @inbox.channel.evolution_instance_name
+    settings = @evolution_service.get_instance_settings(instance_name)
+    render json: { settings: settings }
+  rescue StandardError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   private
 
   def fetch_inbox

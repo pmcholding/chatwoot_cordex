@@ -54,11 +54,52 @@ export default {
 
       // Polling
       statusPollingInterval: null,
+
+      // Auto-save
+      autoSaveTimeout: null,
     };
   },
   computed: {
     isConnected() {
       return this.connectionState?.instance?.state === 'open';
+    },
+  },
+  watch: {
+    // Watch for changes in settings and auto-save
+    'settings.reject_call'(newVal, oldVal) {
+      if (oldVal !== undefined && newVal !== oldVal) {
+        this.autoSaveSettings();
+      }
+    },
+    'settings.msg_call'(newVal, oldVal) {
+      if (oldVal !== undefined && newVal !== oldVal) {
+        this.autoSaveSettings();
+      }
+    },
+    'settings.groups_ignore'(newVal, oldVal) {
+      if (oldVal !== undefined && newVal !== oldVal) {
+        this.autoSaveSettings();
+      }
+    },
+    'settings.always_online'(newVal, oldVal) {
+      if (oldVal !== undefined && newVal !== oldVal) {
+        this.autoSaveSettings();
+      }
+    },
+    'settings.read_messages'(newVal, oldVal) {
+      if (oldVal !== undefined && newVal !== oldVal) {
+        this.autoSaveSettings();
+      }
+    },
+    'settings.read_status'(newVal, oldVal) {
+      if (oldVal !== undefined && newVal !== oldVal) {
+        this.autoSaveSettings();
+      }
+    },
+    'settings.sync_full_history'(newVal, oldVal) {
+      if (oldVal !== undefined && newVal !== oldVal) {
+        this.autoSaveSettings();
+      }
     },
   },
   async mounted() {
@@ -68,6 +109,11 @@ export default {
   beforeUnmount() {
     this.stopStatusPolling();
     this.stopQRTimer();
+
+    // Clear auto-save timeout
+    if (this.autoSaveTimeout) {
+      clearTimeout(this.autoSaveTimeout);
+    }
   },
   methods: {
     async initializeInstance() {
@@ -81,9 +127,9 @@ export default {
         this.webhookUrl = data.webhook_url;
         this.connectionState = data.connection_state;
 
-        // If connected, load settings
-        if (this.isConnected && data.connection_state?.settings) {
-          this.loadSettings(data.connection_state.settings);
+        // If connected (state = 'open'), load settings from instance
+        if (this.isConnected) {
+          await this.loadInstanceSettings();
         }
 
         useAlert(
@@ -115,10 +161,8 @@ export default {
           this.clearQRCode();
           useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.CONNECTED'));
 
-          // Load settings if available
-          if (data.settings) {
-            this.loadSettings(data.settings);
-          }
+          // Load settings from instance when state is open
+          await this.loadInstanceSettings();
         }
       } catch (error) {
         // Failed to check connection status
@@ -227,19 +271,62 @@ export default {
       }
     },
 
+    async autoSaveSettings() {
+      // Debounce auto-save to avoid too many requests
+      if (this.autoSaveTimeout) {
+        clearTimeout(this.autoSaveTimeout);
+      }
+
+      this.autoSaveTimeout = setTimeout(async () => {
+        try {
+          await EvolutionWhatsappAPI.updateSettings(this.settings);
+          // Silent save - no notification for auto-saves
+        } catch (error) {
+          // Show error for failed auto-save
+          useAlert(
+            error.response?.data?.error ||
+              this.$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS_ERROR')
+          );
+        }
+      }, 500); // Wait 500ms before saving
+    },
+
     loadSettings(settingsData) {
+      // Map camelCase from API to snake_case used in Vue
       this.settings = {
-        reject_call: settingsData.reject_call || false,
-        msg_call: settingsData.msg_call || '',
-        groups_ignore: settingsData.groups_ignore || false,
-        always_online: settingsData.always_online || false,
-        read_messages: settingsData.read_messages || false,
-        read_status: settingsData.read_status || false,
-        sync_full_history: settingsData.sync_full_history || false,
+        reject_call:
+          settingsData.rejectCall || settingsData.reject_call || false,
+        msg_call: settingsData.msgCall || settingsData.msg_call || '',
+        groups_ignore:
+          settingsData.groupsIgnore || settingsData.groups_ignore || false,
+        always_online:
+          settingsData.alwaysOnline || settingsData.always_online || false,
+        read_messages:
+          settingsData.readMessages || settingsData.read_messages || false,
+        read_status:
+          settingsData.readStatus || settingsData.read_status || false,
+        sync_full_history:
+          settingsData.syncFullHistory ||
+          settingsData.sync_full_history ||
+          false,
       };
 
       // Show notification that settings were loaded from instance
       useAlert(this.$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.LOADED_FROM_INSTANCE'));
+    },
+
+    async loadInstanceSettings() {
+      try {
+        const response = await EvolutionWhatsappAPI.getInstanceSettings();
+        const settingsData = response.data.settings;
+
+        if (settingsData) {
+          this.loadSettings(settingsData);
+        }
+      } catch (error) {
+        // Failed to load instance settings - not critical, just continue
+        // Could not load instance settings - not critical, just continue
+      }
     },
 
     startStatusPolling() {
@@ -307,24 +394,10 @@ export default {
       >
         <div class="space-y-4">
           <!-- Connection Buttons and Status -->
-          <div class="flex items-center justify-between">
-            <div class="flex space-x-4">
-              <NextButton
-                :is-loading="isConnectingQR"
-                @click="connectWithQRCode"
-              >
-                {{ $t('INBOX_MGMT.WHATSAPP_QR.CONNECT_QR') }}
-              </NextButton>
-              <!-- Phone number connection temporarily disabled - API not working -->
-              <!--
-              <NextButton
-                variant="hollow"
-                @click="showPhoneModal = true"
-              >
-                {{ $t('INBOX_MGMT.WHATSAPP_QR.CONNECT_PHONE') }}
-              </NextButton>
-              -->
-            </div>
+          <div class="flex items-center space-x-4">
+            <NextButton :is-loading="isConnectingQR" @click="connectWithQRCode">
+              {{ $t('INBOX_MGMT.WHATSAPP_QR.CONNECT_QR') }}
+            </NextButton>
 
             <!-- Connection Status -->
             <div v-if="!isConnected && !qrCode">
@@ -335,6 +408,16 @@ export default {
                 {{ $t('INBOX_MGMT.WHATSAPP_QR.NOT_CONNECTED') }}
               </div>
             </div>
+
+            <!-- Phone number connection temporarily disabled - API not working -->
+            <!--
+            <NextButton
+              variant="hollow"
+              @click="showPhoneModal = true"
+            >
+              {{ $t('INBOX_MGMT.WHATSAPP_QR.CONNECT_PHONE') }}
+            </NextButton>
+            -->
           </div>
 
           <!-- QR Code Display -->
@@ -427,129 +510,9 @@ export default {
         :title="$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.TITLE')"
         :sub-title="$t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.SUBTITLE')"
       >
-        <!-- Current Settings Status -->
-        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div class="flex items-center space-x-2 mb-3">
-            <div class="w-2 h-2 bg-blue-500 rounded-full" />
-            <span class="text-sm font-medium text-blue-800">
-              {{ $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.CURRENT_STATUS') }}
-            </span>
-          </div>
-          <div class="grid grid-cols-2 gap-4 text-xs">
-            <div class="space-y-1">
-              <div class="flex justify-between">
-                <span class="text-gray-600"
-                  >{{
-                    $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.REJECT_CALL')
-                  }}:</span
-                >
-                <span
-                  :class="
-                    settings.reject_call ? 'text-green-600' : 'text-gray-500'
-                  "
-                >
-                  {{
-                    settings.reject_call ? $t('GENERAL.YES') : $t('GENERAL.NO')
-                  }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600"
-                  >{{
-                    $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.GROUPS_IGNORE')
-                  }}:</span
-                >
-                <span
-                  :class="
-                    settings.groups_ignore ? 'text-green-600' : 'text-gray-500'
-                  "
-                >
-                  {{
-                    settings.groups_ignore
-                      ? $t('GENERAL.YES')
-                      : $t('GENERAL.NO')
-                  }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600"
-                  >{{
-                    $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.ALWAYS_ONLINE')
-                  }}:</span
-                >
-                <span
-                  :class="
-                    settings.always_online ? 'text-green-600' : 'text-gray-500'
-                  "
-                >
-                  {{
-                    settings.always_online
-                      ? $t('GENERAL.YES')
-                      : $t('GENERAL.NO')
-                  }}
-                </span>
-              </div>
-            </div>
-            <div class="space-y-1">
-              <div class="flex justify-between">
-                <span class="text-gray-600"
-                  >{{
-                    $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.READ_MESSAGES')
-                  }}:</span
-                >
-                <span
-                  :class="
-                    settings.read_messages ? 'text-green-600' : 'text-gray-500'
-                  "
-                >
-                  {{
-                    settings.read_messages
-                      ? $t('GENERAL.YES')
-                      : $t('GENERAL.NO')
-                  }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600"
-                  >{{
-                    $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.READ_STATUS')
-                  }}:</span
-                >
-                <span
-                  :class="
-                    settings.read_status ? 'text-green-600' : 'text-gray-500'
-                  "
-                >
-                  {{
-                    settings.read_status ? $t('GENERAL.YES') : $t('GENERAL.NO')
-                  }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600"
-                  >{{
-                    $t('INBOX_MGMT.WHATSAPP_QR.SETTINGS.SYNC_FULL_HISTORY')
-                  }}:</span
-                >
-                <span
-                  :class="
-                    settings.sync_full_history
-                      ? 'text-green-600'
-                      : 'text-gray-500'
-                  "
-                >
-                  {{
-                    settings.sync_full_history
-                      ? $t('GENERAL.YES')
-                      : $t('GENERAL.NO')
-                  }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Current Settings Status section removed as requested -->
 
-        <form class="space-y-6" @submit.prevent="updateSettings">
+        <div class="space-y-6">
           <!-- Reject Calls -->
           <div class="flex items-center justify-between">
             <div>
@@ -643,13 +606,8 @@ export default {
             </div>
           </div>
 
-          <!-- Save Button -->
-          <div class="pt-4">
-            <NextButton type="submit" :is-loading="isSavingSettings">
-              {{ $t('INBOX_MGMT.WHATSAPP_QR.SAVE_SETTINGS') }}
-            </NextButton>
-          </div>
-        </form>
+          <!-- Auto-save enabled - no manual save button needed -->
+        </div>
       </SettingsSection>
     </div>
 

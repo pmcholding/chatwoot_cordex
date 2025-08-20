@@ -60,6 +60,10 @@ class EvolutionWhatsappAPI extends ApiClient {
     });
   }
 
+  getInstanceSettings() {
+    return axios.get(`${this.url}/instance_settings`);
+  }
+
   getWebhookInfo() {
     return axios.get(`${this.url}/webhook_info`);
   }

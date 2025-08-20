@@ -214,6 +214,7 @@ Rails.application.routes.draw do
               post :connect_with_number
               delete :disconnect
               patch :update_settings
+              get :instance_settings
               get :webhook_info
             end
           end

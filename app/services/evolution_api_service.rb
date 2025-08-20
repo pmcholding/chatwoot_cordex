@@ -80,6 +80,17 @@ class EvolutionApiService
     handle_response(response)
   end
 
+  def get_instance_settings(instance_name)
+    response = HTTParty.get(
+      "#{@base_url}/settings/find/#{instance_name}",
+      headers: {
+        'apikey' => @api_key,
+        'Content-Type' => 'application/json'
+      }
+    )
+    handle_response(response)
+  end
+
   private
 
   def handle_response(response)

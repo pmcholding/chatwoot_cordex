@@ -935,6 +935,8 @@
         "LOADED_FROM_INSTANCE": "Configurações carregadas da instância do WhatsApp",
         "REJECT_CALL": "Rejeitar Chamadas",
         "REJECT_CALL_DESC": "Rejeitar automaticamente chamadas recebidas",
+        "MSG_CALL": "Mensagem de Rejeição de Chamada",
+        "MSG_CALL_PLACEHOLDER": "Desculpe, não posso atender chamadas agora. Por favor, envie uma mensagem.",
         "GROUPS_IGNORE": "Ignorar Grupos",
         "GROUPS_IGNORE_DESC": "Ignorar mensagens de grupos",
         "ALWAYS_ONLINE": "Sempre Online",
