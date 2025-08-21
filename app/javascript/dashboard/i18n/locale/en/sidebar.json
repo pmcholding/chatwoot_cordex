@@ -60,8 +60,12 @@
     "CUSTOM_ROLES": "Custom Roles",
     "SLA": "SLA",
     "BILLING": "Billing",
-    "INBOX": "Inbox"
-,
-    "KANBAN": "Kanban"
+    "INBOX": "Inbox",
+    "KANBAN": "Kanban",
+    "SET_YOUR_AVAILABILITY": "Set your availability",
+    "SET_AUTO_OFFLINE": {
+      "TEXT": "Mark me offline automatically",
+      "INFO_SHORT": "Automatically mark you offline when you aren't using the app."
+    }
   }
 }

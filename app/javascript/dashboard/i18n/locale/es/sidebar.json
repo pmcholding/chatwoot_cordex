@@ -1,6 +1,11 @@
 {
   "SIDEBAR": {
-    "KANBAN": "Kanban"
+    "KANBAN": "Kanban",
+    "SET_YOUR_AVAILABILITY": "Definir mi disponibilidad",
+    "SET_AUTO_OFFLINE": {
+      "TEXT": "Marcarme desconectado automáticamente",
+      "INFO_SHORT": "Marcar desconectado automáticamente cuando no estés usando la app."
+    }
   }
 }
 

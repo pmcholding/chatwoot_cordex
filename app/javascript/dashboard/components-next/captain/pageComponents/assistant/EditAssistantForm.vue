@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
 import { useMapGetter } from 'dashboard/composables/store';
+import { useRoute, useRouter } from 'vue-router';
 
 import Input from 'dashboard/components-next/input/Input.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -30,8 +31,9 @@ const props = defineProps({
     default: null,
   },
 });
-
 const emit = defineEmits(['submit']);
+const route = useRoute();
+const router = useRouter();
 
 const { t } = useI18n();
 
@@ -182,13 +184,34 @@ const openInstructionModal = () => {
 
 const closeInstructionModal = () => {
   showInstructionModal.value = false;
+  // Remove aiMode=true from URL if present
+  if (route.query?.aiMode) {
+    const newQuery = { ...route.query };
+    delete newQuery.aiMode;
+    router.replace({ name: route.name, params: route.params, query: newQuery });
+  }
 };
 
 const handleInstructionsGenerated = instructions => {
   state.instructions = instructions;
+  // Persist instructions immediately
+  const payload = {
+    config: {
+      ...props.assistant.config,
+      instructions: state.instructions,
+      temperature: state.temperature || 1,
+    },
+  };
+  emit('submit', payload);
   showInstructionModal.value = false;
   // Clear validation error if instructions were empty before
   v$.value.instructions.$reset();
+  // Remove aiMode=true from URL if present after applying
+  if (route.query?.aiMode) {
+    const newQuery = { ...route.query };
+    delete newQuery.aiMode;
+    router.replace({ name: route.name, params: route.params, query: newQuery });
+  }
 };
 
 const handleFeaturesUpdate = () => {

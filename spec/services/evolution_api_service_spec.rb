@@ -53,7 +53,7 @@ RSpec.describe EvolutionApiService do
         chatwootToken: 'test-user-token',
         chatwootUrl: 'https://test-frontend.com',
         chatwootSignMsg: false,
-        chatwootReopenConversation: false,
+        chatwootReopenConversation: true,
         chatwootConversationPending: false,
         chatwootImportContacts: false,
         chatwootNameInbox: inbox_name,

@@ -78,6 +78,9 @@
       "NO_RESULTS": "No se encontraron etapas",
       "INPUT_PLACEHOLDER": "Buscar etapas..."
     },
+    "MODAL": {
+      "TITLE": "Conversación con {contactName}"
+    },
     "CONVERSATION": {
       "STAGE_CHANGED": "Conversación movida a {stage}",
       "STAGE_CHANGE_ERROR": "No se pudo cambiar la etapa de la conversación"

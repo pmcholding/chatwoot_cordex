@@ -80,6 +80,9 @@
       "NO_RESULTS": "No stages found",
       "INPUT_PLACEHOLDER": "Search stages..."
     },
+    "MODAL": {
+      "TITLE": "Conversation with {contactName}"
+    },
     "CONVERSATION": {
       "STAGE_CHANGED": "Conversation moved to {stage}",
       "STAGE_CHANGE_ERROR": "Failed to change conversation stage"

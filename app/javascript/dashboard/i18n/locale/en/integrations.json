@@ -429,6 +429,8 @@
       "HEADER": "Assistants",
       "NO_ASSISTANTS_AVAILABLE": "There are no assistants available in your account.",
       "ADD_NEW": "Create a new assistant",
+      "CREATE_WITH_AI_NAME_TITLE": "Name your assistant",
+      "CREATE_WITH_AI_NAME_DESC": "Enter a name for your assistant before generating with AI",
       "DELETE": {
         "TITLE": "Are you sure to delete the assistant?",
         "DESCRIPTION": "This action is permanent. Deleting this assistant will remove it from all connected inboxes and permanently erase all generated knowledge.",

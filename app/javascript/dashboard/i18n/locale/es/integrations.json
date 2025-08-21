@@ -410,8 +410,10 @@
     },
     "ASSISTANTS": {
       "HEADER": "Assistants",
-      "NO_ASSISTANTS_AVAILABLE": "There are no assistants available in your account.",
-      "ADD_NEW": "Create a new assistant",
+      "NO_ASSISTANTS_AVAILABLE": "No hay asistentes disponibles en tu cuenta.",
+      "ADD_NEW": "Crear un nuevo asistente",
+      "CREATE_WITH_AI_NAME_TITLE": "Ponle nombre a tu asistente",
+      "CREATE_WITH_AI_NAME_DESC": "Ingresa un nombre para el asistente antes de generar con IA",
       "TEMPLATE_SELECTION": {
         "TITLE": "Elige el Método de Creación del Asistente",
         "DESCRIPTION": "Selecciona cómo te gustaría crear tu nuevo asistente",

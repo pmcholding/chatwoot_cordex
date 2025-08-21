@@ -1,0 +1,38 @@
+{
+  "CAPTAIN": {
+    "ASSISTANTS": {
+      "CREATE_WITH_AI_NAME_TITLE": "Assistant Name",
+      "CREATE_WITH_AI_NAME_DESC": "Enter the assistant name before generating with AI",
+      "EDIT_TITLE": "Edit Assistant",
+      "EDIT_DESCRIPTION": "Modify assistant settings and configuration",
+      "WELCOME_MESSAGE": "Welcome message",
+      "WELCOME_MESSAGE_PLACEHOLDER": "Enter the welcome message for this assistant",
+      "KNOWLEDGE_BASE": "Knowledge Base",
+      "KNOWLEDGE_BASE_PLACEHOLDER": "Enter knowledge base information for this assistant",
+      "INSTRUCTIONS": "Instructions",
+      "INSTRUCTIONS_PLACEHOLDER": "Enter specific instructions for this assistant",
+      "SYSTEM_PROMPT": "System Prompt",
+      "SYSTEM_PROMPT_PLACEHOLDER": "Enter the system prompt for this assistant",
+      "ASSISTANT_NAME": "Assistant Name",
+      "ASSISTANT_NAME_PLACEHOLDER": "Enter assistant name",
+      "DESCRIPTION": "Description",
+      "DESCRIPTION_PLACEHOLDER": "Enter assistant description",
+      "TEMPERATURE": "Temperature",
+      "TEMPERATURE_DESCRIPTION": "Controls randomness in responses (0.0 = more focused, 1.0 = more creative)",
+      "MAX_TOKENS": "Max Tokens",
+      "MAX_TOKENS_DESCRIPTION": "Maximum number of tokens in response",
+      "MODEL": "Model",
+      "MODEL_DESCRIPTION": "AI model to use for this assistant",
+      "SUBMIT": "Save Assistant",
+      "CANCEL": "Cancel",
+      "UPDATE": "Update Assistant",
+      "CREATE": "Create Assistant",
+      "LOADING": "Processing...",
+      "SUCCESS_MESSAGE": "Assistant saved successfully",
+      "ERROR_MESSAGE": "Failed to save assistant",
+      "DELETE_CONFIRM": "Are you sure you want to delete this assistant?",
+      "DELETE_SUCCESS": "Assistant deleted successfully",
+      "DELETE_ERROR": "Failed to delete assistant"
+    }
+  }
+}

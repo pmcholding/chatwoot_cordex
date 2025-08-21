@@ -412,6 +412,8 @@
       "HEADER": "Assistentes",
       "NO_ASSISTANTS_AVAILABLE": "Não há assistentes disponíveis em sua conta.",
       "ADD_NEW": "Criar um novo assistente",
+      "CREATE_WITH_AI_NAME_TITLE": "Dê um nome ao seu assistente",
+      "CREATE_WITH_AI_NAME_DESC": "Digite um nome para o assistente antes de gerar com IA",
       "TEMPLATE_SELECTION": {
         "TITLE": "Escolha o Método de Criação do Assistente",
         "DESCRIPTION": "Selecione como você gostaria de criar seu novo assistente",

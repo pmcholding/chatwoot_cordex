@@ -12,6 +12,8 @@ import FeatureSpotlightPopover from 'dashboard/components-next/feature-spotlight
 import LimitBanner from 'dashboard/components-next/captain/pageComponents/response/LimitBanner.vue';
 import AssistantSelectionModal from 'dashboard/components-next/captain/pageComponents/assistant/AssistantSelectionModal.vue';
 import CreateAssistantDialog from 'dashboard/components-next/captain/pageComponents/assistant/CreateAssistantDialog.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import Input from 'dashboard/components-next/input/Input.vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -27,6 +29,11 @@ const showSelectionModal = ref(false);
 const showCreateDialog = ref(false);
 const selectedTemplate = ref(null);
 const aiMode = ref(false);
+
+// Assistant name prompt dialog refs/state
+const nameDialog = ref(null);
+const newAssistantName = ref('');
+const isCreatingAI = ref(false);
 
 const handleDelete = () => {
   deleteAssistantDialog.value.dialogRef.open();
@@ -115,11 +122,23 @@ const handleCreateFromScratch = async () => {
   }
 };
 
-const handleCreateWithAI = async () => {
+// Open name prompt first, then create with AI
+const handleCreateWithAI = () => {
+  newAssistantName.value = '';
+  isCreatingAI.value = true;
+  nameDialog.value?.open();
+};
+
+const confirmCreateWithAI = async () => {
   try {
-    // Create a basic assistant first
-    const basicAssistant = {
-      name: 'New AI Assistant',
+    const name = (newAssistantName.value || '').trim();
+    if (!name) {
+      // Fallback default if empty
+      newAssistantName.value = '';
+    }
+
+    const assistantPayload = {
+      name: name || 'New AI Assistant',
       description: 'AI-generated assistant',
       config: {
         product_name: '',
@@ -130,10 +149,11 @@ const handleCreateWithAI = async () => {
 
     const createdAssistant = await store.dispatch(
       'captainAssistants/create',
-      basicAssistant
+      assistantPayload
     );
 
-    // Close the selection modal
+    // Close dialogs
+    nameDialog.value?.close();
     showSelectionModal.value = false;
 
     // Navigate to the edit page with AI mode
@@ -148,6 +168,8 @@ const handleCreateWithAI = async () => {
     aiMode.value = true;
     showSelectionModal.value = false;
     showCreateDialog.value = true;
+  } finally {
+    isCreatingAI.value = false;
   }
 };
 
@@ -241,6 +263,35 @@ onMounted(() => store.dispatch('captainAssistants/get'));
       :entity="selectedAssistant"
       type="Assistants"
     />
+
+    <!-- Prompt for Assistant Name when creating with AI -->
+    <Dialog
+      ref="nameDialog"
+      type="edit"
+      :title="
+        $t('CAPTAIN.ASSISTANTS.CREATE_WITH_AI_NAME_TITLE') ||
+        'Nome do Assistente'
+      "
+      :description="
+        $t('CAPTAIN.ASSISTANTS.CREATE_WITH_AI_NAME_DESC') ||
+        'Digite o nome do assistente antes de gerar com IA'
+      "
+      confirm-button-label="Continuar"
+      show-cancel-button
+      show-confirm-button
+      :disable-confirm-button="!newAssistantName"
+      :is-loading="false"
+      @confirm="confirmCreateWithAI"
+      @close="() => (isCreatingAI = false)"
+    >
+      <Input
+        id="assistant-name"
+        v-model="newAssistantName"
+        type="text"
+        placeholder="Ex: Assistente de Suporte"
+        label="Nome"
+      />
+    </Dialog>
 
     <!-- Assistant Selection Modal -->
     <woot-modal

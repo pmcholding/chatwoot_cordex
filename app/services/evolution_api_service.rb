@@ -26,7 +26,7 @@ class EvolutionApiService
       chatwootToken: @chatwoot_token,
       chatwootUrl: @frontend_url,
       chatwootSignMsg: false,
-      chatwootReopenConversation: false,
+      chatwootReopenConversation: true,
       chatwootConversationPending: false,
       chatwootImportContacts: false,
       chatwootNameInbox: inbox_name,

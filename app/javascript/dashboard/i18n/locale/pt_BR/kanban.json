@@ -78,6 +78,9 @@
       "NO_RESULTS": "Nenhum estágio encontrado",
       "INPUT_PLACEHOLDER": "Pesquisar estágios..."
     },
+    "MODAL": {
+      "TITLE": "Conversa com {contactName}"
+    },
     "CONVERSATION": {
       "STAGE_CHANGED": "Conversa movida para {stage}",
       "STAGE_CHANGE_ERROR": "Falha ao alterar estágio da conversa"

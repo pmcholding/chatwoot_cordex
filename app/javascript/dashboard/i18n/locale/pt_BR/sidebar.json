@@ -62,6 +62,11 @@
     "BILLING": "Cobrança",
     "INBOX": "Caixa de Entrada",
     "KANBAN": "Kanban",
+    "SET_YOUR_AVAILABILITY": "Definir minha disponibilidade",
+    "SET_AUTO_OFFLINE": {
+      "TEXT": "Marcar offline automaticamente",
+      "INFO_SHORT": "Marcar offline automaticamente quando você não estiver usando o app."
+    },
     "WHATSAPP": "WhatsApp"
   }
 }
