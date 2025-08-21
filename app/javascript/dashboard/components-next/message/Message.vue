@@ -128,6 +128,7 @@ const props = defineProps({
   senderId: { type: Number, default: null },
   senderType: { type: String, default: null },
   sourceId: { type: String, default: '' }, // eslint-disable-line vue/no-unused-properties
+  scheduledAt: { type: [Number, String], default: null }, // eslint-disable-line vue/no-unused-properties
 });
 
 const contextMenuPosition = ref({});
@@ -154,6 +155,7 @@ const variant = computed(() => {
     return MESSAGE_VARIANTS.EMAIL;
   }
 
+  if (props.status === MESSAGE_STATUS.SCHEDULED) return MESSAGE_VARIANTS.SCHEDULED;
   if (props.status === MESSAGE_STATUS.FAILED) return MESSAGE_VARIANTS.ERROR;
   if (props.contentAttributes?.isUnsupported)
     return MESSAGE_VARIANTS.UNSUPPORTED;
@@ -366,13 +368,15 @@ const shouldRenderMessage = computed(() => {
   const isUnsupported = props.contentAttributes?.isUnsupported;
   const isAnIntegrationMessage =
     props.contentType === CONTENT_TYPES.INTEGRATIONS;
+  const isScheduledMessage = props.status === 'scheduled';
 
   return (
     hasAttachments ||
     props.content ||
     isEmailContentType ||
     isUnsupported ||
-    isAnIntegrationMessage
+    isAnIntegrationMessage ||
+    isScheduledMessage
   );
 });
 
@@ -461,6 +465,7 @@ provideMessageContext({
   orientation,
   isBotOrAgentMessage,
   shouldGroupWithNext,
+  scheduledAt: computed(() => props.scheduledAt),
 });
 </script>
 

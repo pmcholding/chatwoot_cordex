@@ -149,9 +149,11 @@ const actions = {
         message => !messages.find(item => item.id === message.id)
       );
       selectedChat.messages.push(...missingMessages);
-      // Sort the messages by created_at
+      // Sort the messages by scheduled_at (if exists) or created_at
       const sortedMessages = selectedChat.messages.sort((a, b) => {
-        return new Date(a.created_at) - new Date(b.created_at);
+        const timestampA = a.scheduled_at || a.created_at;
+        const timestampB = b.scheduled_at || b.created_at;
+        return new Date(timestampA) - new Date(timestampB);
       });
       commit(types.SET_MISSING_MESSAGES, {
         id: conversationId,

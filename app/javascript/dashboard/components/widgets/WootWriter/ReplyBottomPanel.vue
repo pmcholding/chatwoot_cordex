@@ -118,6 +118,18 @@ export default {
       type: String,
       default: '',
     },
+    showScheduleButton: {
+      type: Boolean,
+      default: true,
+    },
+    isScheduleActive: {
+      type: Boolean,
+      default: false,
+    },
+    toggleScheduleMode: {
+      type: Function,
+      default: () => {},
+    },
   },
   emits: [
     'replaceText',
@@ -236,6 +248,11 @@ export default {
         ? this.$t('CONVERSATION.FOOTER.DISABLE_SIGN_TOOLTIP')
         : this.$t('CONVERSATION.FOOTER.ENABLE_SIGN_TOOLTIP');
     },
+    scheduleTooltip() {
+      return this.isScheduleActive
+        ? this.$t('CONVERSATION.FOOTER.CANCEL_SCHEDULE')
+        : this.$t('CONVERSATION.FOOTER.SCHEDULE_MESSAGE');
+    },
     enableInsertArticleInReply() {
       return this.portalSlug;
     },
@@ -331,6 +348,16 @@ export default {
         faded
         sm
         @click="toggleMessageSignature"
+      />
+      <NextButton
+        v-if="showScheduleButton"
+        v-tooltip.top-end="scheduleTooltip"
+        icon="i-ph-clock"
+        :slate="!isScheduleActive"
+        :blue="isScheduleActive"
+        faded
+        sm
+        @click="toggleScheduleMode"
       />
       <NextButton
         v-if="enableWhatsAppTemplates"

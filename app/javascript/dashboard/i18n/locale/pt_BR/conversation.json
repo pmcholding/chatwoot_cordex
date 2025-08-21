@@ -176,7 +176,15 @@
       "PRIVATE_MSG_INPUT": "A mensagem será visível apenas para agentes",
       "MESSAGE_SIGNATURE_NOT_CONFIGURED": "A assinatura da mensagem não está configurada. Por favor, configure-a nas configurações do perfil.",
       "CLICK_HERE": "Clique aqui para atualizar",
-      "WHATSAPP_TEMPLATES": "Templates do Whatsapp"
+      "WHATSAPP_TEMPLATES": "Templates do Whatsapp",
+      "SCHEDULE_MESSAGE": "Agendar mensagem",
+      "CANCEL_SCHEDULE": "Cancelar agendamento",
+      "SCHEDULED_FOR": "Agendado para",
+      "SELECT_DATE_TIME": "Selecionar data e hora",
+      "DATE": "Data",
+      "TIME": "Hora",
+      "CANCEL": "Cancelar",
+      "CONFIRM": "Confirmar"
     },
     "REPLYBOX": {
       "REPLY": "Responder",

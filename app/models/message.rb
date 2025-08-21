@@ -11,6 +11,7 @@
 #  message_type              :integer          not null
 #  private                   :boolean          default(FALSE), not null
 #  processed_message_content :text
+#  scheduled_at              :datetime
 #  sender_type               :string
 #  sentiment                 :jsonb
 #  status                    :integer          default("sent")
@@ -36,6 +37,7 @@
 #  index_messages_on_inbox_id                           (inbox_id)
 #  index_messages_on_sender_type_and_sender_id          (sender_type,sender_id)
 #  index_messages_on_source_id                          (source_id)
+#  index_messages_on_status_and_scheduled_at            (status, ((additional_attributes ->> 'scheduled_at'::text))) WHERE (status = 4)
 #
 
 class Message < ApplicationRecord
@@ -95,7 +97,7 @@ class Message < ApplicationRecord
     integrations: 10,
     sticker: 11
   }
-  enum status: { sent: 0, delivered: 1, read: 2, failed: 3 }
+  enum status: { sent: 0, delivered: 1, read: 2, failed: 3, scheduled: 4 }
   # [:submitted_email, :items, :submitted_values] : Used for bot message types
   # [:email] : Used by conversation_continuity incoming email messages
   # [:in_reply_to] : Used to reply to a particular tweet in threads
@@ -112,6 +114,12 @@ class Message < ApplicationRecord
   scope :chat, -> { where.not(message_type: :activity).where(private: false) }
   scope :non_activity_messages, -> { where.not(message_type: :activity).reorder('id desc') }
   scope :today, -> { where("date_trunc('day', created_at) = ?", Date.current) }
+
+  # Scopes for scheduled messages
+  scope :scheduled, -> { where(status: :scheduled) }
+  scope :ready_to_send, -> {
+    scheduled.where("scheduled_at <= ?", Time.current)
+  }
 
   # TODO: Get rid of default scope
   # https://stackoverflow.com/a/1834250/939299
@@ -137,7 +145,7 @@ class Message < ApplicationRecord
 
   def push_event_data
     data = attributes.symbolize_keys.merge(
-      created_at: created_at.to_i,
+      created_at: display_timestamp.to_i,
       message_type: message_type_before_type_cast,
       conversation_id: conversation.display_id,
       conversation: conversation_push_event_data
@@ -180,6 +188,16 @@ class Message < ApplicationRecord
     }
     data[:attachments] = attachments.map(&:push_event_data) if attachments.present?
     data
+  end
+
+  # Methods for scheduled messages
+  def schedule_for(datetime)
+    self.status = :scheduled
+    self.scheduled_at = datetime
+  end
+
+  def display_timestamp
+    scheduled? && scheduled_at ? scheduled_at : created_at
   end
 
   # Method to get content with survey URL for outgoing channel delivery
@@ -321,6 +339,8 @@ class Message < ApplicationRecord
   end
 
   def send_reply
+    return if scheduled? # Don't send scheduled messages immediately
+
     # FIXME: Giving it few seconds for the attachment to be uploaded to the service
     # active storage attaches the file only after commit
     attachments.blank? ? ::SendReplyJob.perform_later(id) : ::SendReplyJob.set(wait: 2.seconds).perform_later(id)

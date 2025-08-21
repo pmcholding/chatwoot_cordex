@@ -124,10 +124,14 @@ export const actions = {
       missingMessages.forEach(message => {
         conversations[message.id] = message;
       });
-      // Sort conversation messages by created_at
+      // Sort conversation messages by scheduled_at (if exists) or created_at
       const updatedConversation = Object.fromEntries(
         Object.entries(conversations).sort(
-          (a, b) => a[1].created_at - b[1].created_at
+          (a, b) => {
+            const timestampA = a[1].scheduled_at || a[1].created_at;
+            const timestampB = b[1].scheduled_at || b[1].created_at;
+            return timestampA - timestampB;
+          }
         )
       );
       commit('conversation/setMetaUserLastSeenAt', lastSeen, { root: true });

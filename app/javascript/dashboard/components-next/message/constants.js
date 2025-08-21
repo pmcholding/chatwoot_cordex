@@ -15,6 +15,7 @@ export const MESSAGE_VARIANTS = {
   TEMPLATE: 'template',
   EMAIL: 'email',
   UNSUPPORTED: 'unsupported',
+  SCHEDULED: 'scheduled',
 };
 
 export const SENDER_TYPES = {
@@ -36,6 +37,7 @@ export const MESSAGE_STATUS = {
   READ: 'read',
   FAILED: 'failed',
   PROGRESS: 'progress',
+  SCHEDULED: 'scheduled',
 };
 
 export const ATTACHMENT_TYPES = {

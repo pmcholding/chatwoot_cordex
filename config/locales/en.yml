@@ -379,3 +379,22 @@ en:
       subject: 'Finish setting up %{custom_domain}'
     ssl_status:
       custom_domain_not_configured: 'Custom domain is not configured'
+
+  activerecord:
+    errors:
+      models:
+        message:
+          attributes:
+            scheduled_at:
+              invalid: "must be in the future"
+              blank: "can't be blank for scheduled messages"
+
+  scheduled_messages:
+    job:
+      success: "Scheduled message %{id} sent successfully"
+      failed: "Failed to send scheduled message %{id}: %{error}"
+
+    validations:
+      invalid_time: "Scheduled time must be in the future"
+      limit_exceeded: "Maximum scheduled messages limit exceeded"
+      permission_denied: "User does not have permission to schedule messages"

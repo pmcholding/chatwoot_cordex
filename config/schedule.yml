@@ -20,6 +20,12 @@ trigger_imap_email_inboxes_job:
   class: 'Inboxes::FetchImapEmailInboxesJob'
   queue: scheduled_jobs
 
+# executed At every minute to send scheduled messages
+send_scheduled_messages_job:
+  cron: '*/1 * * * *'
+  class: 'ScheduledMessageJob'
+  queue: scheduled_jobs
+
 # executed daily at 2230 UTC
 # which is our lowest traffic time
 remove_stale_contact_inboxes_job.rb:

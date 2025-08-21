@@ -26,6 +26,7 @@ const varaintBaseMap = {
   [MESSAGE_VARIANTS.EMAIL]: 'w-full',
   [MESSAGE_VARIANTS.UNSUPPORTED]:
     'bg-n-solid-amber/70 border border-dashed border-n-amber-12 text-n-amber-12',
+  [MESSAGE_VARIANTS.SCHEDULED]: 'bg-n-solid-blue text-n-blue-12 border border-dashed border-n-blue-8',
 };
 
 const orientationMap = {

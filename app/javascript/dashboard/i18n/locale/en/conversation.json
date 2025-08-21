@@ -170,7 +170,15 @@
       "PRIVATE_MSG_INPUT": "Shift + enter for new line. This will be visible only to Agents",
       "MESSAGE_SIGNATURE_NOT_CONFIGURED": "Message signature is not configured, please configure it in profile settings.",
       "CLICK_HERE": "Click here to update",
-      "WHATSAPP_TEMPLATES": "Whatsapp Templates"
+      "WHATSAPP_TEMPLATES": "Whatsapp Templates",
+      "SCHEDULE_MESSAGE": "Schedule message",
+      "CANCEL_SCHEDULE": "Cancel schedule",
+      "SCHEDULED_FOR": "Scheduled for",
+      "SELECT_DATE_TIME": "Select date and time",
+      "DATE": "Date",
+      "TIME": "Time",
+      "CANCEL": "Cancel",
+      "CONFIRM": "Confirm"
     },
     "REPLYBOX": {
       "REPLY": "Reply",
@@ -391,6 +399,20 @@
     "ORIGINAL_CONTENT": "Original Content",
     "TRANSLATED_CONTENT": "Translated Content",
     "NO_TRANSLATIONS_AVAILABLE": "No translations are available for this content"
+  },
+  "SCHEDULED_MESSAGE": {
+    "TITLE": "Scheduled",
+    "WILL_BE_SENT": "Will be sent on",
+    "CANCEL": "Cancel",
+    "CANCELLED": "Cancelled",
+    "SUCCESS": "Message scheduled successfully",
+    "FAILED": "Failed to schedule message"
+  },
+  "ERRORS": {
+    "INVALID_SCHEDULE_TIME": "Scheduled time must be in the future",
+    "SCHEDULE_LIMIT_EXCEEDED": "Maximum number of scheduled messages exceeded",
+    "SCHEDULE_PERMISSION_DENIED": "You don't have permission to schedule messages",
+    "FAILED_TO_SCHEDULE_MESSAGE": "Failed to schedule message"
   },
   "TYPING": {
     "ONE": "{user} is typing",

@@ -16,6 +16,8 @@ import ReplyBottomPanel from 'dashboard/components/widgets/WootWriter/ReplyBotto
 import ArticleSearchPopover from 'dashboard/routes/dashboard/helpcenter/components/ArticleSearch/SearchPopover.vue';
 import MessageSignatureMissingAlert from './MessageSignatureMissingAlert.vue';
 import Banner from 'dashboard/components/ui/Banner.vue';
+import ScheduleDatePicker from 'dashboard/components/widgets/ScheduleDatePicker.vue';
+import ScheduledMessageAPI from 'dashboard/api/inbox/scheduledMessage';
 import { REPLY_EDITOR_MODES } from 'dashboard/components/widgets/WootWriter/constants';
 import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor.vue';
 import AudioRecorder from 'dashboard/components/widgets/WootWriter/AudioRecorder.vue';
@@ -61,6 +63,7 @@ export default {
     ReplyToMessage,
     ReplyTopPanel,
     ResizableTextArea,
+    ScheduleDatePicker,
     WhatsappTemplates,
     WootMessageEditor,
   },
@@ -118,6 +121,9 @@ export default {
       newConversationModalActive: false,
       showArticleSearchPopover: false,
       hasRecordedAudio: false,
+      isScheduled: false,
+      scheduledDateTime: null,
+      showSchedulePicker: false,
     };
   },
   computed: {
@@ -288,7 +294,11 @@ export default {
       return {
         'is-private': this.isPrivate,
         'is-focused': this.isFocused || this.hasAttachments,
+        'is-scheduled': this.isScheduled,
       };
+    },
+    showScheduleButton() {
+      return !this.isOnPrivateNote;
     },
     hasAttachments() {
       return this.attachedFiles.length;
@@ -753,12 +763,27 @@ export default {
     },
     async sendMessage(messagePayload) {
       try {
-        await this.$store.dispatch(
-          'createPendingMessageAndSend',
-          messagePayload
-        );
-        emitter.emit(BUS_EVENTS.SCROLL_TO_MESSAGE);
-        emitter.emit(BUS_EVENTS.MESSAGE_SENT);
+        if (this.isScheduled && this.scheduledDateTime) {
+          // Send scheduled message
+          await ScheduledMessageAPI.create(this.currentChat.id, {
+            message: {
+              content: messagePayload.message,
+              private: messagePayload.private,
+              content_attributes: messagePayload.content_attributes || {}
+            },
+            scheduled_at: this.scheduledDateTime
+          });
+          useAlert(this.$t('CONVERSATION.SCHEDULED_MESSAGE.SUCCESS'));
+          this.cancelSchedule();
+        } else {
+          // Send normal message
+          await this.$store.dispatch(
+            'createPendingMessageAndSend',
+            messagePayload
+          );
+          emitter.emit(BUS_EVENTS.SCROLL_TO_MESSAGE);
+          emitter.emit(BUS_EVENTS.MESSAGE_SENT);
+        }
         this.removeFromDraft();
         this.sendMessageAnalyticsData(messagePayload.private);
       } catch (error) {
@@ -1090,6 +1115,32 @@ export default {
     togglePopout() {
       this.$emit('update:popOutReplyBox', !this.popOutReplyBox);
     },
+    toggleScheduleMode() {
+      if (this.isScheduled) {
+        this.cancelSchedule();
+      } else {
+        this.showSchedulePicker = true;
+      }
+    },
+    setScheduleDateTime(dateTime) {
+      this.scheduledDateTime = dateTime;
+      this.isScheduled = true;
+      this.showSchedulePicker = false;
+    },
+    cancelSchedule() {
+      this.isScheduled = false;
+      this.scheduledDateTime = null;
+    },
+    formatDateTime(dateTime) {
+      if (!dateTime) return '';
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(dateTime));
+    },
   },
 };
 </script>
@@ -1126,6 +1177,22 @@ export default {
         :message="inReplyTo"
         @dismiss="resetReplyToMessage"
       />
+      <div
+        v-if="isScheduled"
+        class="scheduled-message-indicator"
+      >
+        <span class="flex items-center gap-1">
+          <i class="i-ph-clock text-sm"></i>
+          {{ $t('CONVERSATION.FOOTER.SCHEDULED_FOR') }}: {{ formatDateTime(scheduledDateTime) }}
+        </span>
+        <button
+          @click="cancelSchedule"
+          class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+          :title="$t('CONVERSATION.FOOTER.CANCEL_SCHEDULE')"
+        >
+          <i class="i-ph-x text-sm"></i>
+        </button>
+      </div>
       <CannedResponse
         v-if="showMentions && hasSlashCommand"
         v-on-clickaway="hideMentions"
@@ -1234,6 +1301,9 @@ export default {
       :message="message"
       :portal-slug="connectedPortalSlug"
       :new-conversation-modal-active="newConversationModalActive"
+      :show-schedule-button="showScheduleButton"
+      :is-schedule-active="isScheduled"
+      :toggle-schedule-mode="toggleScheduleMode"
       @select-whatsapp-template="openWhatsappTemplateModal"
       @toggle-editor="toggleRichContentEditor"
       @replace-text="replaceText"
@@ -1251,6 +1321,12 @@ export default {
       ref="confirmDialog"
       :title="$t('CONVERSATION.REPLYBOX.UNDEFINED_VARIABLES.TITLE')"
       :description="undefinedVariableMessage"
+    />
+
+    <ScheduleDatePicker
+      :show="showSchedulePicker"
+      @close="showSchedulePicker = false"
+      @confirm="setScheduleDateTime"
     />
   </div>
 </template>
@@ -1276,6 +1352,22 @@ export default {
   &.is-private {
     @apply bg-n-solid-amber dark:border-n-amber-3/10 border-n-amber-12/5;
   }
+
+  &.is-scheduled {
+    background-color: #e0f2fe;
+    border-color: #0ea5e9;
+  }
+}
+
+.scheduled-message-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #0ea5e9;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #bae6fd;
+  background-color: #e0f2fe;
 }
 
 .send-button {

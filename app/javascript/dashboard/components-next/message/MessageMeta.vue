@@ -29,11 +29,49 @@ const {
   sourceId,
   messageType,
   contentAttributes,
+  scheduledAt,
 } = useMessageContext();
 
-const readableTime = computed(() =>
-  messageTimestamp(createdAt.value, 'LLL d, h:mm a')
-);
+const readableTime = computed(() => {
+  // Use scheduled_at for scheduled messages, otherwise use created_at
+  const timestamp = status.value === 'scheduled' && scheduledAt.value
+    ? scheduledAt.value
+    : createdAt.value;
+
+  // Ensure timestamp is valid before formatting
+  if (!timestamp || timestamp === null || timestamp === undefined) {
+    return '';
+  }
+
+  // Convert timestamp to proper format
+  let validTimestamp = timestamp;
+  if (typeof timestamp === 'number') {
+    // Backend sends Unix timestamps in seconds, messageTimestamp expects seconds
+    validTimestamp = timestamp;
+  } else if (typeof timestamp === 'string') {
+    // If it's a string, try to parse it as a date and convert to Unix seconds
+    const parsedDate = new Date(timestamp);
+    if (!isNaN(parsedDate.getTime())) {
+      validTimestamp = Math.floor(parsedDate.getTime() / 1000); // Convert to seconds
+    } else {
+      console.warn('Invalid timestamp string for message:', timestamp);
+      return '';
+    }
+  }
+
+  try {
+    // Validate the timestamp before formatting (check if it's a reasonable Unix timestamp)
+    if (typeof validTimestamp !== 'number' || validTimestamp < 0 || validTimestamp > 4102444800) { // Year 2100
+      console.warn('Invalid timestamp for message:', timestamp);
+      return '';
+    }
+
+    return messageTimestamp(validTimestamp, 'LLL d, h:mm a');
+  } catch (error) {
+    console.warn('Invalid timestamp for message:', timestamp, error);
+    return '';
+  }
+});
 
 const showStatusIndicator = computed(() => {
   if (isPrivate.value) return false;
