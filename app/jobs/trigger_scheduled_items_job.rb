@@ -22,6 +22,10 @@ class TriggerScheduledItemsJob < ApplicationJob
 
     # Job to clear notifications which are older than 1 month
     Notification::RemoveOldNotificationJob.perform_later
+
+    # Job to process scheduled messages
+    ScheduledMessageJob.perform_later
+
   end
 end
 

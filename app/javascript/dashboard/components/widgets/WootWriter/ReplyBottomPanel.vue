@@ -118,6 +118,14 @@ export default {
       type: String,
       default: '',
     },
+    isScheduleActive: {
+      type: Boolean,
+      default: false,
+    },
+    toggleScheduleMode: {
+      type: Function,
+      default: () => {},
+    },
   },
   emits: [
     'replaceText',
@@ -331,6 +339,17 @@ export default {
         faded
         sm
         @click="toggleMessageSignature"
+      />
+      <!-- Schedule Button -->
+      <NextButton
+        data-testid="toggle-schedule"
+        v-tooltip.top-end="isScheduleActive ? $t('CONVERSATION.FOOTER.CANCEL_SCHEDULE') : $t('CONVERSATION.FOOTER.SCHEDULE_MESSAGE')"
+        icon="i-ph-clock"
+        :slate="!isScheduleActive"
+        :blue="isScheduleActive"
+        faded
+        sm
+        @click="toggleScheduleMode"
       />
       <NextButton
         v-if="enableWhatsAppTemplates"

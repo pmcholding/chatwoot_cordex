@@ -7,6 +7,7 @@ import { useAI } from 'dashboard/composables/useAI';
 
 // components
 import ReplyBox from './ReplyBox.vue';
+import ScheduledMessagesList from './ScheduledMessagesList.vue';
 import MessageList from 'next/message/MessageList.vue';
 import ConversationLabelSuggestion from './conversation/LabelSuggestion.vue';
 import Banner from 'dashboard/components/ui/Banner.vue';
@@ -40,6 +41,7 @@ export default {
   components: {
     MessageList,
     ReplyBox,
+    ScheduledMessagesList,
     Banner,
     ConversationLabelSuggestion,
     Spinner,
@@ -489,6 +491,7 @@ export default {
         </li>
       </template>
       <template #after>
+        <ScheduledMessagesList :conversation-id="currentChat.id" />
         <ConversationLabelSuggestion
           v-if="shouldShowLabelSuggestions"
           :suggested-labels="labelSuggestions"

@@ -18,6 +18,9 @@ import MessageSignatureMissingAlert from './MessageSignatureMissingAlert.vue';
 import Banner from 'dashboard/components/ui/Banner.vue';
 import { REPLY_EDITOR_MODES } from 'dashboard/components/widgets/WootWriter/constants';
 import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor.vue';
+import ScheduleDatePicker from 'dashboard/components/widgets/ScheduleDatePicker.vue';
+import ScheduledMessageApi from 'dashboard/api/inbox/scheduledMessage';
+
 import AudioRecorder from 'dashboard/components/widgets/WootWriter/AudioRecorder.vue';
 import { AUDIO_FORMATS } from 'shared/constants/messages';
 import { BUS_EVENTS } from 'shared/constants/busEvents';
@@ -63,6 +66,7 @@ export default {
     ResizableTextArea,
     WhatsappTemplates,
     WootMessageEditor,
+    ScheduleDatePicker,
   },
   mixins: [inboxMixin, fileUploadMixin, keyboardEventListenerMixins],
   props: {
@@ -115,6 +119,14 @@ export default {
       showUserMentions: false,
       showCannedMenu: false,
       showVariablesMenu: false,
+
+
+      // Scheduled message state (Phase 1 PRD)
+      isScheduled: false,
+      scheduledDateTime: null,
+      scheduledMessageId: null,
+      showSchedulePicker: false,
+
       newConversationModalActive: false,
       showArticleSearchPopover: false,
       hasRecordedAudio: false,
@@ -288,6 +300,7 @@ export default {
       return {
         'is-private': this.isPrivate,
         'is-focused': this.isFocused || this.hasAttachments,
+        'scheduled': this.isScheduled,
       };
     },
     hasAttachments() {
@@ -495,6 +508,36 @@ export default {
     );
   },
   methods: {
+    toggleScheduleMode() {
+      if (this.isScheduled) {
+        this.cancelSchedule();
+      } else {
+        // Allow opening the scheduler even if message is empty; scheduling will be persisted on Send
+        this.showSchedulePicker = true;
+      }
+    },
+    async setScheduleDateTime(iso) {
+      // Only set local state; actual creation will happen on Send
+      this.scheduledDateTime = iso;
+      this.isScheduled = true;
+      this.showSchedulePicker = false;
+    },
+    async cancelSchedule() {
+      if (this.scheduledMessageId) {
+        try {
+          await ScheduledMessageApi.cancel({
+            conversationId: this.currentChat.id,
+            id: this.scheduledMessageId,
+          });
+        } catch (e) {
+          // ignore
+        }
+      }
+      this.isScheduled = false;
+      this.scheduledDateTime = null;
+      this.scheduledMessageId = null;
+    },
+
     handleInsert(article) {
       const { url, title } = article;
       if (this.isRichEditorEnabled) {
@@ -687,6 +730,31 @@ export default {
         return;
       }
       if (!this.showMentions) {
+        if (this.isScheduled && this.scheduledDateTime) {
+          // Create scheduled message instead of sending now
+          ScheduledMessageApi.create({
+            conversationId: this.currentChat.id,
+            content: this.message,
+            scheduledAt: this.scheduledDateTime,
+          })
+            .then(({ data }) => {
+              this.scheduledMessageId = data.id;
+              // Clear editor as if sent
+              this.clearMessage();
+              this.hideEmojiPicker();
+              this.$emit('update:popOutReplyBox', false);
+              useAlert(this.$t('CONVERSATION.FOOTER.SCHEDULED_FOR') + ': ' + new Date(this.scheduledDateTime).toLocaleString());
+            })
+            .catch(() => {
+              useAlert(this.$t('CONVERSATION.MESSAGE_ERROR'));
+            })
+            .finally(() => {
+              this.isScheduled = false;
+              this.scheduledDateTime = null;
+            });
+          return;
+        }
+
         const isOnWhatsApp =
           this.isATwilioWhatsAppChannel ||
           this.isAWhatsAppCloudChannel ||
@@ -1114,6 +1182,11 @@ export default {
       @set-reply-mode="setReplyMode"
       @toggle-popout="togglePopout"
     />
+    <div v-if="isScheduled" class="text-xs text-blue-600 dark:text-blue-400 px-3 py-1 border-b border-blue-200 dark:border-blue-700">
+      📅 {{ $t('CONVERSATION.FOOTER.SCHEDULED_FOR') }}: {{ new Date(scheduledDateTime).toLocaleString() }}
+      <button class="ml-2 text-red-500 hover:text-red-700" @click="cancelSchedule">{{ $t('CONVERSATION.FOOTER.CANCEL_SCHEDULE') }}</button>
+    </div>
+
     <ArticleSearchPopover
       v-if="showArticleSearchPopover && connectedPortalSlug"
       :selected-portal-slug="connectedPortalSlug"
@@ -1220,6 +1293,12 @@ export default {
       :mode="replyType"
       :on-file-upload="onFileUpload"
       :on-send="onSendReply"
+      :portal-slug="connectedPortalSlug"
+      :new-conversation-modal-active="newConversationModalActive"
+      @select-whatsapp-template="openWhatsappTemplateModal"
+      @toggle-editor="toggleRichContentEditor"
+      @replace-text="replaceText"
+      @toggle-insert-article="toggleInsertArticle"
       :conversation-type="conversationType"
       :recording-audio-duration-text="recordingAudioDurationText"
       :recording-audio-state="recordingAudioState"
@@ -1231,13 +1310,15 @@ export default {
       :toggle-audio-recorder-play-pause="toggleAudioRecorderPlayPause"
       :toggle-audio-recorder="toggleAudioRecorder"
       :toggle-emoji-picker="toggleEmojiPicker"
+      :is-schedule-active="isScheduled"
+      :toggle-schedule-mode="toggleScheduleMode"
       :message="message"
-      :portal-slug="connectedPortalSlug"
-      :new-conversation-modal-active="newConversationModalActive"
-      @select-whatsapp-template="openWhatsappTemplateModal"
-      @toggle-editor="toggleRichContentEditor"
-      @replace-text="replaceText"
-      @toggle-insert-article="toggleInsertArticle"
+
+    />
+    <ScheduleDatePicker
+      v-model:visible="showSchedulePicker"
+      @cancel="cancelSchedule"
+      @confirm="setScheduleDateTime"
     />
     <WhatsappTemplates
       :inbox-id="inbox.id"
@@ -1272,6 +1353,7 @@ export default {
   transition: height 2s cubic-bezier(0.37, 0, 0.63, 1);
 
   @apply relative mb-2 mx-2 border border-n-weak rounded-xl bg-n-solid-1;
+
 
   &.is-private {
     @apply bg-n-solid-amber dark:border-n-amber-3/10 border-n-amber-12/5;

@@ -174,9 +174,14 @@
       "DISABLE_SIGN_TOOLTIP": "Desativar assinatura",
       "MSG_INPUT": "Shift + enter para nova linha. Digite '/' para selecionar uma Resposta Pronta.",
       "PRIVATE_MSG_INPUT": "A mensagem será visível apenas para agentes",
+      "SCHEDULE_MESSAGE": "Agendar mensagem",
+      "CANCEL_SCHEDULE": "Cancelar agendamento",
+      "SCHEDULED_FOR": "Agendado para",
+      "SELECT_DATE_TIME": "Selecione data e hora",
       "MESSAGE_SIGNATURE_NOT_CONFIGURED": "A assinatura da mensagem não está configurada. Por favor, configure-a nas configurações do perfil.",
       "CLICK_HERE": "Clique aqui para atualizar",
-      "WHATSAPP_TEMPLATES": "Templates do Whatsapp"
+      "WHATSAPP_TEMPLATES": "Templates do Whatsapp",
+      "SCHEDULED_MESSAGES": "Mensagens agendadas"
     },
     "REPLYBOX": {
       "REPLY": "Responder",

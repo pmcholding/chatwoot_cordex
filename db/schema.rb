@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_20_232844) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_21_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -61,6 +61,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_20_232844) do
     t.integer "status", default: 0
     t.jsonb "internal_attributes", default: {}, null: false
     t.jsonb "settings", default: {"audio_transcriptions" => true}
+    t.jsonb "features_enabled", default: {}
+    t.index ["features_enabled"], name: "idx_accounts_features_enabled_gin", using: :gin
     t.index ["status"], name: "index_accounts_on_status"
   end
 
@@ -141,6 +143,47 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_20_232844) do
     t.string "language", default: "en", null: false
     t.index ["language"], name: "index_agent_templates_on_language"
     t.index ["name"], name: "index_agent_templates_on_name"
+  end
+
+  create_table "ai_agent_assistants", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "account_id", null: false
+    t.string "description"
+    t.jsonb "config", default: {}, null: false
+    t.jsonb "guardrails", default: {}
+    t.jsonb "response_guidelines", default: {}
+    t.bigint "agent_bot_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "name"], name: "index_ai_agent_assistants_on_account_id_and_name", unique: true
+    t.index ["account_id"], name: "index_ai_agent_assistants_on_account_id"
+    t.index ["agent_bot_id"], name: "index_ai_agent_assistants_on_agent_bot_id"
+  end
+
+  create_table "ai_agent_inboxes", force: :cascade do |t|
+    t.bigint "ai_agent_assistant_id", null: false
+    t.bigint "inbox_id", null: false
+    t.boolean "auto_assign", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ai_agent_assistant_id", "inbox_id"], name: "index_ai_agent_inboxes_unique", unique: true
+    t.index ["ai_agent_assistant_id"], name: "index_ai_agent_inboxes_on_ai_agent_assistant_id"
+    t.index ["inbox_id"], name: "index_ai_agent_inboxes_on_inbox_id", unique: true
+  end
+
+  create_table "ai_agent_responses", force: :cascade do |t|
+    t.string "question", null: false
+    t.text "answer", null: false
+    t.vector "embedding", limit: 1536
+    t.bigint "assistant_id", null: false
+    t.bigint "account_id", null: false
+    t.string "status", default: "active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_ai_agent_responses_on_account_id"
+    t.index ["assistant_id"], name: "index_ai_agent_responses_on_assistant_id"
+    t.index ["embedding"], name: "vector_idx_ai_agent_responses_embedding", using: :ivfflat
+    t.index ["status"], name: "index_ai_agent_responses_on_status"
   end
 
   create_table "applied_slas", force: :cascade do |t|
@@ -424,6 +467,21 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_20_232844) do
     t.index ["forward_to_email"], name: "index_channel_email_on_forward_to_email", unique: true
   end
 
+  create_table "channel_evolution_whatsapp", force: :cascade do |t|
+    t.string "evolution_api_url", null: false
+    t.string "evolution_api_key", null: false
+    t.string "evolution_instance_name", null: false
+    t.string "evolution_webhook_url"
+    t.string "phone_number"
+    t.string "connection_state", default: "close"
+    t.jsonb "instance_settings", default: {}
+    t.integer "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_channel_evolution_whatsapp_on_account_id"
+    t.index ["evolution_instance_name"], name: "index_channel_evolution_whatsapp_on_evolution_instance_name", unique: true
+  end
+
   create_table "channel_facebook_pages", id: :serial, force: :cascade do |t|
     t.string "page_id", null: false
     t.string "user_access_token", null: false
@@ -640,8 +698,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_20_232844) do
     t.index ["contact_inbox_id"], name: "index_conversations_on_contact_inbox_id"
     t.index ["first_reply_created_at"], name: "index_conversations_on_first_reply_created_at"
     t.index ["inbox_id"], name: "index_conversations_on_inbox_id"
-    t.index ["kanban_stage_id", "updated_at"], name: "idx_conversations_kanban_stage_updated"
-    t.index ["kanban_stage_id"], name: "index_conversations_on_kanban_stage_id"
+    t.index ["kanban_stage_id", "updated_at"], name: "idx_conversations_kanban_stage_updated", order: { updated_at: :desc }
     t.index ["priority"], name: "index_conversations_on_priority"
     t.index ["status", "account_id"], name: "index_conversations_on_status_and_account_id"
     t.index ["status", "priority"], name: "index_conversations_on_status_and_priority"
@@ -870,11 +927,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_20_232844) do
     t.integer "position", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id", "name"], name: "unique_stage_name_per_account", unique: true
-    t.index ["account_id", "position"], name: "idx_kanban_stages_account_position", unique: true
-    t.index ["account_id"], name: "idx_kanban_stages_account_id"
-    t.index ["account_id"], name: "index_kanban_stages_on_account_id"
-    t.check_constraint "color::text ~ '^#[0-9A-Fa-f]{6}$'::text", name: "valid_color_format"
+    t.index ["account_id", "name"], name: "idx_kanban_stages_account_name_unique", unique: true
+    t.index ["account_id", "position"], name: "idx_kanban_stages_account_position"
+    t.index ["account_id", "position"], name: "idx_kanban_stages_account_position_unique", unique: true
+    t.check_constraint "\"position\" >= 1 AND \"position\" <= 20", name: "check_kanban_stages_position_range"
+    t.check_constraint "color::text ~ '^#[0-9A-Fa-f]{6}$'::text", name: "check_kanban_stages_color_format"
   end
 
   create_table "labels", force: :cascade do |t|
@@ -1095,6 +1152,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_20_232844) do
     t.index ["user_id"], name: "index_reporting_events_on_user_id"
   end
 
+  create_table "scheduled_messages", force: :cascade do |t|
+    t.bigint "conversation_id", null: false
+    t.bigint "user_id", null: false
+    t.text "content", null: false
+    t.datetime "scheduled_at", null: false
+    t.integer "status", default: 0
+    t.jsonb "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["conversation_id"], name: "index_scheduled_messages_on_conversation_id"
+    t.index ["status", "scheduled_at"], name: "idx_sched_msgs_status_time"
+    t.index ["user_id"], name: "index_scheduled_messages_on_user_id"
+  end
+
   create_table "sla_events", force: :cascade do |t|
     t.bigint "applied_sla_id", null: false
     t.bigint "conversation_id", null: false
@@ -1255,11 +1326,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_20_232844) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "channel_evolution_whatsapp", "accounts"
   add_foreign_key "conversations", "kanban_stages", on_delete: :nullify
   add_foreign_key "inboxes", "portals"
   add_foreign_key "kanban_settings", "accounts", on_delete: :cascade
   add_foreign_key "kanban_settings", "kanban_stages", column: "default_stage_id", on_delete: :nullify
   add_foreign_key "kanban_stages", "accounts", on_delete: :cascade
+  add_foreign_key "scheduled_messages", "conversations"
+  add_foreign_key "scheduled_messages", "users"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").
       after(:insert).
