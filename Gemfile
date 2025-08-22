@@ -250,3 +250,4 @@ group :development, :test do
   gem 'spring-watcher-listen'
 end
 gem 'solargraph'
+gem 'httparty'
