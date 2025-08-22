@@ -16,7 +16,7 @@ RSpec.describe EvolutionApiService do
     allow(Rails.application.credentials).to receive(:dig).with(:evolution_api, :frontend_url).and_return('https://test-frontend.com')
 
     # Fallback to ENV if credentials are not set
-    allow(ENV).to receive(:[]).with('EVOLUTION_API_URL').and_return('https://test-api.com')
+    allow(ENV).to receive(:[]).with('EVOLUTION_API_URL_V2').and_return('https://test-api.com')
     allow(ENV).to receive(:[]).with('EVOLUTION_API_KEY').and_return('test-key')
     allow(ENV).to receive(:[]).with('CHATWOOT_TOKEN').and_return('test-token')
     allow(ENV).to receive(:[]).with('FRONTEND_URL').and_return('https://test-frontend.com')

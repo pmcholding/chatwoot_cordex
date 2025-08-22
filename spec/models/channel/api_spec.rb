@@ -28,7 +28,7 @@ RSpec.describe Channel::Api do
 
     before do
       allow(Rails.application.credentials).to receive(:dig).with(:evolution_api, :url).and_return('https://evo.test.com')
-      allow(ENV).to receive(:[]).with('EVOLUTION_API_URL').and_return('https://evo.test.com')
+      allow(ENV).to receive(:[]).with('EVOLUTION_API_URL_V2').and_return('https://evo.test.com')
       channel_api.update!(inbox: inbox)
     end
 
@@ -88,7 +88,7 @@ RSpec.describe Channel::Api do
     describe '#evolution_webhook_url' do
       it 'returns nil when base URL is not configured' do
         allow(Rails.application.credentials).to receive(:dig).with(:evolution_api, :url).and_return(nil)
-        allow(ENV).to receive(:[]).with('EVOLUTION_API_URL').and_return(nil)
+        allow(ENV).to receive(:[]).with('EVOLUTION_API_URL_V2').and_return(nil)
 
         expect(channel_api.evolution_webhook_url).to be_nil
       end

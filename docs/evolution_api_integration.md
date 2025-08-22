@@ -19,7 +19,7 @@ Add the following environment variables to your `.env` file:
 
 ```bash
 # Evolution API Configuration
-EVOLUTION_API_URL=https://evo.cordex.ai
+EVOLUTION_API_URL_V2=https://evo.cordex.ai
 EVOLUTION_API_KEY=your_evolution_api_key
 FRONTEND_URL=https://your-chatwoot-domain.com
 ```
@@ -28,7 +28,7 @@ FRONTEND_URL=https://your-chatwoot-domain.com
 
 ### Required Variables
 
-- `EVOLUTION_API_URL`: The base URL of your Evolution API instance
+- `EVOLUTION_API_URL_V2`: The base URL of your Evolution API instance
 - `EVOLUTION_API_KEY`: API key for authenticating with Evolution API
 - `CHATWOOT_TOKEN`: Token used by Evolution API to send webhooks to Chatwoot
 - `FRONTEND_URL`: Your Chatwoot frontend URL (used as chatwootUrl in Evolution API)

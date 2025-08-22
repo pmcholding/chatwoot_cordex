@@ -16,7 +16,7 @@ Integrar a Evolution API ao Chatwoot para permitir conexão de instâncias Whats
 
 ### 2.1 Variáveis Requeridas
 ```bash
-EVOLUTION_API_URL=https://evo.cordex.ai
+EVOLUTION_API_URL_V2=https://evo.cordex.ai
 EVOLUTION_API_KEY=0a128ed725af4c594b33bda5cbb7b4ae
 FRONTEND_URL=https://app.cordex.ai
 ```

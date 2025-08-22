@@ -60,7 +60,7 @@ class Channel::Api < ApplicationRecord
     instance_name ||= generate_evolution_instance_name
     return nil unless instance_name
 
-    base_url = Rails.application.credentials.dig(:evolution_api, :url) || ENV.fetch('EVOLUTION_API_URL', nil)
+    base_url = Rails.application.credentials.dig(:evolution_api, :url) || ENV.fetch('EVOLUTION_API_URL_V2', nil)
     return nil unless base_url
 
     "#{base_url}/chatwoot/webhook/#{instance_name}"

@@ -4,7 +4,7 @@ class EvolutionApiService
   include HTTParty
 
   def initialize(user_token: nil)
-    @base_url = Rails.application.credentials.dig(:evolution_api, :url) || ENV.fetch('EVOLUTION_API_URL', nil)
+    @base_url = Rails.application.credentials.dig(:evolution_api, :url) || ENV.fetch('EVOLUTION_API_URL_V2', nil)
     @api_key = Rails.application.credentials.dig(:evolution_api, :key) || ENV.fetch('EVOLUTION_API_KEY', nil)
     @frontend_url = Rails.application.credentials.dig(:evolution_api, :frontend_url) || ENV.fetch('FRONTEND_URL', nil)
 
