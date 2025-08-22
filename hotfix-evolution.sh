@@ -300,8 +300,11 @@ fi
 
 # Executar bundle install
 echo "Executando bundle install..."
-run_in_container "bundle install"
-echo "✓ Dependências instaladas"
+if run_in_container "bundle install"; then
+    echo "✓ Dependências instaladas"
+else
+    echo "⚠️  Erro ao executar bundle install"
+fi
 
 # Recompilar assets se necessário
 echo "Recompilando assets..."

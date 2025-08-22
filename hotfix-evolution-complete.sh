@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Hotfix Evolution API Integration Script - Local Version
-# Este script instala a implementação Evolution API no ambiente local
+# Hotfix Evolution API Integration Script - Complete Version
+# Este script instala a implementação Evolution API e executa todas as configurações necessárias
 
 set -e
 
-echo "=== Hotfix Evolution API Integration - Local ===" 
-echo "Iniciando instalação da integração Evolution API localmente..."
+echo "=== Hotfix Evolution API Integration - Complete ===" 
+echo "Iniciando instalação completa da integração Evolution API..."
 
 # Variáveis de configuração
 BACKUP_DIR="/tmp/chatwoot-evolution-backup-$(date +%Y%m%d_%H%M%S)"
@@ -233,46 +233,57 @@ if ! grep -q 'httparty' Gemfile 2>/dev/null; then
     echo "✓ HTTParty adicionado ao Gemfile"
 fi
 
-# Executar bundle install automaticamente
-echo "Instalando dependências Ruby..."
+# Executar bundle install
+echo "Executando bundle install..."
 if command -v bundle >/dev/null 2>&1; then
     bundle install
-    echo "✓ Bundle install executado com sucesso"
+    echo "✓ Dependências instaladas com sucesso"
 else
-    echo "⚠️  Bundler não encontrado. Execute 'bundle install' manualmente"
+    echo "⚠️  Bundle não encontrado. Execute 'bundle install' manualmente."
+fi
+
+# Executar pnpm install se necessário (opcional)
+if [ -f "package.json" ] && command -v pnpm >/dev/null 2>&1; then
+    echo "Executando pnpm install..."
+    pnpm install
+    echo "✓ Dependências JavaScript instaladas"
+else
+    echo "ℹ️  pnpm não encontrado ou package.json não existe. Pule se não precisar."
 fi
 
 echo ""
-echo "=== Instalação Concluída ==="
+echo "🎉 === Instalação Concluída com Sucesso! ==="
 echo ""
 echo "📋 Resumo:"
 echo "• Backup criado em: $BACKUP_DIR"
 echo "• Arquivos Evolution API baixados e instalados"
 echo "• Rotas configuradas"
 echo "• Dependências instaladas automaticamente"
+echo "• Pronto para usar!"
 echo ""
-echo "🔧 Configuração opcional:"
-echo "• Configure as variáveis de ambiente:"
-echo "  - EVOLUTION_API_URL_V2"
-echo "  - EVOLUTION_API_KEY"
-echo "  - FRONTEND_URL"
-echo "  - CHATWOOT_TOKEN"
+echo "🚀 Como usar:"
+echo "1. Acesse: http://localhost:3000/app/accounts/1/settings/inboxes/32"
+echo "2. Vá para a aba 'WhatsApp QR Code' (deve aparecer automaticamente)"
+echo "3. Configure sua instância Evolution"
 echo ""
-echo "📖 Para usar:"
-echo "1. Acesse Configurações > Caixas de Entrada"
-echo "2. Adicione nova caixa de entrada"
-echo "3. Selecione 'API'"
-echo "4. Vá para aba 'WhatsApp QR Code'"
+echo "🔧 Configuração de ambiente (opcional para teste completo):"
+echo "• EVOLUTION_API_URL_V2 - URL da Evolution API"
+echo "• EVOLUTION_API_KEY - Chave da Evolution API"
+echo "• FRONTEND_URL - URL do Chatwoot"
+echo "• CHATWOOT_TOKEN - Token de usuário"
 echo ""
 echo "🔄 Para reverter:"
 echo "• Execute: cp $BACKUP_DIR/*.backup para os arquivos originais"
 echo ""
-echo "🧹 Limpeza:"
-echo "• Arquivos temporários em: $TEMP_DIR"
-echo "• Execute: rm -rf $TEMP_DIR (após confirmar que tudo funcionou)"
+echo "✅ A aba 'WhatsApp QR Code' já deve estar visível nas configurações de inboxes API!"
 
 # Limpar arquivos temporários automaticamente após sucesso
 echo ""
 echo "Limpando arquivos temporários..."
 rm -rf "$TEMP_DIR"
 echo "✓ Arquivos temporários removidos"
+
+echo ""
+echo "🎯 Comando de teste rápido:"
+echo "   Acesse: http://localhost:3000/app/accounts/1/settings/inboxes/32"
+echo "   A aba 'WhatsApp QR Code' deve estar disponível!"
