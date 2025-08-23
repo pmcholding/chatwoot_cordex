@@ -5,7 +5,7 @@
 
 set -e
 
-echo "=== Hotfix Evolution API Integration - Complete ===" 
+echo "=== Hotfix Evolution API Integration - Complete ==="
 echo "Iniciando instalação completa da integração Evolution API..."
 
 # Variáveis de configuração
@@ -22,10 +22,10 @@ download_file() {
     local file_path="$1"
     local url="${GITHUB_BASE_URL}/${file_path}"
     local dest="${TEMP_DIR}/${file_path}"
-    
+
     echo "Baixando $file_path..."
     mkdir -p "$(dirname "$dest")"
-    
+
     if curl -L -f -s -o "$dest" "$url"; then
         echo "✓ $file_path baixado com sucesso"
         return 0
@@ -38,18 +38,18 @@ download_file() {
 # Função para adicionar métodos Evolution ao modelo Channel::Api
 add_evolution_methods_to_model() {
     echo "Verificando se métodos Evolution já existem no modelo Channel::Api..."
-    
+
     if grep -q 'evolution_webhook_configured?' app/models/channel/api.rb 2>/dev/null; then
         echo "✓ Métodos Evolution já existem no modelo"
         return 0
     fi
-    
+
     echo "Adicionando métodos Evolution ao modelo Channel::Api..."
-    
+
     # Baixar arquivo com métodos Evolution
     local methods_url="${GITHUB_BASE_URL}/evolution-methods.rb"
     local methods_file="${TEMP_DIR}/evolution-methods.rb"
-    
+
     if curl -L -f -s -o "$methods_file" "$methods_url"; then
         echo "✓ Métodos Evolution baixados"
     else
@@ -89,10 +89,10 @@ add_evolution_methods_to_model() {
   end
 EVOLUTION_METHODS
     fi
-    
+
     # Fazer backup do modelo original
     cp app/models/channel/api.rb app/models/channel/api.rb.backup
-    
+
     # Inserir métodos Evolution antes do 'private' ou antes do último 'end'
     if grep -q 'private' app/models/channel/api.rb; then
         sed -i '/private/i\\n  # Evolution API methods added by hotfix' app/models/channel/api.rb
@@ -102,9 +102,74 @@ EVOLUTION_METHODS
         sed -i '$i\\n  # Evolution API methods added by hotfix' app/models/channel/api.rb
         sed -i '/Evolution API methods added by hotfix/r '"$methods_file" app/models/channel/api.rb
     fi
-    
+
     echo "✓ Métodos Evolution adicionados ao modelo Channel::Api"
 }
+
+# Patch Settings.vue to show WhatsApp QR tab on API inboxes even if the branch lacks the UI wiring
+patch_settings_vue() {
+  SETTINGS_VUE="app/javascript/dashboard/routes/dashboard/settings/inbox/Settings.vue"
+  echo "Verificando/patching Settings.vue para aba WhatsApp QR Code..."
+  if [ ! -f "$SETTINGS_VUE" ]; then
+    echo "⚠️  $SETTINGS_VUE não encontrado; pulando patch de UI"
+    return 0
+  fi
+
+  # 1) Ensure import of WhatsAppQRCode component
+  if ! grep -q "import WhatsAppQRCode from './components/WhatsAppQRCode.vue'" "$SETTINGS_VUE"; then
+    echo "• Inserindo import WhatsAppQRCode"
+    # Insert just before the first export default occurrence
+    sed -i "0,/export default/{/export default/s//import WhatsAppQRCode from '\.\/components\/WhatsAppQRCode.vue';\nexport default/}" "$SETTINGS_VUE" || true
+  else
+    echo "• Import já presente"
+  fi
+
+  # 2) Ensure component registration inside components: { ... }
+  if grep -q "components:\s*{" "$SETTINGS_VUE"; then
+    if ! grep -q "\bWhatsAppQRCode\b" "$SETTINGS_VUE"; then
+      echo "• Registrando componente WhatsAppQRCode no bloco components"
+      # Add after the first components: { occurrence
+      sed -i "/components\s*{/a \\    WhatsAppQRCode," "$SETTINGS_VUE" || true
+    else
+      echo "• WhatsAppQRCode já registrado em components"
+    fi
+  else
+    echo "⚠️  Bloco components não encontrado; seguindo"
+  fi
+
+  # 3) Ensure tabs() contains whatsappQRCode for API inboxes
+  if ! grep -q "key:\s*'whatsappQRCode'" "$SETTINGS_VUE"; then
+    echo "• Inserindo tab whatsappQRCode para isAPIInbox"
+    awk '
+      BEGIN{inserted=0}
+      /let[ ]+visibleToAllChannelTabs[ ]*=\[/ && !inserted{
+        print; print "        // Add WhatsApp QR Code tab for API channels";
+        print "        if (this.isAPIInbox) {";
+        print "          visibleToAllChannelTabs = [";
+        print "            ...visibleToAllChannelTabs,";
+        print "            { key: \"whatsappQRCode\", name: this.$t(\"INBOX_MGMT.TABS.WHATSAPP_QR_CODE\") },";
+        print "          ];";
+        print "        }";
+        inserted=1; next
+      }
+      {print}
+    ' "$SETTINGS_VUE" > "$SETTINGS_VUE.tmp" && mv "$SETTINGS_VUE.tmp" "$SETTINGS_VUE" || true
+  else
+    echo "• Tab whatsappQRCode já presente"
+  fi
+
+  # 4) Ensure template block for selectedTabKey === 'whatsappQRCode'
+  if ! grep -q "selectedTabKey === 'whatsappQRCode'" "$SETTINGS_VUE"; then
+    echo "• Inserindo bloco de template do WhatsAppQRCode antes de configuration"
+    sed -i "/<div v-if=\"selectedTabKey === 'configuration'\">/i \
+      <div v-if=\"selectedTabKey === 'whatsappQRCode'\">\n        <WhatsAppQRCode :inbox=\"inbox\" />\n      </div>\n" "$SETTINGS_VUE" || true
+  else
+    echo "• Bloco de template já presente"
+  fi
+
+  echo "✓ Patch de Settings.vue concluído"
+}
+
 
 # Criar backup dos arquivos que serão modificados
 echo "Criando backup dos arquivos existentes..."
@@ -151,6 +216,10 @@ if [ "$download_success" != "true" ]; then
     exit 1
 fi
 
+
+# Apply Settings.vue UI patch to ensure the tab is visible across branches
+patch_settings_vue
+
 echo "✓ Todos os arquivos baixados com sucesso"
 
 # Copiar arquivos baixados para o projeto
@@ -175,18 +244,18 @@ add_evolution_methods_to_model
 # Função para adicionar rotas Evolution ao routes.rb
 add_evolution_routes() {
     echo "Verificando rotas da Evolution API..."
-    
+
     if grep -q 'evolution_whatsapp' config/routes.rb 2>/dev/null; then
         echo "✓ Rotas Evolution já existem"
         return 0
     fi
-    
+
     echo "Adicionando rotas da Evolution API..."
-    
+
     # Baixar arquivo com rotas Evolution
     local routes_url="${GITHUB_BASE_URL}/add-evolution-routes.rb"
     local routes_file="${TEMP_DIR}/add-evolution-routes.rb"
-    
+
     if curl -L -f -s -o "$routes_file" "$routes_url"; then
         echo "✓ Rotas Evolution baixadas"
     else
@@ -205,13 +274,13 @@ add_evolution_routes() {
         end
 EVOLUTION_ROUTES
     fi
-    
+
     # Fazer backup do routes.rb original
     cp config/routes.rb config/routes.rb.backup
-    
+
     # Inserir rotas Evolution após 'resources :inboxes do'
     sed -i '/resources :inboxes do/r '"$routes_file" config/routes.rb
-    
+
     echo "✓ Rotas Evolution adicionadas"
 }
 
