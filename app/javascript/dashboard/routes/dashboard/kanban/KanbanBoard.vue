@@ -281,7 +281,7 @@ const onColumnScroll = (e, stageId) => {
   const el = e.target;
   const ratio = el.scrollTop / (el.scrollHeight - el.clientHeight || 1);
   if (ratio > 0.85 && hasMoreForStage(stageId) && !loadingForStage(stageId)) {
-    store.dispatch('kanban/loadMore', { stageId });
+    store.dispatch('kanban/loadMore', stageId);
   }
 };
 

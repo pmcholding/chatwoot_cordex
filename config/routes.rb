@@ -152,6 +152,9 @@ Rails.application.routes.draw do
               patch :reorder
               get :board_data
             end
+            member do
+              get :stage_conversations
+            end
           end
 
           resource :kanban_settings, only: [:show, :update]

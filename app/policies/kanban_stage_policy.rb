@@ -26,4 +26,8 @@ class KanbanStagePolicy < ApplicationPolicy
   def board_data?
     @account_user.administrator? || @account_user.agent?
   end
+
+  def stage_conversations?
+    @account_user.administrator? || @account_user.agent?
+  end
 end

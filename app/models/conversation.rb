@@ -222,8 +222,8 @@ class Conversation < ApplicationRecord
   scope :for_kanban_stage, ->(stage_id) { where(kanban_stage_id: stage_id) }
   scope :unassigned_kanban, -> { where(kanban_stage_id: nil) }
 
-  def self.kanban_board_data(account, filters = {})
-    stages = account.kanban_stages.ordered.includes(:conversations)
+  def self.kanban_board_data(account, filters = {}, per_page: 15)
+    stages = account.kanban_stages.ordered
 
     base_query = account.conversations
                         .includes(:contact, :assignee, :inbox, :labels)
@@ -232,18 +232,53 @@ class Conversation < ApplicationRecord
     # Apply filters if provided
     base_query = apply_kanban_filters(base_query, filters, account) if filters.present?
 
-    # Group conversations by stage
-    conversations_by_stage = base_query.group_by(&:kanban_stage_id)
+    # Get conversations for each stage with pagination
+    conversations_by_stage = {}
+    has_more_by_stage = {}
+    total_counts_by_stage = {}
 
-    # Add unassigned conversations
-    unassigned = conversations_by_stage.delete(nil) || []
-    conversations_by_stage['unassigned'] = unassigned
+    # Process each stage
+    stages.each do |stage|
+      stage_query = base_query.where(kanban_stage_id: stage.id)
+      total_counts_by_stage[stage.id] = stage_query.count
+      stage_conversations = stage_query.limit(per_page + 1).to_a
+      has_more_by_stage[stage.id] = stage_conversations.size > per_page
+      conversations_by_stage[stage.id] = stage_conversations.take(per_page)
+    end
+
+    # Process unassigned (nil kanban_stage_id)
+    unassigned_query = base_query.where(kanban_stage_id: nil)
+    total_counts_by_stage['unassigned'] = unassigned_query.count
+    unassigned_conversations = unassigned_query.limit(per_page + 1).to_a
+    has_more_by_stage['unassigned'] = unassigned_conversations.size > per_page
+    conversations_by_stage['unassigned'] = unassigned_conversations.take(per_page)
 
     {
       stages: stages,
       conversations_by_stage: conversations_by_stage,
-      total_count: base_query.count
+      has_more_by_stage: has_more_by_stage,
+      total_counts_by_stage: total_counts_by_stage
     }
+  end
+
+  def self.kanban_stage_conversations(account, stage_id, filters = {}, page: 1, per_page: 15)
+    base_query = account.conversations
+                        .includes(:contact, :assignee, :inbox, :labels)
+                        .kanban_ordered
+
+    # Apply filters if provided
+    base_query = apply_kanban_filters(base_query, filters, account) if filters.present?
+
+    # Filter by stage (nil for unassigned)
+    base_query = if stage_id == 'unassigned'
+                   base_query.where(kanban_stage_id: nil)
+                 else
+                   base_query.where(kanban_stage_id: stage_id)
+                 end
+
+    # Apply pagination
+    offset = (page - 1) * per_page
+    base_query.offset(offset).limit(per_page + 1).to_a
   end
 
   def self.apply_kanban_filters(query, filters, account = nil)

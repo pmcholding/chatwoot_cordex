@@ -30,31 +30,40 @@ export const actions = {
     commit('SET_LOADING', true);
     try {
       const response = await KanbanAPI.getBoardData(currentState.filters);
-      const { stages, conversations_by_stage } = response.data;
+      const {
+        stages,
+        conversations_by_stage,
+        has_more_by_stage,
+        total_counts_by_stage,
+      } = response.data;
 
-      commit('SET_STAGES', stages);
+      // Set stages with total counts from backend
+      const stagesWithCounts = stages.map(stage => ({
+        ...stage,
+        count: total_counts_by_stage?.[stage.id] || 0,
+      }));
+      commit('SET_STAGES', stagesWithCounts);
 
       // Transform conversations_by_stage to match our store structure
       const grouped = stages.reduce((acc, stage) => {
         acc[stage.id] = {
           items: conversations_by_stage[stage.id] || [],
           loading: false,
-          hasMore: false,
+          hasMore: has_more_by_stage?.[stage.id] || false,
+          totalCount: total_counts_by_stage?.[stage.id] || 0,
         };
         return acc;
       }, {});
 
       // Add unassigned conversations
-      if (conversations_by_stage.unassigned) {
-        grouped.unassigned = {
-          items: conversations_by_stage.unassigned,
-          loading: false,
-          hasMore: false,
-        };
-      }
+      grouped.unassigned = {
+        items: conversations_by_stage.unassigned || [],
+        loading: false,
+        hasMore: has_more_by_stage?.unassigned || false,
+        totalCount: total_counts_by_stage?.unassigned || 0,
+      };
 
       commit('SET_ALL_CARDS', grouped);
-      commit('RECALC_COUNTS');
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error fetching kanban data:', error);
@@ -66,16 +75,41 @@ export const actions = {
     }
   },
 
-  async loadMore() {
-    // For now, we load all conversations at once, so no pagination needed
-    // This could be implemented later if needed
+  async loadMore({ commit, state: currentState }, stageId) {
+    const stageData = currentState.cardsByStage[stageId];
+    if (!stageData || !stageData.hasMore || stageData.loading) return;
+
+    commit('SET_STAGE_LOADING', { stageId, loading: true });
+
+    try {
+      // Calculate next page based on current items
+      const currentItems = stageData.items.length;
+      const perPage = 15;
+      const nextPage = Math.floor(currentItems / perPage) + 1;
+
+      const response = await KanbanAPI.getStageConversations(
+        stageId,
+        nextPage,
+        currentState.filters
+      );
+
+      const { conversations, has_more } = response.data;
+
+      commit('APPEND_STAGE_ITEMS', { stageId, items: conversations });
+      commit('SET_STAGE_HAS_MORE', { stageId, hasMore: has_more });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error loading more conversations:', error);
+    } finally {
+      commit('SET_STAGE_LOADING', { stageId, loading: false });
+    }
   },
 
   async moveCard({ commit }, { cardId, fromStageId, toStageId, toIndex }) {
     try {
       // Optimistic update
       commit('MOVE_CARD', { cardId, fromStageId, toStageId, toIndex });
-      commit('RECALC_COUNTS');
+      commit('UPDATE_STAGE_COUNTS', { fromStageId, toStageId });
 
       // API call
       await KanbanAPI.moveConversation(cardId, toStageId);
@@ -89,7 +123,10 @@ export const actions = {
         toStageId: fromStageId,
         toIndex: 0,
       });
-      commit('RECALC_COUNTS');
+      commit('UPDATE_STAGE_COUNTS', {
+        fromStageId: toStageId,
+        toStageId: fromStageId,
+      });
       throw error;
     }
   },
@@ -124,7 +161,6 @@ export const actions = {
     try {
       await KanbanAPI.deleteStage(id);
       commit('DELETE_STAGE', { id });
-      commit('RECALC_COUNTS');
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error deleting stage:', error);
@@ -165,7 +201,14 @@ export const mutations = {
     $state.cardsByStage[stageId].loading = loading;
   },
   SET_STAGE_HAS_MORE($state, { stageId, hasMore }) {
-    $state.cardsByStage[stageId].hasMore = hasMore;
+    if ($state.cardsByStage[stageId]) {
+      $state.cardsByStage[stageId].hasMore = hasMore;
+    }
+  },
+  APPEND_STAGE_ITEMS($state, { stageId, items }) {
+    if ($state.cardsByStage[stageId]) {
+      $state.cardsByStage[stageId].items.push(...items);
+    }
   },
   MOVE_CARD($state, { cardId, fromStageId, toStageId, toIndex }) {
     const from = $state.cardsByStage[fromStageId]?.items || [];
@@ -201,11 +244,25 @@ export const mutations = {
   SET_FILTER($state, payload) {
     $state.filters = { ...$state.filters, ...payload };
   },
-  RECALC_COUNTS($state) {
-    $state.stages = $state.stages.map(s => ({
-      ...s,
-      count: $state.cardsByStage[s.id]?.items?.length || 0,
-    }));
+  UPDATE_STAGE_COUNTS($state, { fromStageId, toStageId }) {
+    // Decrement count in source stage
+    const fromStage = $state.stages.find(s => s.id === fromStageId);
+    if (fromStage && fromStage.count > 0) {
+      fromStage.count -= 1;
+    }
+    if ($state.cardsByStage[fromStageId]?.totalCount > 0) {
+      $state.cardsByStage[fromStageId].totalCount -= 1;
+    }
+
+    // Increment count in destination stage
+    const toStage = $state.stages.find(s => s.id === toStageId);
+    if (toStage) {
+      toStage.count = (toStage.count || 0) + 1;
+    }
+    if ($state.cardsByStage[toStageId]) {
+      $state.cardsByStage[toStageId].totalCount =
+        ($state.cardsByStage[toStageId].totalCount || 0) + 1;
+    }
   },
 };
 

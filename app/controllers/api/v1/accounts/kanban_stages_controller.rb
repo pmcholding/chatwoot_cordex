@@ -120,17 +120,41 @@ class Api::V1::Accounts::KanbanStagesController < Api::V1::Accounts::BaseControl
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
-  # Get kanban board data with conversations
+  # Get kanban board data with conversations (paginated)
   def board_data
     filters = params.permit(:q, :assignee_id, :inbox_id, :status, label_ids: [], created_after: nil, created_before: nil)
+    per_page = (params[:per_page] || 15).to_i
 
     begin
-      data = Conversation.kanban_board_data(Current.account, filters)
+      data = Conversation.kanban_board_data(Current.account, filters, per_page: per_page)
 
       render json: {
         stages: data[:stages].as_json,
         conversations_by_stage: serialize_conversations_by_stage(data[:conversations_by_stage]),
-        total_count: data[:total_count]
+        has_more_by_stage: data[:has_more_by_stage],
+        total_counts_by_stage: data[:total_counts_by_stage]
+      }
+    rescue StandardError => e
+      render json: { error: e.message, backtrace: e.backtrace.first(5) }, status: :internal_server_error
+    end
+  end
+
+  # Get more conversations for a specific stage (pagination)
+  def stage_conversations
+    stage_id = params[:id]
+    page = (params[:page] || 1).to_i
+    per_page = (params[:per_page] || 15).to_i
+    filters = params.permit(:q, :assignee_id, :inbox_id, :status, label_ids: [], created_after: nil, created_before: nil)
+
+    begin
+      conversations = Conversation.kanban_stage_conversations(Current.account, stage_id, filters, page: page, per_page: per_page)
+
+      has_more = conversations.size > per_page
+      conversations_to_return = conversations.take(per_page)
+
+      render json: {
+        conversations: serialize_conversations(conversations_to_return),
+        has_more: has_more
       }
     rescue StandardError => e
       render json: { error: e.message, backtrace: e.backtrace.first(5) }, status: :internal_server_error
@@ -149,46 +173,54 @@ class Api::V1::Accounts::KanbanStagesController < Api::V1::Accounts::BaseControl
 
   def serialize_conversations_by_stage(conversations_by_stage)
     conversations_by_stage.transform_values do |conversations|
-      conversations.map do |conversation|
-        last_message = conversation.messages.order(:created_at).last
-
-        {
-          id: conversation.display_id,
-          display_id: conversation.display_id,
-          title: last_message&.content || "Conversation ##{conversation.display_id}",
-          subject: last_message&.content,
-          last_message: last_message&.content,
-          contact_name: conversation.contact.name,
-          contact_phone: conversation.contact.phone_number,
-          contact_email: conversation.contact.email,
-          contact_avatar: conversation.contact.avatar_url,
-          assignee: if conversation.assignee
-                      {
-                        id: conversation.assignee.id,
-                        name: conversation.assignee.name,
-                        avatar_url: conversation.assignee.avatar_url
-                      }
-                    end,
-          inbox: {
-            id: conversation.inbox.id,
-            name: conversation.inbox.name,
-            channel_type: conversation.inbox.channel_type
-          },
-          status: conversation.status,
-          priority: conversation.priority,
-          labels: Current.account.labels.where(title: conversation.cached_label_list_array).map do |label|
-            {
-              id: label.id,
-              title: label.title,
-              color: label.color
-            }
-          end,
-          unread_count: conversation.unread_incoming_messages.count,
-          updated_at: conversation.updated_at,
-          last_activity_at: conversation.last_activity_at,
-          kanban_stage_id: conversation.kanban_stage_id
-        }
-      end
+      serialize_conversations(conversations)
     end
+  end
+
+  def serialize_conversations(conversations)
+    conversations.map do |conversation|
+      serialize_conversation(conversation)
+    end
+  end
+
+  def serialize_conversation(conversation)
+    last_message = conversation.messages.order(:created_at).last
+
+    {
+      id: conversation.display_id,
+      display_id: conversation.display_id,
+      title: last_message&.content || "Conversation ##{conversation.display_id}",
+      subject: last_message&.content,
+      last_message: last_message&.content,
+      contact_name: conversation.contact.name,
+      contact_phone: conversation.contact.phone_number,
+      contact_email: conversation.contact.email,
+      contact_avatar: conversation.contact.avatar_url,
+      assignee: if conversation.assignee
+                  {
+                    id: conversation.assignee.id,
+                    name: conversation.assignee.name,
+                    avatar_url: conversation.assignee.avatar_url
+                  }
+                end,
+      inbox: {
+        id: conversation.inbox.id,
+        name: conversation.inbox.name,
+        channel_type: conversation.inbox.channel_type
+      },
+      status: conversation.status,
+      priority: conversation.priority,
+      labels: Current.account.labels.where(title: conversation.cached_label_list_array).map do |label|
+        {
+          id: label.id,
+          title: label.title,
+          color: label.color
+        }
+      end,
+      unread_count: conversation.unread_incoming_messages.count,
+      updated_at: conversation.updated_at,
+      last_activity_at: conversation.last_activity_at,
+      kanban_stage_id: conversation.kanban_stage_id
+    }
   end
 end

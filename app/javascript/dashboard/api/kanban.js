@@ -13,10 +13,17 @@ class KanbanAPI extends ApiClient {
     });
   }
 
-  // Get kanban board data with conversations
+  // Get kanban board data with conversations (paginated)
   getBoardData(filters = {}) {
     return axios.get(`${this.url}/board_data`, {
-      params: filters,
+      params: { ...filters, per_page: 15 },
+    });
+  }
+
+  // Get more conversations for a specific stage (pagination)
+  getStageConversations(stageId, page = 1, filters = {}) {
+    return axios.get(`${this.url}/${stageId}/stage_conversations`, {
+      params: { page, per_page: 15, ...filters },
     });
   }
 
