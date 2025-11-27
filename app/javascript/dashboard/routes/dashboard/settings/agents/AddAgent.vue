@@ -1,23 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, computed } from 'vue';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email } from '@vuelidate/validators';
 import Button from 'dashboard/components-next/button/Button.vue';
-import InstructionGeneratorModal from 'dashboard/components/widgets/InstructionGeneratorModal.vue';
-
-const props = defineProps({
-  template: {
-    type: Object,
-    default: null,
-  },
-  aiMode: {
-    type: Boolean,
-    default: false,
-  },
-});
 
 const emit = defineEmits(['close']);
 
@@ -26,21 +14,17 @@ const { t } = useI18n();
 
 const agentName = ref('');
 const agentEmail = ref('');
-const agentInstructions = ref('');
 const selectedRoleId = ref('agent');
-const showCaptainModal = ref(false);
 
 const rules = {
   agentName: { required },
   agentEmail: { required, email },
-  agentInstructions: { required },
   selectedRoleId: { required },
 };
 
 const v$ = useVuelidate(rules, {
   agentName,
   agentEmail,
-  agentInstructions,
   selectedRoleId,
 });
 
@@ -77,56 +61,6 @@ const selectedRole = computed(() =>
   )
 );
 
-// Template pre-filling
-const initializeTemplate = () => {
-  if (props.template) {
-    agentInstructions.value = props.template.instructions || '';
-    if (props.template.name) {
-      agentName.value = props.template.name;
-    }
-  }
-};
-
-// AI mode handling
-const initializeAIMode = () => {
-  if (props.aiMode) {
-    showCaptainModal.value = true;
-  }
-};
-
-const handleInstructionsGenerated = instructions => {
-  agentInstructions.value = instructions;
-  showCaptainModal.value = false;
-  useAlert(t('AGENT_MGMT.ADD.FORM.CAPTAIN.SUCCESS_MESSAGE'));
-  // Clear validation error if instructions were empty before
-  v$.value.agentInstructions.$reset();
-};
-
-const openCaptainModal = () => {
-  showCaptainModal.value = true;
-};
-
-const closeCaptainModal = () => {
-  showCaptainModal.value = false;
-};
-
-// Watch for template changes
-watch(
-  () => props.template,
-  async (newTemplate, oldTemplate) => {
-    if (newTemplate && newTemplate !== oldTemplate) {
-      await nextTick();
-      initializeTemplate();
-    }
-  },
-  { immediate: true, deep: true }
-);
-
-onMounted(() => {
-  initializeTemplate();
-  initializeAIMode();
-});
-
 const addAgent = async () => {
   v$.value.$touch();
   if (v$.value.$invalid) return;
@@ -135,7 +69,6 @@ const addAgent = async () => {
     const payload = {
       name: agentName.value,
       email: agentEmail.value,
-      instructions: agentInstructions.value,
     };
 
     if (selectedRole.value.name.startsWith('custom_')) {
@@ -214,27 +147,6 @@ const addAgent = async () => {
         </label>
       </div>
 
-      <div class="w-full">
-        <label :class="{ error: v$.agentInstructions.$error }">
-          {{ $t('AGENT_MGMT.ADD.FORM.INSTRUCTIONS.LABEL') }}
-          <textarea
-            v-model="agentInstructions"
-            rows="4"
-            placeholder="Enter agent instructions..."
-            @input="v$.agentInstructions.$touch"
-          />
-        </label>
-        <div class="flex justify-between items-center mt-2">
-          <Button
-            v-if="!showCaptainModal"
-            faded
-            size="sm"
-            :label="$t('AGENT_MGMT.ADD.FORM.CAPTAIN.BUTTON_TEXT')"
-            @click="openCaptainModal"
-          />
-        </div>
-      </div>
-
       <div class="flex flex-row justify-end w-full gap-2 px-0 py-2">
         <Button
           faded
@@ -251,16 +163,5 @@ const addAgent = async () => {
         />
       </div>
     </form>
-
-    <!-- Captain Instruction Generator Modal -->
-    <InstructionGeneratorModal
-      :show="showCaptainModal"
-      :initial-context="{
-        agentName: agentName,
-        existingInstructions: agentInstructions,
-      }"
-      @close="closeCaptainModal"
-      @apply-instructions="handleInstructionsGenerated"
-    />
   </div>
 </template>

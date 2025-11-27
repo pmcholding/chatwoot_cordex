@@ -985,6 +985,7 @@ DEPENDENCIES
   hairtrigger
   hashie
   html2text
+  httparty
   image_processing
   iso-639
   jbuilder
