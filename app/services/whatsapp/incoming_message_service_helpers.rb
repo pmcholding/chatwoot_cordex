@@ -8,8 +8,28 @@ module Whatsapp::IncomingMessageServiceHelpers
       account_id: @inbox.account_id,
       inbox_id: @inbox.id,
       contact_id: @contact.id,
-      contact_inbox_id: @contact_inbox.id
+      contact_inbox_id: @contact_inbox.id,
+      additional_attributes: ctwa_referral_attributes
     }
+  end
+
+  # Persiste o referral de anúncios Click-to-WhatsApp (inclui ctwa_clid) nos
+  # additional_attributes da conversa, para atribuição via Meta Conversions API.
+  # Retorna {} quando não há referral — comportamento idêntico ao anterior.
+  def ctwa_referral_attributes
+    referral = @processed_params[:messages]&.first&.dig(:referral)
+    return {} if referral.blank?
+
+    {
+      ctwa_clid: referral[:ctwa_clid],
+      referral_source_id: referral[:source_id],
+      referral_source_type: referral[:source_type],
+      referral_source_url: referral[:source_url],
+      referral_headline: referral[:headline]
+    }.compact
+  rescue StandardError => e
+    Rails.logger.warn "CTWA referral parse failed: #{e.message}"
+    {}
   end
 
   def processed_params
